@@ -1,0 +1,294 @@
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<title>API Sanity Checker</title>
+<meta charset="UTF-8" />
+<meta name="generator" content="MediaWiki 1.18.1" />
+<link rel="shortcut icon" href="/favicon.ico" />
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ISP_RAS (en)" />
+<link rel="EditURI" type="application/rsd+xml" href="http://ispras.linuxbase.org/api.php?action=rsd" />
+<link rel="alternate" type="application/atom+xml" title="ISP_RAS Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom" />
+<link rel="stylesheet" href="/load.php?debug=false&amp;lang=en&amp;modules=mediawiki.legacy.commonPrint%2Cshared%7Cskins.monobook&amp;only=styles&amp;skin=monobook&amp;*" />
+<!--[if lt IE 5.5000]><link rel="stylesheet" href="/skins/monobook/IE50Fixes.css?303" media="screen" /><![endif]-->
+<!--[if IE 5.5000]><link rel="stylesheet" href="/skins/monobook/IE55Fixes.css?303" media="screen" /><![endif]-->
+<!--[if IE 6]><link rel="stylesheet" href="/skins/monobook/IE60Fixes.css?303" media="screen" /><![endif]-->
+<!--[if IE 7]><link rel="stylesheet" href="/skins/monobook/IE70Fixes.css?303" media="screen" /><![endif]--><meta name="ResourceLoaderDynamicStyles" content="" />
+<link rel="stylesheet" href="/load.php?debug=false&amp;lang=en&amp;modules=site&amp;only=styles&amp;skin=monobook&amp;*" />
+<style>a:lang(ar),a:lang(ckb),a:lang(fa),a:lang(kk-arab),a:lang(mzn),a:lang(ps),a:lang(ur){text-decoration:none}a.new,#quickbar a.new{color:#ba0000}
+
+/* cache key: rasispdb:resourceloader:filter:minify-css:4:c88e2bcd56513749bec09a7e29cb3ffa */
+</style>
+<script src="/load.php?debug=false&amp;lang=en&amp;modules=startup&amp;only=scripts&amp;skin=monobook&amp;*"></script>
+<script>if(window.mw){
+	mw.config.set({"wgCanonicalNamespace": "", "wgCanonicalSpecialPageName": false, "wgNamespaceNumber": 0, "wgPageName": "API_Sanity_Checker", "wgTitle": "API Sanity Checker", "wgCurRevisionId": 8103, "wgArticleId": 2411, "wgIsArticle": true, "wgAction": "view", "wgUserName": null, "wgUserGroups": ["*"], "wgCategories": ["API Sanity Checker"], "wgBreakFrames": false, "wgRestrictionEdit": [], "wgRestrictionMove": []});
+}
+</script><script>if(window.mw){
+	mw.loader.load(["mediawiki.page.startup"]);
+}
+</script>
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-API_Sanity_Checker action-view skin-monobook">
+<div id="globalWrapper">
+<div id="column-content"><div id="content">
+	<a id="top"></a>
+	
+	<h1 id="firstHeading" class="firstHeading">API Sanity Checker</h1>
+	<div id="bodyContent">
+		<div id="siteSub"></div>
+		<div id="contentSub"></div>
+		
+		<!-- start content -->
+<div lang="en" dir="ltr" class="mw-content-ltr"><p><i>API Sanity Checker</i> is an automatic generator of basic unit tests for shared C/C++ libraries. It is able to generate reasonable (in most, but unfortunately not all, cases) input data for parameters and compose simple ("sanity" or "shallow"-quality) test cases for every function in the API through the analysis of declarations in header files. The quality of generated tests allows to check absence of critical errors in simple use cases. The tool is able to build and execute generated tests and detect crashes (segfaults), aborts, all kinds of emitted signals, non-zero program return code and program hanging. It may be considered as a tool for out-of-the-box low-cost sanity checking (fuzzing) of the library API or as a test development framework for initial generation of templates for advanced tests. Also it supports universal <a rel="nofollow" class="external text" href="http://sourceforge.net/projects/template2code/">T2C</a> format of tests, random test generation mode, specialized data types and other useful features.
+</p><p>See also:
+</p>
+<ul><li> <a rel="nofollow" class="external text" href="http://upstream-tracker.org/">Upstream Tracker</a>
+</li><li> <a href="http://ispras.linuxbase.org/index.php/ABI_compliance_checker" title="ABI Compliance Checker">ABI Compliance Checker</a>
+</li></ul>
+<p><br />
+</p>
+<table id="toc" class="toc"><tr><td><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Downloads"><span class="tocnumber">1</span> <span class="toctext">Downloads</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Releases"><span class="tocnumber">1.1</span> <span class="toctext">Releases</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Git"><span class="tocnumber">1.2</span> <span class="toctext">Git</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="#License"><span class="tocnumber">2</span> <span class="toctext">License</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Supported_Platforms"><span class="tocnumber">3</span> <span class="toctext">Supported Platforms</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#System_Requirements"><span class="tocnumber">4</span> <span class="toctext">System Requirements</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Examples_of_Generated_Tests"><span class="tocnumber">5</span> <span class="toctext">Examples of Generated Tests</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Detectable_Problems"><span class="tocnumber">6</span> <span class="toctext">Detectable Problems</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Installation"><span class="tocnumber">7</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-10"><a href="#Usage"><span class="tocnumber">8</span> <span class="toctext">Usage</span></a>
+<ul>
+<li class="toclevel-2 tocsection-11"><a href="#Generating_Tests"><span class="tocnumber">8.1</span> <span class="toctext">Generating Tests</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Viewing_Tests"><span class="tocnumber">8.2</span> <span class="toctext">Viewing Tests</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Building_Tests"><span class="tocnumber">8.3</span> <span class="toctext">Building Tests</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Running_Tests"><span class="tocnumber">8.4</span> <span class="toctext">Running Tests</span></a></li>
+<li class="toclevel-2 tocsection-15"><a href="#Improving_Tests"><span class="tocnumber">8.5</span> <span class="toctext">Improving Tests</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#Command-Line_Options"><span class="tocnumber">8.6</span> <span class="toctext">Command-Line Options</span></a></li>
+<li class="toclevel-2 tocsection-17"><a href="#Examples"><span class="tocnumber">8.7</span> <span class="toctext">Examples</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-18"><a href="#Similar_Tools"><span class="tocnumber">9</span> <span class="toctext">Similar Tools</span></a></li>
+<li class="toclevel-1 tocsection-19"><a href="#How_the_Tool_Works"><span class="tocnumber">10</span> <span class="toctext">How the Tool Works</span></a></li>
+<li class="toclevel-1 tocsection-20"><a href="#Bugs"><span class="tocnumber">11</span> <span class="toctext">Bugs</span></a></li>
+<li class="toclevel-1 tocsection-21"><a href="#Applications"><span class="tocnumber">12</span> <span class="toctext">Applications</span></a></li>
+<li class="toclevel-1 tocsection-22"><a href="#Future_Plans"><span class="tocnumber">13</span> <span class="toctext">Future Plans</span></a></li>
+<li class="toclevel-1 tocsection-23"><a href="#Maintainers"><span class="tocnumber">14</span> <span class="toctext">Maintainers</span></a></li>
+<li class="toclevel-1 tocsection-24"><a href="#Credits"><span class="tocnumber">15</span> <span class="toctext">Credits</span></a></li>
+<li class="toclevel-1 tocsection-25"><a href="#Articles"><span class="tocnumber">16</span> <span class="toctext">Articles</span></a></li>
+</ul>
+</td></tr></table>
+<h2> <span class="mw-headline" id="Downloads"> Downloads </span></h2>
+<h3> <span class="mw-headline" id="Releases"> Releases </span></h3>
+<p>All releases can be downloaded from <b><a href="Changes.html" title="API Sanity Checker Downloads">this page</a></b> or <b><a rel="nofollow" class="external text" href="https://github.com/lvc/api-sanity-checker/downloads">github.com</a></b>.
+</p><p>Latest release: <a rel="nofollow" class="external text" href="https://github.com/downloads/lvc/api-sanity-checker/api-sanity-checker-1.12.10.tar.gz">1.12.10</a>
+</p>
+<h3> <span class="mw-headline" id="Git"> Git </span></h3>
+<p>Read-only access to the latest development version:<br />
+&#160;&#160;<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;git clone <a rel="nofollow" class="external text" href="https://github.com/lvc/api-sanity-checker">git://github.com/lvc/api-sanity-checker.git</a> &#160;</code><br />
+</p>
+<h2> <span class="mw-headline" id="License"> License </span></h2>
+<p>This program is free software. You may use, redistribute and/or modify it under the terms of either the <b>GNU GPL</b> or <b>LGPL</b>.
+</p>
+<h2> <span class="mw-headline" id="Supported_Platforms"> Supported Platforms </span></h2>
+<p>GNU/Linux, FreeBSD, Mac OS X, MS Windows, Haiku/BeOS.
+</p>
+<h2> <span class="mw-headline" id="System_Requirements"> System Requirements </span></h2>
+<ul><li><b>Linux, FreeBSD</b>
+<ul><li> <a rel="nofollow" class="external text" href="http://gcc.gnu.org/">G++</a> (3.0-4.7, recommended 4.5 or newer)
+</li><li> <a rel="nofollow" class="external text" href="http://www.gnu.org/software/binutils/">GNU Binutils</a> (readelf, c++filt, objdump)
+</li><li> <a rel="nofollow" class="external text" href="http://www.perl.org/">Perl5 </a> (5.8 or newer)
+</li><li> WARNING: if you are using ccache program (i.e. gcc points to /usr/lib/ccache/gcc) then it should be newer than 3.1.2 or disabled.
+</li></ul>
+</li></ul>
+<ul><li><b>Mac OS X</b>
+<ul><li> <a rel="nofollow" class="external text" href="http://developer.apple.com/technologies/tools/xcode.html">Xcode</a> (gcc, otool, c++filt)
+</li></ul>
+</li></ul>
+<ul><li><b>MS Windows</b>
+<ul><li> <a rel="nofollow" class="external text" href="http://www.mingw.org/">MinGW</a> (3.0-4.7, recommended 4.5 or newer)
+</li><li> MS Visual C++ (dumpbin, undname, cl)
+</li><li> <a rel="nofollow" class="external text" href="http://www.activestate.com/activeperl">Active Perl 5</a> (5.8 or newer)
+</li><li> Add gcc.exe path (C:\MinGW\bin\) to your system PATH variable
+</li><li> Run vsvars32.bat script (C:\Microsoft Visual Studio 9.0\Common7\Tools\)
+</li></ul>
+</li></ul>
+<h2> <span class="mw-headline" id="Examples_of_Generated_Tests"> Examples of Generated Tests </span></h2>
+<table class="wikitable">
+<tr>
+<th> Library
+</th>
+<th> Version
+</th>
+<th> Number of Tests
+</th>
+<th> Problems Found
+</th></tr>
+<tr align="left">
+<td> FreeType2
+</td>
+<td> 2.3.11
+</td>
+<td> <a rel="nofollow" class="external text" href="http://upstream-tracker.org/tests/freetype2/2.3.11/view_tests.html">178</a>
+</td>
+<td> <a rel="nofollow" class="external text" href="http://upstream-tracker.org/test_results/freetype2/2.3.11/test_results.html">13</a>
+</td></tr>
+<tr align="left">
+<td> Glibc
+</td>
+<td> 2.13
+</td>
+<td> <a rel="nofollow" class="external text" href="http://upstream-tracker.org/tests/glibc/2.13/view_tests.html">1996</a>
+</td>
+<td> <a rel="nofollow" class="external text" href="http://upstream-tracker.org/test_results/glibc/2.13/test_results.html">340</a>
+</td></tr>
+<tr align="left">
+<td> libX11
+</td>
+<td> 1.3.4
+</td>
+<td> <a rel="nofollow" class="external text" href="http://upstream-tracker.org/tests/libX11/1.3.4/view_tests.html">778</a>
+</td>
+<td> <a rel="nofollow" class="external text" href="http://upstream-tracker.org/test_results/libX11/1.3.4/test_results.html">286</a>
+</td></tr></table>
+<h2> <span class="mw-headline" id="Detectable_Problems"> Detectable Problems </span></h2>
+<ul><li> Crash (segfault, signal SEGV)
+</li><li> Abort (signal ABRT)
+</li><li> All emitted signals: FPE, BUS, ILL and others
+</li><li> Non-zero exit code
+</li><li> Program hanging
+</li><li> Requirement failure (if specified)
+</li></ul>
+<h2> <span class="mw-headline" id="Installation"> Installation </span></h2>
+<p>The tool is <b>ready-to-use</b> after extracting the archive. You can also use a <b>Makefile</b> to install the tool into the system:<br />
+<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;cd api-sanity-checker-x.y.z/&#160;</code><br /><br />
+<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;sudo perl Makefile.pl -install --prefix=PREFIX [/usr, /usr/local, ...]&#160;</code>
+</p><p>This command will install an <code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;api-sanity-checker&#160;</code> program in the <code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;PREFIX/bin&#160;</code> system directory.
+</p>
+<h2> <span class="mw-headline" id="Usage"> Usage </span></h2>
+<p>For generating, building and running tests you should provide the <b><a href="Descriptor.html" title="Library Descriptor">XML descriptor</a></b> for your library version. It is a simple XML-file that specifies version number, paths to header files and shared libraries and optionally some other information. An example of the descriptor is the following (0.3.4.xml):
+</p>
+<pre><span style="color:Green;">&lt;version&gt;</span>
+    0.3.4
+<span style="color:Green;">&lt;/version&gt;</span>
+
+<span style="color:Green;">&lt;headers&gt;</span>
+    /usr/local/libssh/0.3.4/include/
+<span style="color:Green;">&lt;/headers&gt;</span>
+
+<span style="color:Green;">&lt;libs&gt;</span>
+    /usr/local/libssh/0.3.4/lib/
+<span style="color:Green;">&lt;/libs&gt;</span>
+</pre>
+<h3> <span class="mw-headline" id="Generating_Tests"> Generating Tests </span></h3>
+<p>Command for generating a test suite:<br />
+&#160;&#160;<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;api-sanity-checker -lib <i>NAME</i> -d <i><a href="Descriptor.html" title="Library Descriptor">VER.xml</a></i> -gen&#160;</code>
+</p>
+<h3> <span class="mw-headline" id="Viewing_Tests"> Viewing Tests </span></h3>
+<p>You can view generated tests using the index file:<br />
+&#160;&#160;<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;tests/<i>NAME</i>/<i>VER</i>/view_tests.html&#160;</code><br />
+or manually in the directory:<br />
+&#160;&#160;<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;tests/<i>NAME</i>/<i>VER</i>/groups/&#160;</code>
+</p>
+<h3> <span class="mw-headline" id="Building_Tests"> Building Tests </span></h3>
+<p>Command for building tests:<br />
+&#160;&#160;<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;api-sanity-checker -l <i>NAME</i> -d <i><a href="Descriptor.html" title="Library Descriptor">VER.xml</a></i> -build&#160;</code>
+</p>
+<h3> <span class="mw-headline" id="Running_Tests"> Running Tests </span></h3>
+<p>Command for running tests:<br />
+&#160;&#160;<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;api-sanity-checker -l <i>NAME</i> -d <i><a href="Descriptor.html" title="Library Descriptor">VER.xml</a></i> -run&#160;</code><br /><br />
+After a time will be generated test report:<br />
+&#160;&#160;<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;test_results/<i>NAME</i>/<i>VER</i>/test_results.html&#160;</code>
+</p>
+<h3> <span class="mw-headline" id="Improving_Tests"> Improving Tests </span></h3>
+<p>To improve generated tests quality, you can provide the collection of <b><a href="http://ispras.linuxbase.org/index.php/Specialized_Type" title="Specialized Type">specialized types</a></b> for the library.
+</p>
+<h3> <span class="mw-headline" id="Command-Line_Options"> Command-Line Options </span></h3>
+<p>The tool has many useful options for manipulating with the test generation and execution processes. See the list of all options on <b><a href="Options.html" title="API Sanity Autotest Options" class="mw-redirect">this page</a></b>.
+</p>
+<h3> <span class="mw-headline" id="Examples"> Examples </span></h3>
+<p>Generate, build and execute the tests for the libssh library:<br />
+&#160;&#160;<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;api-sanity-checker -l libssh -d 0.3.4.xml -gen -build -run&#160;</code><br /><br />
+Tests will be generated to:<br />
+&#160;&#160;<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;tests/libssh/0.3.4/groups/&#160;</code><br />
+&#160;&#160;<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;tests/libssh/0.3.4/view_tests.html&#160;</code><br /><br />
+The report will be generated to:<br />
+&#160;&#160;<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;test_results/libssh/0.3.4/test_results.html&#160;</code><br /><br />
+Generate tests in the Template2Code (T2C) format:<br />
+&#160;&#160;<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;api-sanity-checker -l libssh -d 0.3.4.xml -gen -t2c&#160;</code><br /><br />
+The package with T2C tests will be generated to:<br />
+&#160;&#160;<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;tests_t2c/libssh/0.3.4/t2c-libssh-tests-0.3.4.tar.gz&#160;</code><br /><br />
+Execute the tests using the Xvfb server:<br />
+&#160;&#160;<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;api-sanity-checker -l allegro -d 4.9.21.xml -run -xvfb&#160;</code><br /><br />
+Generate tests using the <a rel="nofollow" class="external text" href="http://www.splint.org/">Splint</a> annotations in headers:<br />
+&#160;&#160;<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;api-sanity-checker -l popt -d 1.16.xml -gen -splint-specs&#160;</code><br />
+</p>
+<h2> <span class="mw-headline" id="Similar_Tools"> Similar Tools </span></h2>
+<ol><li> <b>Trinity</b> - The Linux system call fuzzer,
+</li><li> <b>iknowthis</b> - A system call fuzzer for UNIX-like systems,
+</li></ol>
+<h2> <span class="mw-headline" id="How_the_Tool_Works"> How the Tool Works </span></h2>
+<p>The basic idea of the test data generation algorithm is to recursively initialize parameters of a function using the values returned (or returned through the out-parameter) by other functions for structured data types (class, struct, union) or by some simple values for intrinsic data types (int, float, enum, ...). The recursion step includes the heuristic selection of the appropriate function, that should be called to initialize complex parameters for other functions. If some parameter of a function cannot be initialized, then the algorithm tries to select other function.
+</p><p>Let's see the example test for <a rel="nofollow" class="external text" href="http://freetype.fis.uniroma2.it/freetype2/docs/reference/ft2-sizes_management.html#FT_Activate_Size">FT_Activate_Size ( FT_Size size )</a> function from the FreeType2 library:
+</p>
+<pre>   <span style="color:Green">#include &lt;freetype/freetype.h&gt;</span>
+   <span style="color:Brown">int</span> main(<span style="color:Brown">int</span> argc, <span style="color:Brown">char</span> *argv[])
+   {
+       FT_Library alibrary = <span style="color:Blue">0</span>;
+       FT_Init_FreeType(&amp;alibrary);<span style="color:Gray">//initialize "alibrary"</span>
+       
+       FT_Face face = <span style="color:Blue">0</span>;
+       FT_New_Face(
+           alibrary,
+           <span style="color:#FF00FF">"sample.ttf"</span>,
+           <span style="color:Blue">0</span>,
+           &amp;face);<span style="color:Gray">//initialize "face"</span>
+       
+       FT_Size size = <span style="color:Blue">0</span>;
+       FT_New_Size(face, &amp;size);<span style="color:Gray">//initialize "size"</span>
+       
+       <span style="color:Red">FT_Activate_Size</span>(size);<span style="color:Gray">//target call</span>
+       return <span style="color:Blue">0</span>;
+   }
+</pre>
+<p>In this test case the parameter "size" of target function FT_Activate_Size is initialized through the call of FT_New_Size function using its 2nd out-parameter. The first parameter "face" of FT_New_Size function is recursively initialized by the use of FT_New_Face function's 4th out-parameter. And finally the first parameter "alibrary" of FT_New_Face is initialized by the call of FT_Init_FreeType function on the 3rd recursion step. Other parameters of FT_New_Face function are initialized by intrinsic values.
+</p>
+<h2> <span class="mw-headline" id="Bugs"> Bugs </span></h2>
+<p>Please post your bug reports, feature requests and questions to the <a rel="nofollow" class="external text" href="http://forge.ispras.ru/projects/api-sanity-autotest">issue tracker</a> or send to <a rel="nofollow" class="external text" href="mailto:aponomarenko@rosalab.ru">this address</a>.
+</p>
+<h2> <span class="mw-headline" id="Applications"> Applications </span></h2>
+<p>LSB 4.0 certification test suites for Qt3 (9792 interfaces tested), Qt4 (10803 interfaces tested) and libxml2 (1284 interfaces tested) libraries were developed with the help of this tool, also known as <a href="http://ispras.linuxbase.org/index.php/AZOV_Framework" title="AZOV Framework">AZOV Code Generator</a> in the past (2007-2009).
+</p>
+<h2> <span class="mw-headline" id="Future_Plans"> Future Plans </span></h2>
+<ul><li> Add CUnit format support. See <a rel="nofollow" class="external text" href="http://www.linuxfoundation.org/collaborate/workgroups/gsoc/2011-gsoc-lsb-projects">2011 GSoC</a> LSB projects.
+</li><li> Extending support of <a rel="nofollow" class="external text" href="http://www.splint.org/">Splint</a> and <a rel="nofollow" class="external text" href="http://en.wikipedia.org/wiki/ANSI/ISO_C_Specification_Language">ACSL</a> annotations.
+</li><li> Making better distinction between pointer arguments (*x) and arrays (x[]).
+</li><li> More kinds of generated test data files (images, fonts, ...).
+</li><li> Option for generating bound values for parameters.
+</li></ul>
+<h2> <span class="mw-headline" id="Maintainers"> Maintainers </span></h2>
+<p>The tool was originally developed by the <a rel="nofollow" class="external text" href="http://linuxtesting.org">Russian Linux Verification Center</a> at <a href="http://ispras.linuxbase.org/index.php/ISP_RAS_Company_Profile" title="ISP RAS Company Profile">ISPRAS</a> and since <b>1.12.9</b> version it's developed by the <a rel="nofollow" class="external text" href="http://www.rosalab.com/">ROSA Laboratory</a> in Russia. <a rel="nofollow" class="external text" href="http://andrey-ponomarenko.myopenid.com/">Andrey Ponomarenko</a> is the leader of this project.
+</p>
+<h2> <span class="mw-headline" id="Credits"> Credits </span></h2>
+<p>We would like to thank <a href="http://ispras.linuxbase.org/index.php/Thanks" title="Thanks">everyone</a> who has contributed to the success of this project!
+</p>
+<h2> <span class="mw-headline" id="Articles"> Articles </span></h2>
+<ol><li> <a rel="nofollow" class="external text" href="http://en.wikipedia.org/wiki/Sanity_testing#Software_development">wikipedia.org, <b>“Sanity testing in software development”</b></a>
+</li><li> <a rel="nofollow" class="external text" href="http://en.wikipedia.org/wiki/Fuzz_testing">wikipedia.org, <b>“Fuzz testing”</b></a>
+</li><li> <a rel="nofollow" class="external text" href="http://panda.ispras.ru/~kuliamin/docs/AzovPrg-2008-en.pdf">R. S. Zybin , V. V. Kuliamin , A. V. Ponomarenko , V. V. Rubanov  and E. S. Chernov, <b>“Automation of broad sanity test generation”</b></a>
+</li></ol>
+
+<!-- 
+NewPP limit report
+Preprocessor node count: 139/1000000
+Post-expand include size: 0/2097152 bytes
+Template argument size: 0/2097152 bytes
+Expensive parser function count: 0/100
+-->
+
+<!-- Saved in parser cache with key rasispdb:pcache:idhash:2411-0!*!0!!en!*!* and timestamp 20121002092033 -->
+</div></div></div></div></div></body></html>

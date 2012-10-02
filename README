@@ -1,0 +1,25 @@
+NAME:
+  API Sanity Checker - an automatic generator of basic unit tests for a C/C++ library API.
+
+INSTALL:
+  sudo perl Makefile.pl -install --prefix=/usr
+
+USAGE:
+  api-sanity-checker -lib NAME -d VERSION.xml -gen -build -run
+
+  VERSION.xml is XML-descriptor:
+
+    <version>
+        1.0
+    </version>
+
+    <headers>
+        /path/to/headers/
+    </headers>
+
+    <libs>
+        /path/to/libraries/
+    </libs>
+
+ADV. USAGE:
+  For advanced usage, see doc/Readme.html or output of --help option.

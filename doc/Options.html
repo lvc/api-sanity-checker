@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<title>API Sanity Checker Options</title>
+<meta charset="UTF-8" />
+<meta name="generator" content="MediaWiki 1.18.1" />
+<link rel="shortcut icon" href="/favicon.ico" />
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ISP_RAS (en)" />
+<link rel="EditURI" type="application/rsd+xml" href="http://ispras.linuxbase.org/api.php?action=rsd" />
+<link rel="alternate" type="application/atom+xml" title="ISP_RAS Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom" />
+<link rel="stylesheet" href="/load.php?debug=false&amp;lang=en&amp;modules=mediawiki.legacy.commonPrint%2Cshared%7Cskins.monobook&amp;only=styles&amp;skin=monobook&amp;*" />
+<!--[if lt IE 5.5000]><link rel="stylesheet" href="/skins/monobook/IE50Fixes.css?303" media="screen" /><![endif]-->
+<!--[if IE 5.5000]><link rel="stylesheet" href="/skins/monobook/IE55Fixes.css?303" media="screen" /><![endif]-->
+<!--[if IE 6]><link rel="stylesheet" href="/skins/monobook/IE60Fixes.css?303" media="screen" /><![endif]-->
+<!--[if IE 7]><link rel="stylesheet" href="/skins/monobook/IE70Fixes.css?303" media="screen" /><![endif]--><meta name="ResourceLoaderDynamicStyles" content="" />
+<link rel="stylesheet" href="/load.php?debug=false&amp;lang=en&amp;modules=site&amp;only=styles&amp;skin=monobook&amp;*" />
+<style>a:lang(ar),a:lang(ckb),a:lang(fa),a:lang(kk-arab),a:lang(mzn),a:lang(ps),a:lang(ur){text-decoration:none}a.new,#quickbar a.new{color:#ba0000}
+
+/* cache key: rasispdb:resourceloader:filter:minify-css:4:c88e2bcd56513749bec09a7e29cb3ffa */
+</style>
+<script src="/load.php?debug=false&amp;lang=en&amp;modules=startup&amp;only=scripts&amp;skin=monobook&amp;*"></script>
+<script>if(window.mw){
+	mw.config.set({"wgCanonicalNamespace": "", "wgCanonicalSpecialPageName": false, "wgNamespaceNumber": 0, "wgPageName": "API_Sanity_Checker_Options", "wgTitle": "API Sanity Checker Options", "wgCurRevisionId": 8095, "wgArticleId": 2419, "wgIsArticle": true, "wgAction": "view", "wgUserName": null, "wgUserGroups": ["*"], "wgCategories": ["API Sanity Checker"], "wgBreakFrames": false, "wgRestrictionEdit": [], "wgRestrictionMove": []});
+}
+</script><script>if(window.mw){
+	mw.loader.load(["mediawiki.page.startup"]);
+}
+</script>
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-API_Sanity_Checker_Options action-view skin-monobook">
+<div id="globalWrapper">
+<div id="column-content"><div id="content">
+	<a id="top"></a>
+	
+	<h1 id="firstHeading" class="firstHeading">API Sanity Checker Options</h1>
+	<div id="bodyContent">
+		<div id="siteSub"></div>
+		<div id="contentSub"></div>
+		
+		<!-- start content -->
+<div lang="en" dir="ltr" class="mw-content-ltr"><table id="toc" class="toc"><tr><td><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Information_Options"><span class="tocnumber">1</span> <span class="toctext">Information Options</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#General_Options"><span class="tocnumber">2</span> <span class="toctext">General Options</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Extra_Options"><span class="tocnumber">3</span> <span class="toctext">Extra Options</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Other_Options"><span class="tocnumber">4</span> <span class="toctext">Other Options</span></a></li>
+</ul>
+</td></tr></table>
+<h2> <span class="mw-headline" id="Information_Options"> Information Options </span></h2>
+<ul><li><b>-h|-help</b>
+</li></ul>
+<div style="padding-left:40px;">Print this help.</div><br />
+<ul><li><b>-info</b>
+</li></ul>
+<div style="padding-left:40px;">Print complete information.</div><br />
+<ul><li><b>-v|-version</b>
+</li></ul>
+<div style="padding-left:40px;">Print version.</div><br />
+<ul><li><b>-dumpversion</b>
+</li></ul>
+<div style="padding-left:40px;">Print the tool version and don't do anything else.</div><br />
+<h2> <span class="mw-headline" id="General_Options"> General Options </span></h2>
+<ul><li><b>-l|-lib|-library &lt;name&gt;</b>
+</li></ul>
+<div style="padding-left:40px;">Library name (without version). It affects only on the path and the title of the reports.</div><br />
+<ul><li><b>-d|-descriptor &lt;path&gt;</b>
+</li></ul>
+<div style="padding-left:40px;">Path to the library descriptor. It may be one of the following:<br />
+<p>1. <a href="Descriptor.html" title="Library Descriptor">XML-descriptor</a>,<br />
+2. Directory with headers and libraries:
+</p>
+<pre> api-sanity-checker -lib NAME -d DIR1.0/ -gen -build -run
+</pre>
+<p>3. Comma separated list of headers and libraries:
+</p>
+<pre> api-sanity-checker -lib NAME -d HEADER.h,LIB.so -gen -build -run
+</pre>
+If you are using an alternative descriptor type then you should specify a version number with -vnum option too.</div><br />
+<ul><li><b>-gen|-generate</b>
+</li></ul>
+<div style="padding-left:40px;">Generate test(s). Options -l and -d should be specified. To generate test for the particular function use it with -f option. Exit code: number of test cases failed to build.</div><br />
+<ul><li><b>-build|-make</b>
+</li></ul>
+<div style="padding-left:40px;">Build test(s). Options -l and -d should be specified. To build test for the particular function use it with -f option. Exit code: number of test cases failed to generate.</div><br />
+<ul><li><b>-run</b>
+</li></ul>
+<div style="padding-left:40px;">Run test(s), create test report. Options -l and -d should be specified. To run test for the particular function use it with -f option. Exit code: number of failed test cases.</div><br />
+<ul><li><b>-clean</b>
+</li></ul>
+<div style="padding-left:40px;">Clean test(s). Options -l and -d should be specified. To clean test for the particular function use it with -f option.</div><br />
+<ul><li><b>-vnum &lt;version&gt;</b>
+</li></ul>
+<div style="padding-left:40px;">Specify library version outside the descriptor.</div><br />
+<ul><li><b>-s|-symbol &lt;name&gt;</b>
+</li></ul>
+<div style="padding-left:40px;">Generate/Build/Run test for specified interface (mangled/symbol name in C++).</div><br />
+<ul><li><b>-symbols-list &lt;path&gt;</b>
+</li></ul>
+<div style="padding-left:40px;">This option allow to specify a file with a list of functions (one per line, mangled/symbol names in C++) that should be tested, other library interfaces will not be tested.</div><br />
+<ul><li><b>-header &lt;name&gt;</b>
+</li></ul>
+<div style="padding-left:40px;">This option allows to restrict a list of functions that should be tested by providing a header file name in which they are declared. This option was introduced for step-by-step tests development.</div><br />
+<ul><li><b>-xvfb</b>
+</li></ul>
+<div style="padding-left:40px;">Use <a rel="nofollow" class="external text" href="http://en.wikipedia.org/wiki/Xvfb">Xvfb-server</a> instead of current X-server (by default) for running tests.</div><br />
+<ul><li><b>-t2c|-template2code</b>
+</li></ul>
+<div style="padding-left:40px;">Generate tests in the universal <a rel="nofollow" class="external text" href="http://sourceforge.net/projects/template2code/">Template2Code</a> format.</div><br />
+<ul><li><b>-splint-specs</b>
+</li></ul>
+<div style="padding-left:40px;">Read <a rel="nofollow" class="external text" href="http://www.splint.org/manual/manual.html">splint</a> specifications (annotations) in the header files.</div><br />
+<ul><li><b>-strict-gen</b>
+</li></ul>
+<div style="padding-left:40px;">Terminate the process of generating tests and return error code '1' if cannot generate at least one test case.</div><br />
+<ul><li><b>-strict-build</b>
+</li></ul>
+<div style="padding-left:40px;">Terminate the process of building tesst and return error code '1' if cannot build at least one test case.</div><br />
+<ul><li><b>-strict-run</b>
+</li></ul>
+<div style="padding-left:40px;">Terminate the process of running tests and return error code '1' if at least one test case failed.</div><br />
+<ul><li><b>-strict</b>
+</li></ul>
+<div style="padding-left:40px;">This option enables all -strict-* options.</div><br />
+<h2> <span class="mw-headline" id="Extra_Options"> Extra Options </span></h2>
+<ul><li><b>-d-tmpl|-descriptor-template</b>
+</li></ul>
+<div style="padding-left:40px;">Create library descriptor template 'lib_ver.xml' in the current directory.</div><br />
+<ul><li><b>-s-tmpl|-specialized-type-template</b>
+</li></ul>
+<div style="padding-left:40px;">Create specialized type template 'spectypes.xml' in the current directory.</div><br />
+<ul><li><b>-r|-random</b>
+</li></ul>
+<div style="padding-left:40px;">Random tests generating mode.</div><br />
+<ul><li><b>-min</b>
+</li></ul>
+<div style="padding-left:40px;">Generate minimun code (as far as possible).</div><br />
+<ul><li><b>-max</b>
+</li></ul>
+<div style="padding-left:40px;">Generate maximum code (as far as possible).</div><br />
+<ul><li><b>-show-retval</b>
+</li></ul>
+<div style="padding-left:40px;">Show the function return type in the report.</div><br />
+<ul><li><b>-check-retval</b>
+</li></ul>
+<div style="padding-left:40px;">Insert requirements on return values (retval!=NULL) for each called interface.</div><br />
+<ul><li><b>-st|-specialized-types &lt;path&gt;</b>
+</li></ul>
+<div style="padding-left:40px;">Path to the collection of <a href="http://ispras.linuxbase.org/index.php/Specialized_Type" title="Specialized Type">specialized types</a>.</div><br />
+<ul><li><b>-td|-test-data &lt;path&gt;</b>
+</li></ul>
+<div style="padding-left:40px;">Path to the directory with <a href="http://ispras.linuxbase.org/index.php/Specialized_Type#Using_Test_Data" title="Specialized Type">test data</a>.</div><br />
+<ul><li><b>-headers-only</b>
+</li></ul>
+<div style="padding-left:40px;">If the library is header-based and has no shared objects this option allows to generate tests for headers only.</div><br />
+<ul><li><b>-isolated</b>
+</li></ul>
+<div style="padding-left:40px;">Allow to restrict functions usage by the lists specified by the -functions-list option<br />or by the group devision in the descriptor.</div><br />
+<ul><li><b>-view-only</b>
+</li></ul>
+<div style="padding-left:40px;">Remove all files from the test suite except *.html files. This option allows to create a lightweight html-index for all tests in the test suite.</div><br />
+<ul><li><b>-disable-default-values</b>
+</li></ul>
+<div style="padding-left:40px;">Disable usage of default values for function parameters.</div><br />
+<ul><li><b>-p|-params &lt;path&gt;</b>
+</li></ul>
+<div style="padding-left:40px;">Path to file with the function parameter names. It can be used for improving generated tests if the library header files don't contain parameter names. File format:</div>
+<div style="padding-left:80px;">func1;param1;param2;param3 ...<br />func2;param1;param2;param3 ...<br />...</div><br />
+<ul><li><b>-library-full-name &lt;name&gt;</b>
+</li></ul>
+<div style="padding-left:40px;">Library name in the report title.</div><br />
+<ul><li><b>-relpath|-reldir &lt;path&gt;</b>
+</li></ul>
+<div style="padding-left:40px;">Replace {RELPATH} in the library descriptor by &lt;path&gt;.</div><br />
+<ul><li><b>-debug</b>
+</li></ul>
+<div style="padding-left:40px;">Write extended log for debugging.</div><br />
+<h2> <span class="mw-headline" id="Other_Options"> Other Options </span></h2>
+<ul><li><b>-test</b>
+</li></ul>
+<div style="padding-left:40px;">Run internal tests. Create a simple library and run the tool on it. This option allows to check if the tool works correctly on the system.</div><br />
+<ul><li><b>-time</b>
+</li></ul>
+<div style="padding-left:40px;">Show expend time for generating, building and running tests.</div><br />
+<ul><li><b>-check-stdcxx-symbols</b>
+</li></ul>
+<div style="padding-left:40px;">Enable checking of stdc++ interfaces from the library (for C++ libraries).</div><br />
+<ul><li><b>-disable-variable-reuse</b>
+</li></ul>
+<div style="padding-left:40px;">Disable reusing of previously created variables.</div><br />
+<ul><li><b>-long-variable-names</b>
+</li></ul>
+<div style="padding-left:40px;">Enable long (complex) variable names instead of short names (by default).</div><br />
+
+<!-- 
+NewPP limit report
+Preprocessor node count: 58/1000000
+Post-expand include size: 0/2097152 bytes
+Template argument size: 0/2097152 bytes
+Expensive parser function count: 0/100
+-->
+
+<!-- Saved in parser cache with key rasispdb:pcache:idhash:2419-0!*!0!!en!*!* and timestamp 20121002085651 -->
+</div></div></div></div></div></body></html>
