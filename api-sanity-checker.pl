@@ -3613,10 +3613,10 @@ sub getSymbols_Lib($$)
             print STDERR "ERROR: can't find \"nm\"\n";
             exit(1);
         }
-        open(DYLIB, "$NM -jg \"$Lib_Path\" 2>\"$TMP_DIR/null\" |");
+        open(DYLIB, "$NM -g \"$Lib_Path\" 2>\"$TMP_DIR/null\" |");
         while(<DYLIB>)
         {
-            if(/\A_([\w\$]+)\s*\Z/)
+            if(/ [STD] _([\w\$]+)\s*\Z/)
             {
                 my $fullname = $1;
                 my ($realname, $version) = get_symbol_name_version($fullname);
