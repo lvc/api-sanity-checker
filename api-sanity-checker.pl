@@ -1,11 +1,11 @@
 #!/usr/bin/perl
 ###########################################################################
-# API Sanity Checker (ASC) 1.12.10
+# API Sanity Checker (ASC) 1.12.11
 # Unit test generator for a shared C/C++ library API
 #
 # Copyright (C) 2009-2010 The Linux Foundation
 # Copyright (C) 2009-2011 Institute for System Programming, RAS
-# Copyright (C) 2011-2012 ROSA Laboratory
+# Copyright (C) 2011-2012 ROSA Lab
 #
 # Written by Andrey Ponomarenko
 #
@@ -21,7 +21,7 @@
 #    - Perl 5 (5.8 or newer)
 #
 #  Mac OS X
-#    - Xcode (gcc, otool, c++filt)
+#    - Xcode (gcc, nm, c++filt)
 #
 #  MS Windows
 #    - MinGW (3.0-4.7, recommended 4.5 or newer)
@@ -52,7 +52,7 @@ use File::Copy qw(copy);
 use Cwd qw(abs_path cwd);
 use Config;
 
-my $TOOL_VERSION = "1.12.10";
+my $TOOL_VERSION = "1.12.11";
 
 my ($Help, $InfoMsg, $TargetLibraryName, $GenerateTests, $TargetInterfaceName, $BuildTests, $RunTests, $CleanTests,
 $DisableReuse, $LongVarNames, %Descriptor, $UseXvfb, $TestSystem, $MinimumCode, $TestDataPath, $MaximumCode,
@@ -78,12 +78,12 @@ my $TMP_DIR = tempdir(CLEANUP=>1);
 
 my %HomePage = (
     "Wiki"=>"http://ispras.linux-foundation.org/index.php/API_Sanity_Autotest",
-    "Dev"=>"http://forge.ispras.ru/projects/api-sanity-autotest"
+    "Dev"=>"https://github.com/lvc/api-sanity-checker"
 );
 
 my $ShortUsage = "API Sanity Checker (ASC) $TOOL_VERSION
 Unit test generator for a shared C/C++ library API
-Copyright (C) 2012 ROSA Laboratory
+Copyright (C) 2012 ROSA Lab
 License: GNU LGPL or GNU GPL
 
 Usage: $CmdName [options]
@@ -3599,7 +3599,7 @@ sub getSymbols_Lib($$)
     return () if(not $Lib_Path or not -f $Lib_Path);
     my ($Lib_Dir, $Lib_SoName) = separate_path(resolve_symlink($Lib_Path));
     return () if($CheckedSoLib{$Lib_SoName} and $IsNeededLib);
-    return () if(isCyclical(\@RecurLib, $Lib_SoName));# or $#RecurLib>=5
+    return () if(isCyclical(\@RecurLib, $Lib_SoName)); # or $#RecurLib>=5
     $CheckedSoLib{$Lib_SoName} = 1;
     push(@RecurLib, $Lib_SoName);
     my %NeededLib = ();
@@ -3607,27 +3607,27 @@ sub getSymbols_Lib($$)
     $GLIBC_TESTING = 1 if($Lib_SoName=~/\Alibc.$LIB_EXT/ and not $IsNeededLib);
     if($OSgroup eq "macos")
     {
-        my $OtoolCmd = get_CmdPath("otool");
-        if(not $OtoolCmd)
+        my $NM = get_CmdPath("nm");
+        if(not $NM)
         {
-            print STDERR "ERROR: can't find \"otool\"\n";
+            print STDERR "ERROR: can't find \"nm\"\n";
             exit(1);
         }
-        open(DYLIB, "$OtoolCmd -TV $Lib_Path 2>$TMP_DIR/null |");
+        open(DYLIB, "$NM -jg \"$Lib_Path\" 2>\"$TMP_DIR/null\" |");
         while(<DYLIB>)
         {
-            if(/[^_]+\s+_([\w\$]+)\s*\Z/)
+            if(/\A_([\w\$]+)\s*\Z/)
             {
                 my $fullname = $1;
                 my ($realname, $version) = get_symbol_name_version($fullname);
                 if(not $SoLib_IntPrefix{$Lib_SoName})
-                {# collecting prefixes
+                { # collecting prefixes
                     $SoLib_IntPrefix{$Lib_SoName} = get_int_prefix($realname);
                 }
                 if($IsNeededLib)
                 {
                     if($SharedObject_Paths{get_filename($Lib_Path)}{$Lib_Path})
-                    {# other shared objects in the same package
+                    { # other shared objects in the same package
                         if(not $NeededInterface_Library{$realname})
                         {
                             $NeededInterface_Library{$realname} = $Lib_Path;
@@ -3660,7 +3660,15 @@ sub getSymbols_Lib($$)
             }
         }
         close(DYLIB);
-        open(DYLIB, "$OtoolCmd -L $Lib_Path 2>$TMP_DIR/null |");
+        
+        my $OtoolCmd = get_CmdPath("otool");
+        if(not $OtoolCmd)
+        {
+            print STDERR "ERROR: can't find \"otool\"\n";
+            exit(1);
+        }
+        
+        open(DYLIB, "$OtoolCmd -L \"$Lib_Path\" 2>\"$TMP_DIR/null\" |");
         while(<DYLIB>)
         {
             if(/\s*([\/\\].+\.$LIB_EXT)\s*/
@@ -3678,24 +3686,24 @@ sub getSymbols_Lib($$)
             print STDERR "ERROR: can't find \"dumpbin\"\n";
             exit(1);
         }
-        open(DLL, "$DumpBinCmd /EXPORTS \"$Lib_Path\" 2>$TMP_DIR/null |");
+        open(DLL, "$DumpBinCmd /EXPORTS \"$Lib_Path\" 2>\"$TMP_DIR/null\" |");
         while(<DLL>)
         {
             if(/(\?[\w\?\@]+)/ or /[^_]+\s+_([\w]+)/)
-            {#DLL: /\A\s*\w+\s+\w+\s+\w+\s+([\w\?\@]+)\s*\Z/
+            { # DLL: /\A\s*\w+\s+\w+\s+\w+\s+([\w\?\@]+)\s*\Z/
                 my $realname = $1;
                 if(lc($realname) eq "summary") {
-                    last;# end of output
+                    last; # end of output
                 }
                 $realname=~s/\A_//g;
                 if(not $SoLib_IntPrefix{$Lib_SoName})
-                {# collecting prefixes
+                { # collecting prefixes
                     $SoLib_IntPrefix{$Lib_SoName} = get_int_prefix($realname);
                 }
                 if($IsNeededLib)
                 {
                     if($SharedObject_Paths{get_filename($Lib_Path)}{$Lib_Path})
-                    {# other shared objects in the same package
+                    { # other shared objects in the same package
                         if(not $NeededInterface_Library{$realname}) {
                             $NeededInterface_Library{$realname} = $Lib_Path;
                         }
@@ -3720,7 +3728,7 @@ sub getSymbols_Lib($$)
             }
         }
         close(DLL);
-        open(DLL, "$DumpBinCmd /DEPENDENTS $Lib_Path 2>$TMP_DIR/null |");
+        open(DLL, "$DumpBinCmd /DEPENDENTS \"$Lib_Path\" 2>\"$TMP_DIR/null\" |");
         while(<DLL>)
         {
             if(/\s*(.+?\.$LIB_EXT)\s*/i
@@ -3738,7 +3746,7 @@ sub getSymbols_Lib($$)
             print STDERR "ERROR: can't find \"readelf\"\n";
             exit(1);
         }
-        open(SOLIB, "$ReadelfCmd -WhlSsdA $Lib_Path 2>$TMP_DIR/null |");
+        open(SOLIB, "$ReadelfCmd -WhlSsdA \"$Lib_Path\" 2>\"$TMP_DIR/null\" |");
         my $symtab=0; # indicates that we are processing 'symtab' section of 'readelf' output
         while(<SOLIB>)
         {
@@ -3817,7 +3825,7 @@ sub getSymbols_Lib($$)
         $Language{$Lib_SoName} = "C";
     }
     foreach my $SoLib (sort {length($a)<=>length($b)} keys(%NeededLib))
-    {# dependencies
+    { # dependencies
         my $DepPath = find_solib_path($SoLib);
         if($DepPath and -f $DepPath)
         {
@@ -3976,16 +3984,17 @@ sub callPreprocessor($$$$)
     else {
         $Cmd .= " | grep \"$Grep\"";
     }
-    my $Path = "$TMP_DIR/preprocessed";
-    system("$Cmd >$Path");
-    return $Path;
+    my $Out = $TMP_DIR."/preprocessed.h";
+    system($Cmd." >\"$Out\" 2>\"$TMP_DIR/null\"");
+    return $Out;
 }
 
 sub cmd_find($$$$)
 {
     my ($Path, $Type, $Name, $MaxDepth) = @_;
     return () if(not $Path or not -e $Path);
-    if($OSgroup eq "windows") {
+    if($OSgroup eq "windows")
+    {
         my $DirCmd = get_CmdPath("dir");
         if(not $DirCmd) {
             print STDERR "ERROR: can't find \"dir\" command\n";
@@ -4001,7 +4010,8 @@ sub cmd_find($$$$)
             $Cmd .= " /AD";
         }
         my @Files = ();
-        if($Name) {
+        if($Name)
+        {
             $Name=~s/\*/.*/g if($Name!~/\]/);
             foreach my $File (split(/\n/, `$Cmd`))
             {
@@ -4014,7 +4024,8 @@ sub cmd_find($$$$)
             @Files = split(/\n/, `$Cmd 2>$TMP_DIR/null`);
         }
         my @AbsPaths = ();
-        foreach my $File (@Files) {
+        foreach my $File (@Files)
+        {
             if($File!~/\A(\/|\w+:[\/\\])/) {
                 $File = joinPath($Path, $File);
             }
@@ -4039,7 +4050,8 @@ sub cmd_find($$$$)
         if($Type) {
             $Cmd .= " -type $Type";
         }
-        if($Name) {
+        if($Name)
+        {
             if($Name=~/\]/) {
                 $Cmd .= " -regex \"$Name\"";
             }
@@ -18584,7 +18596,8 @@ sub generate_tests()
     }
     else
     {# from the shared objects (default)
-        if(not keys(%Interface_Library)) {
+        if(not keys(%Interface_Library))
+        {
             print STDERR "ERROR: cannot generate tests because extracted list of symbols is empty\n";
             exit(1);
         }
@@ -18601,12 +18614,14 @@ sub generate_tests()
                 $TargetInterfaces{$Interface} = 1;
             }
         }
-        if(not keys(%TargetInterfaces)) {
+        if(not keys(%TargetInterfaces))
+        {
             print STDERR "ERROR: cannot obtain enough information from header files to generate tests\n";
             exit(1);
         }
     }
-    if(not keys(%TargetInterfaces)) {
+    if(not keys(%TargetInterfaces))
+    {
         print STDERR "ERROR: specified information is not enough to generate tests\n";
         exit(1);
     }
@@ -18622,7 +18637,8 @@ sub generate_tests()
             {
                 foreach my $Interface (keys(%{$LibGroups{$LibGroup}}))
                 {
-                    if($TargetInterfaces{$Interface}) {
+                    if($TargetInterfaces{$Interface})
+                    {
                         $LibGroups_Filtered{$LibGroup}{$Interface} = 1;
                         $All_Count+=1;
                     }
@@ -18683,9 +18699,11 @@ sub generate_tests()
             @RecurSpecType = ();
             %SubClass_Created = ();
             my %Result = generate_sanity_test($Interface);
-            if(not $Result{"IsCorrect"}) {
+            if(not $Result{"IsCorrect"})
+            {
                 print FAIL_LIST $Interface."\n";
-                if($StrictGen) {
+                if($StrictGen)
+                {
                     print STDERR "ERROR: can't generate test for $Interface\n";
                     exit(1);
                 }
@@ -18774,7 +18792,7 @@ sub t2c_group_generation($$$$$$)
     my $MaxLength = 0;
     my $LibGroupName = getLibGroupName($C1, $C2);
     my %TestComponents = ();
-    #resetting global state for section
+    # resetting global state for section
     restore_state(());
     foreach my $Interface (@{$Interfaces})
     {
@@ -18803,14 +18821,14 @@ sub t2c_group_generation($$$$$$)
         $TestComponents{"Blocks"} .= "##=========================================================================\n## ".get_Signature($Interface)."\n\n<BLOCK>\n\n<TARGETS>\n    ".$CompleteSignature{$Interface}{"ShortName"}."\n</TARGETS>\n\n".(($DefinesList)?"<DEFINE>\n".$DefinesList."</DEFINE>\n\n":"")."<CODE>\n".$Result{"main"}."</CODE>\n\n".(($ValuesList)?"<VALUES>\n".$ValuesList."</VALUES>\n\n":"")."</BLOCK>\n\n\n";
         $MaxLength = length($CompleteSignature{$Interface}{"ShortName"}) if($MaxLength<length($CompleteSignature{$Interface}{"ShortName"}));
     }
-    #adding test data
+    # adding test data
     my $TestDataDir = $SuitePath."/testdata/".(($MediumPath)?"$MediumPath/":"")."$TestName/";
     mkpath($TestDataDir);
     $TestComponents{"Blocks"} = add_VirtualTestData($TestComponents{"Blocks"}, $TestDataDir);
     $TestComponents{"Blocks"} = add_TestData($TestComponents{"Blocks"}, $TestDataDir);
     my $Content = "#library $TargetLibraryName\n#libsection $LibGroupName\n\n<GLOBAL>\n\n// Tested here:\n";
     foreach my $Interface (@{$Interfaces})
-    {#development progress
+    { # development progress
         $Content .= "// ".$CompleteSignature{$Interface}{"ShortName"};
         foreach (0 .. $MaxLength - length($CompleteSignature{$Interface}{"ShortName"}) + 2) {
             $Content .= " ";
@@ -18819,7 +18837,7 @@ sub t2c_group_generation($$$$$$)
     }
     $Content .= "\n";
     foreach my $Header (@{$TestComponents{"Headers"}})
-    {#includes
+    { # includes
         $Content .= "#include <$Header>\n";
     }
     $Content .= "\n".$TestComponents{"Code"}."\n" if($TestComponents{"Code"});
@@ -18897,7 +18915,7 @@ sub build_tests()
     my $Test_Num = 0;
     open(FAIL_LIST, ">$TEST_SUITE_PATH/build_fail_list");
     foreach my $Interface (sort {lc($a) cmp lc($b)} keys(%Interface_TestDir))
-    {#building tests
+    { # building tests
         print "\r".get_one_step_title($Test_Num, $All_Count, "building tests", $ResultCounter{"Build"}{"Success"}, $ResultCounter{"Build"}{"Fail"});
         build_sanity_test($Interface);
         if(not $BuildResult{$Interface}{"IsCorrect"}) {
@@ -18921,7 +18939,7 @@ sub clean_tests()
     my $All_Count = keys(%Interface_TestDir);
     my $Test_Num = 0;
     foreach my $Interface (sort {lc($a) cmp lc($b)} keys(%Interface_TestDir))
-    {#cleaning tests
+    { # cleaning tests
         print "\r".get_one_step_title($Test_Num, $All_Count, "cleaning tests", $Test_Num, 0);
         clean_sanity_test($Interface);
         $Test_Num += 1;
@@ -18958,7 +18976,7 @@ sub run_tests()
     my $XvfbStarted = 0;
     $XvfbStarted = runXvfb() if($UseXvfb);
     foreach my $Interface (sort {lc($a) cmp lc($b)} keys(%ForRunning))
-    {# running tests
+    { # running tests
         print "\r".get_one_step_title($Test_Num, $All_Count, "running tests", $ResultCounter{"Run"}{"Success"}, $ResultCounter{"Run"}{"Fail"});
         run_sanity_test($Interface);
         if(not $RunResult{$Interface}{"IsCorrect"}) {
@@ -18984,11 +19002,11 @@ sub detectPointerSize()
     my $Defines = `$GCC_PATH -E -dD $TMP_DIR/empty.h`;
     unlink("$TMP_DIR/empty.h");
     if($Defines=~/ __SIZEOF_POINTER__\s+(\d+)/)
-    {# GCC 4
+    { # GCC 4
         $POINTER_SIZE = $1;
     }
     elsif($Defines=~/ __PTRDIFF_TYPE__\s+(\w+)/)
-    {# GCC 3
+    { # GCC 3
         my $PTRDIFF = $1;
         if($PTRDIFF=~/long/) {
             $POINTER_SIZE = 8;
@@ -18997,7 +19015,8 @@ sub detectPointerSize()
             $POINTER_SIZE = 4;
         }
     }
-    if(not int($POINTER_SIZE)) {
+    if(not int($POINTER_SIZE))
+    {
         print STDERR "ERROR: can't check size of pointer\n";
         exit(1);
     }
@@ -19078,7 +19097,7 @@ sub testSystem_cpp()
             return 1;
         }";
     
-    #Initialization by interface
+    # Initialization by interface
     $DataDefs .= "
         struct simple_struct {
             int m;
@@ -19098,7 +19117,7 @@ sub testSystem_cpp()
             return 1;
         }";
     
-    #Private Interface
+    # Private Interface
     $DataDefs .= "
         class $DeclSpec private_class {
         private:
@@ -19111,7 +19130,7 @@ sub testSystem_cpp()
             return p;
         }";
     
-    #Assembling structure
+    # Assembling structure
     $DataDefs .= "
         struct complex_struct {
             int a;
@@ -19126,7 +19145,7 @@ sub testSystem_cpp()
             return 1;
         }";
     
-    #Abstract class
+    # Abstract class
     $DataDefs .= "
         class $DeclSpec abstract_class {
         public:
@@ -19140,7 +19159,7 @@ sub testSystem_cpp()
             return p;
         }";
     
-    #Parameter FuncPtr
+    # Parameter FuncPtr
     $DataDefs .= "
         typedef int (*funcptr_type)(int a, int b);
         $DeclSpec funcptr_type func_return_funcptr(int a);
@@ -19153,7 +19172,7 @@ sub testSystem_cpp()
             return 0;
         }";
 
-    #Parameter FuncPtr (2)
+    # Parameter FuncPtr (2)
     $DataDefs .= "
         typedef int (*funcptr_type2)(int a, int b, float c);
         $DeclSpec int func_param_funcptr2(funcptr_type2 p);";
@@ -19162,7 +19181,7 @@ sub testSystem_cpp()
             return 0;
         }";
     
-    #Parameter Array
+    # Parameter Array
     $DataDefs .= "
         $DeclSpec int func_param_array(struct complex_struct const ** x);";
     $Sources .= "
@@ -19170,7 +19189,7 @@ sub testSystem_cpp()
             return 0;
         }";
     
-    #Nested classes
+    # Nested classes
     $DataDefs .= "//Nested classes
         class $DeclSpec A {
         public:
@@ -19196,7 +19215,7 @@ sub testSystem_cpp()
             return false;
         };";
     
-    #Throw class
+    # Throw class
     $DataDefs .= "
         class $DeclSpec Exception {
         public:
@@ -19386,7 +19405,8 @@ sub runTests($$$$$$)
     if($OSgroup eq "windows")
     {
         my $CL = get_CmdPath("cl");
-        if(not $CL) {
+        if(not $CL)
+        {
             print STDERR "ERROR: can't find \"cl\" compiler\n";
             exit(1);
         }
@@ -19395,28 +19415,47 @@ sub runTests($$$$$$)
     elsif($OSgroup eq "linux")
     {
         writeFile("$LibName/version", "VERSION_1.0 {\n};\nVERSION_2.0 {\n};\n");
-        $BuildCmd = "$GCC_PATH -Wl,--version-script version -shared -fkeep-inline-functions".($Lang eq "C++"?" -x c++":"")." libsample.$Ext -o libsample.$LIB_EXT";
+        if($Lang eq "C++") {
+            $BuildCmd = "$GCC_PATH -Wl,--version-script version -shared -x c++ libsample.$Ext -lstdc++ -o libsample.$LIB_EXT";
+        }
+        else {
+            $BuildCmd = "$GCC_PATH -Wl,--version-script version -shared libsample.$Ext -o libsample.$LIB_EXT";
+        }
         if(getArch()=~/\A(arm|x86_64)\Z/i)
         { # relocation R_X86_64_32S against `vtable for class' can not be used when making a shared object; recompile with -fPIC
             $BuildCmd .= " -fPIC";
         }
     }
-    elsif($OSgroup eq "macos") {
-        $BuildCmd = "$GCC_PATH -dynamiclib -fkeep-inline-functions".($Lang eq "C++"?" -x c++":"")." libsample.$Ext -o libsample.$LIB_EXT";
+    elsif($OSgroup eq "macos")
+    {
+        if($Lang eq "C++") {
+            $BuildCmd = "$GCC_PATH -dynamiclib -x c++ libsample.$Ext -lstdc++ -o libsample.$LIB_EXT";
+        }
+        else {
+            $BuildCmd = "$GCC_PATH -dynamiclib libsample.$Ext -o libsample.$LIB_EXT";
+        }
     }
-    else {
-        $BuildCmd = "$GCC_PATH -shared -fkeep-inline-functions".($Lang eq "C++"?" -x c++":"")." libsample.$Ext -o libsample.$LIB_EXT";
+    else
+    {
+        if($Lang eq "C++") {
+            $BuildCmd = "$GCC_PATH -Wl,--version-script version -shared -x c++ libsample.$Ext -lstdc++ -o libsample.$LIB_EXT";
+        }
+        else {
+            $BuildCmd = "$GCC_PATH -Wl,--version-script version -shared libsample.$Ext -o libsample.$LIB_EXT";
+        }
     }
     writeFile("$LibName/Makefile", "all:\n\t$BuildCmd\n");
     system("cd $LibName && $BuildCmd");
-    if($?) {
+    if($?)
+    {
         print STDERR "ERROR: can't compile \'$LibName/libsample.$Ext\'\n";
         return;
     }
     # running the tool
     system("perl $0 -l $LibName -d $LibName/descriptor.xml -gen -build -run -show-retval");
     my ($Total, $Passed, $Failed) = (0, 0, 0);
-    if(my $FLine = readFirstLine("test_results/$LibName/1.0/test_results.html")) {
+    if(my $FLine = readFirstLine("test_results/$LibName/1.0/test_results.html"))
+    {
         if($FLine=~/total:(\d+)/) {
             $Total = $1;
         }
@@ -19456,8 +19495,9 @@ sub esc($)
 sub detect_default_paths()
 {
     foreach my $Type (keys(%{$OS_AddPath{$OSgroup}}))
-    {# additional search paths
-        foreach my $Path (keys(%{$OS_AddPath{$OSgroup}{$Type}})) {
+    { # additional search paths
+        foreach my $Path (keys(%{$OS_AddPath{$OSgroup}{$Type}}))
+        {
             next if(not -d $Path);
             $SystemPaths{$Type}{$Path} = $OS_AddPath{$OSgroup}{$Type}{$Path};
         }
@@ -19465,11 +19505,12 @@ sub detect_default_paths()
     if($OSgroup ne "windows")
     {
         foreach my $Type ("include", "lib", "bin")
-        {# autodetecting system "devel" directories
+        { # autodetecting system "devel" directories
             foreach my $Path (cmd_find("/","d","*$Type*",1)) {
                 $SystemPaths{$Type}{$Path} = 1;
             }
-            if(-d "/usr") {
+            if(-d "/usr")
+            {
                 foreach my $Path (cmd_find("/usr","d","*$Type*",1)) {
                     $SystemPaths{$Type}{$Path} = 1;
                 }
@@ -19759,7 +19800,7 @@ sub scenario()
         exit(0);
     }
     if(defined $ShowVersion) {
-        print "API Sanity Checker (ASC) $TOOL_VERSION\nCopyright (C) 2012 ROSA Laboratory\nLicense: LGPL or GPL <http://www.gnu.org/licenses/>\nThis program is free software: you can redistribute it and/or modify it.\n\nWritten by Andrey Ponomarenko.\n";
+        print "API Sanity Checker (ASC) $TOOL_VERSION\nCopyright (C) 2012 ROSA Lab\nLicense: LGPL or GPL <http://www.gnu.org/licenses/>\nThis program is free software: you can redistribute it and/or modify it.\n\nWritten by Andrey Ponomarenko.\n";
         exit(0);
     }
     if(defined $DumpVersion) {
@@ -19959,23 +20000,27 @@ sub scenario()
             }
             create_Index();
         }
-        else {
+        else
+        {
             generate_tests();
             create_Index() if(not defined $Template2Code);
         }
         if($ResultCounter{"Gen"}{"Success"}>0)
         {
-            if($TargetInterfaceName) {
+            if($TargetInterfaceName)
+            {
                 my $TestPath = getTestPath($TargetInterfaceName);
                 print "see generated test in \'$TestPath/\'\n";
             }
             else
             {
-                if($Template2Code) {
+                if($Template2Code)
+                {
                     print "1. see generated test suite in the directory \'$TEST_SUITE_PATH/\'\n";
                     print "2. see Template2Code technology documentation for building and running tests:\nhttp://template2code.sourceforge.net/t2c-doc/index.html\n";
                 }
-                else {
+                else
+                {
                     print "1. see generated test suite in the directory \'$TEST_SUITE_PATH/\'\n";
                     print "2. for viewing the tests use \'$TEST_SUITE_PATH/view_tests.html\'\n";
                     print "3. use -build option for building tests\n";

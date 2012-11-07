@@ -21,7 +21,7 @@
 </style>
 <script src="/load.php?debug=false&amp;lang=en&amp;modules=startup&amp;only=scripts&amp;skin=monobook&amp;*"></script>
 <script>if(window.mw){
-	mw.config.set({"wgCanonicalNamespace": "", "wgCanonicalSpecialPageName": false, "wgNamespaceNumber": 0, "wgPageName": "API_Sanity_Checker", "wgTitle": "API Sanity Checker", "wgCurRevisionId": 8103, "wgArticleId": 2411, "wgIsArticle": true, "wgAction": "view", "wgUserName": null, "wgUserGroups": ["*"], "wgCategories": ["API Sanity Checker"], "wgBreakFrames": false, "wgRestrictionEdit": [], "wgRestrictionMove": []});
+	mw.config.set({"wgCanonicalNamespace": "", "wgCanonicalSpecialPageName": false, "wgNamespaceNumber": 0, "wgPageName": "API_Sanity_Checker", "wgTitle": "API Sanity Checker", "wgCurRevisionId": 8105, "wgArticleId": 2411, "wgIsArticle": true, "wgAction": "view", "wgUserName": null, "wgUserGroups": ["*"], "wgCategories": ["API Sanity Checker"], "wgBreakFrames": false, "wgRestrictionEdit": [], "wgRestrictionMove": []});
 }
 </script><script>if(window.mw){
 	mw.loader.load(["mediawiki.page.startup"]);
@@ -72,14 +72,15 @@
 <li class="toclevel-2 tocsection-17"><a href="#Examples"><span class="tocnumber">8.7</span> <span class="toctext">Examples</span></a></li>
 </ul>
 </li>
-<li class="toclevel-1 tocsection-18"><a href="#Similar_Tools"><span class="tocnumber">9</span> <span class="toctext">Similar Tools</span></a></li>
-<li class="toclevel-1 tocsection-19"><a href="#How_the_Tool_Works"><span class="tocnumber">10</span> <span class="toctext">How the Tool Works</span></a></li>
-<li class="toclevel-1 tocsection-20"><a href="#Bugs"><span class="tocnumber">11</span> <span class="toctext">Bugs</span></a></li>
-<li class="toclevel-1 tocsection-21"><a href="#Applications"><span class="tocnumber">12</span> <span class="toctext">Applications</span></a></li>
-<li class="toclevel-1 tocsection-22"><a href="#Future_Plans"><span class="tocnumber">13</span> <span class="toctext">Future Plans</span></a></li>
-<li class="toclevel-1 tocsection-23"><a href="#Maintainers"><span class="tocnumber">14</span> <span class="toctext">Maintainers</span></a></li>
-<li class="toclevel-1 tocsection-24"><a href="#Credits"><span class="tocnumber">15</span> <span class="toctext">Credits</span></a></li>
-<li class="toclevel-1 tocsection-25"><a href="#Articles"><span class="tocnumber">16</span> <span class="toctext">Articles</span></a></li>
+<li class="toclevel-1 tocsection-18"><a href="#Tutorial"><span class="tocnumber">9</span> <span class="toctext">Tutorial</span></a></li>
+<li class="toclevel-1 tocsection-19"><a href="#Similar_Tools"><span class="tocnumber">10</span> <span class="toctext">Similar Tools</span></a></li>
+<li class="toclevel-1 tocsection-20"><a href="#How_the_Tool_Works"><span class="tocnumber">11</span> <span class="toctext">How the Tool Works</span></a></li>
+<li class="toclevel-1 tocsection-21"><a href="#Bugs"><span class="tocnumber">12</span> <span class="toctext">Bugs</span></a></li>
+<li class="toclevel-1 tocsection-22"><a href="#Applications"><span class="tocnumber">13</span> <span class="toctext">Applications</span></a></li>
+<li class="toclevel-1 tocsection-23"><a href="#Future_Plans"><span class="tocnumber">14</span> <span class="toctext">Future Plans</span></a></li>
+<li class="toclevel-1 tocsection-24"><a href="#Maintainers"><span class="tocnumber">15</span> <span class="toctext">Maintainers</span></a></li>
+<li class="toclevel-1 tocsection-25"><a href="#Credits"><span class="tocnumber">16</span> <span class="toctext">Credits</span></a></li>
+<li class="toclevel-1 tocsection-26"><a href="#Articles"><span class="tocnumber">17</span> <span class="toctext">Articles</span></a></li>
 </ul>
 </td></tr></table>
 <h2> <span class="mw-headline" id="Downloads"> Downloads </span></h2>
@@ -101,7 +102,7 @@
 <ul><li><b>Linux, FreeBSD</b>
 <ul><li> <a rel="nofollow" class="external text" href="http://gcc.gnu.org/">G++</a> (3.0-4.7, recommended 4.5 or newer)
 </li><li> <a rel="nofollow" class="external text" href="http://www.gnu.org/software/binutils/">GNU Binutils</a> (readelf, c++filt, objdump)
-</li><li> <a rel="nofollow" class="external text" href="http://www.perl.org/">Perl5 </a> (5.8 or newer)
+</li><li> <a rel="nofollow" class="external text" href="http://www.perl.org/">Perl 5 </a> (5.8 or newer)
 </li><li> WARNING: if you are using ccache program (i.e. gcc points to /usr/lib/ccache/gcc) then it should be newer than 3.1.2 or disabled.
 </li></ul>
 </li></ul>
@@ -205,7 +206,7 @@ After a time will be generated test report:<br />
 &#160;&#160;<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;test_results/<i>NAME</i>/<i>VER</i>/test_results.html&#160;</code>
 </p>
 <h3> <span class="mw-headline" id="Improving_Tests"> Improving Tests </span></h3>
-<p>To improve generated tests quality, you can provide the collection of <b><a href="http://ispras.linuxbase.org/index.php/Specialized_Type" title="Specialized Type">specialized types</a></b> for the library.
+<p>To improve generated tests quality, you can provide the collection of <b><a href="SpecType.html" title="Specialized Type">specialized types</a></b> for the library.
 </p>
 <h3> <span class="mw-headline" id="Command-Line_Options"> Command-Line Options </span></h3>
 <p>The tool has many useful options for manipulating with the test generation and execution processes. See the list of all options on <b><a href="Options.html" title="API Sanity Autotest Options" class="mw-redirect">this page</a></b>.
@@ -226,6 +227,9 @@ Execute the tests using the Xvfb server:<br />
 &#160;&#160;<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;api-sanity-checker -l allegro -d 4.9.21.xml -run -xvfb&#160;</code><br /><br />
 Generate tests using the <a rel="nofollow" class="external text" href="http://www.splint.org/">Splint</a> annotations in headers:<br />
 &#160;&#160;<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;api-sanity-checker -l popt -d 1.16.xml -gen -splint-specs&#160;</code><br />
+</p>
+<h2> <span class="mw-headline" id="Tutorial"> Tutorial </span></h2>
+<p>See <a rel="nofollow" class="external text" href="http://sourceware.org/glibc/wiki/Testing/Smoke_test">"Smoke test"</a> article at glibc wiki.
 </p>
 <h2> <span class="mw-headline" id="Similar_Tools"> Similar Tools </span></h2>
 <ol><li> <b>Trinity</b> - The Linux system call fuzzer,
@@ -284,11 +288,11 @@ Generate tests using the <a rel="nofollow" class="external text" href="http://ww
 
 <!-- 
 NewPP limit report
-Preprocessor node count: 139/1000000
+Preprocessor node count: 143/1000000
 Post-expand include size: 0/2097152 bytes
 Template argument size: 0/2097152 bytes
 Expensive parser function count: 0/100
 -->
 
-<!-- Saved in parser cache with key rasispdb:pcache:idhash:2411-0!*!0!!en!*!* and timestamp 20121002092033 -->
+<!-- Saved in parser cache with key rasispdb:pcache:idhash:2411-0!*!0!!en!*!* and timestamp 20121106204503 -->
 </div></div></div></div></div></body></html>

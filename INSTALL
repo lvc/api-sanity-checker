@@ -8,11 +8,11 @@ All rights reserved.
 RELEASE INFORMATION
 
 Project:           API Sanity Checker
-Version:           1.12.10
-Date:              2012-10-02
+Version:           1.12.11
+Date:              2012-11-07
 
 
-This INSTALL file explains how to install and setup environment
+This file explains how to install and setup environment
 for the tool in your computer.
 
 
@@ -37,7 +37,7 @@ Content:
 2. REQUIREMENTS FOR MAC OS X
 ============================
 
-   1. Xcode (gcc, c++filt, otool)
+   1. Xcode (gcc, c++filt, nm)
 
 
 
