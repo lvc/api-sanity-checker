@@ -1,11 +1,11 @@
 #!/usr/bin/perl
 ###########################################################################
 # Makefile for API Sanity Checker
-# Install/remove the tool for GNU/Linux and FreeBSD
+# Install/remove the tool for GNU/Linux, FreeBSD and Mac OS X
 #
-# Copyright (C) 2009-2010 The Linux Foundation.
-# Copyright (C) 2009-2011 Institute for System Programming, RAS.
-# Copyright (C) 2011 ROSA Laboratory.
+# Copyright (C) 2009-2010 The Linux Foundation
+# Copyright (C) 2009-2011 Institute for System Programming, RAS
+# Copyright (C) 2011-2012 ROSA Lab
 #
 # Written by Andrey Ponomarenko
 #
@@ -71,7 +71,8 @@ EXTRA OPTIONS:
       supported.
 \n";
 
-if(not @ARGV) {
+if(not @ARGV)
+{
     print $HELP_MSG;
     exit(0);
 }
@@ -89,17 +90,19 @@ GetOptions(
 
 sub scenario()
 {
-    if($Help) {
+    if($Help)
+    {
         print $HELP_MSG;
         exit(0);
     }
-    if($Config{"osname"}!~/linux|freebsd|openbsd|netbsd/)
-    { # MS Windows, Mac OS X
+    if($Config{"osname"}!~/linux|freebsd|openbsd|netbsd|macos|darwin|rhapsody/)
+    {
         print STDERR "The tool is ready-to-use without the need to install.\n";
-        print STDERR "This Makefile is for GNU/Linux and BSD systems.\n";
+        print STDERR "This Makefile is for GNU/Linux, FreeBSD and Mac OS X.\n";
         exit(1);
     }
-    if(not $Install and not $Update and not $Remove) {
+    if(not $Install and not $Update and not $Remove)
+    {
         print STDERR "ERROR: command is not selected (-install, -update or -remove)\n";
         exit(1);
     }
@@ -120,27 +123,32 @@ sub scenario()
         if($DESTDIR ne "/") {
             $DESTDIR=~s/[\/]+\Z//g;
         }
-        if($DESTDIR!~/\A\//) {
+        if($DESTDIR!~/\A\//)
+        {
             print STDERR "ERROR: destdir is not absolute path\n";
             exit(1);
         }
-        if(not -d $DESTDIR) {
+        if(not -d $DESTDIR)
+        {
             print STDERR "ERROR: you should create destdir directory first\n";
             exit(1);
         }
         $PREFIX = $DESTDIR.$PREFIX;
-        if(not -d $PREFIX) {
+        if(not -d $PREFIX)
+        {
             print STDERR "ERROR: you should create installation directory first (destdir + prefix):\n  mkdir -p $PREFIX\n";
             exit(1);
         }
     }
     else
     {
-        if($PREFIX!~/\A\//) {
+        if($PREFIX!~/\A\//)
+        {
             print STDERR "ERROR: prefix is not absolute path\n";
             exit(1);
         }
-        if(not -d $PREFIX) {
+        if(not -d $PREFIX)
+        {
             print STDERR "ERROR: you should create prefix directory first\n";
             exit(1);
         }
@@ -153,7 +161,8 @@ sub scenario()
     my $MODULES_PATH = "$PREFIX/share/$TOOL_SNAME";
     my $REL_PATH = "../share/$TOOL_SNAME";
     
-    if(not -w $PREFIX) {
+    if(not -w $PREFIX)
+    {
         print STDERR "ERROR: you should be root\n";
         exit(1);
     }
