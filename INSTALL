@@ -9,7 +9,7 @@ RELEASE INFORMATION
 
 Project:           API Sanity Checker
 Version:           1.12.11
-Date:              2012-11-07
+Date:              2012-11-08
 
 
 This file explains how to install and setup environment
@@ -21,7 +21,7 @@ Content:
    1. Requirements for Linux and FreeBSD
    2. Requirements for Mac OS X
    3. Requirements for MS Windows
-   4. Configuring and Installing for Linux and FreeBSD
+   4. Configuring and Installing
    5. Running the Tool
 
 
@@ -55,7 +55,7 @@ Content:
 
 
 
-4. CONFIGURING AND INSTALLING FOR LINUX AND FREEBSD
+4. CONFIGURING AND INSTALLING
 ===================================================
 
    This command will install an api-sanity-checker program in the

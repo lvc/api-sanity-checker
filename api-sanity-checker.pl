@@ -111,7 +111,7 @@ if($#ARGV==-1) {
 }
 
 foreach (2 .. $#ARGV)
-{# correct comma separated options
+{ # correct comma separated options
     if($ARGV[$_-1] eq ",") {
         $ARGV[$_-2].=",".$ARGV[$_];
         splice(@ARGV, $_-1, 2);
@@ -1185,15 +1185,17 @@ sub get_CmdPath($)
     return "" if(not $Name);
     return $Cache{"get_CmdPath"}{$Name} if(defined $Cache{"get_CmdPath"}{$Name});
     if($Name eq "c++filt")
-    {# search for c++filt in the same directory as GCC
+    { # search for c++filt in the same directory as GCC
         my $Path = get_CmdPath("gcc");
         if($Path=~s/([\/\\])gcc\Z/$1c++filt/
-        and (-f $Path or -f $Path.".exe")) {
+        and (-f $Path or -f $Path.".exe"))
+        {
             $Cache{"get_CmdPath"}{$Name} = $Path;
             return $Cache{"get_CmdPath"}{$Name};
         }
     }
-    if(my $DefaultPath = get_CmdPath_Default($Name)) {
+    if(my $DefaultPath = get_CmdPath_Default($Name))
+    {
         $Cache{"get_CmdPath"}{$Name} = $DefaultPath;
         return $Cache{"get_CmdPath"}{$Name};
     }
@@ -1213,12 +1215,12 @@ sub get_CmdPath($)
 }
 
 sub get_CmdPath_Default($)
-{# search in PATH
+{ # search in PATH
     my $Name = $_[0];
     return "" if(not $Name);
     return $Cache{"get_CmdPath_Default"}{$Name} if(defined $Cache{"get_CmdPath_Default"}{$Name});
     if($Name eq "find")
-    {# special case: search for "find" utility
+    { # special case: search for "find" utility
         if(`find . -maxdepth 0 2>$TMP_DIR/null`) {
             $Cache{"get_CmdPath_Default"}{$Name} = "find";
             return "find";
@@ -1232,20 +1234,24 @@ sub get_CmdPath_Default($)
         return $Name;
     }
     if($OSgroup eq "windows"
-    and `$Name /? 2>$TMP_DIR/null`) {
+    and `$Name /? 2>$TMP_DIR/null`)
+    {
         $Cache{"get_CmdPath_Default"}{$Name} = $Name;
         return $Name;
     }
-    if($Name ne "which") {
+    if($Name ne "which")
+    {
         my $WhichCmd = get_CmdPath("which");
-        if($WhichCmd and `$WhichCmd $Name 2>$TMP_DIR/null`) {
+        if($WhichCmd and `$WhichCmd $Name 2>$TMP_DIR/null`)
+        {
             $Cache{"get_CmdPath_Default"}{$Name} = $Name;
             return $Cache{"get_CmdPath_Default"}{$Name};
         }
     }
     foreach my $Path (sort {length($a)<=>length($b)} keys(%DefaultBinPaths))
     {
-        if(-f $Path."/".$Name or -f $Path."/".$Name.".exe") {
+        if(-f $Path."/".$Name or -f $Path."/".$Name.".exe")
+        {
             $Cache{"get_CmdPath_Default"}{$Name} = joinPath($Path,$Name);
             return $Cache{"get_CmdPath_Default"}{$Name};
         }
@@ -1278,14 +1284,14 @@ sub get_OSgroup()
 
 sub detectDisplay()
 {
-    my $DISPLAY_NUM=9; #default display number
+    my $DISPLAY_NUM=9; # default display number
     if(my $XPropCmd = get_CmdPath("xprop"))
-    {# OK, found xprop, now use it to get a free display number
+    { # OK, found xprop, now use it to get a free display number
         foreach my $DNUM (9, 8, 7, 6, 5, 4, 3, 2, 10, 11, 12)
-        {# try these display numbers only
+        { # try these display numbers only
             system("$XPropCmd -display :$DNUM".".0 -root >$TMP_DIR/null 2>&1");
-            if($? ne 0) {
-                # no properties found for this display, guess it is free
+            if($? ne 0)
+            { # no properties found for this display, guess it is free
                 $DISPLAY_NUM=$DNUM;
                 last;
             }
@@ -1308,7 +1314,8 @@ sub runXvfb()
     my $XT_DISPLAY = detectDisplay();
     my $TEST_DISPLAY=$XT_DISPLAY;
     my $running=0;
-    if(my $PidofCmd = get_CmdPath("pidof")) {
+    if(my $PidofCmd = get_CmdPath("pidof"))
+    {
         $running=`$PidofCmd Xvfb`;
         chomp($running);
     }
@@ -1320,7 +1327,8 @@ sub runXvfb()
     {
         print("starting X Virtual Frame Buffer on the display $TEST_DISPLAY\n");
         system("$Xvfb -screen 0 1024x768x24 $TEST_DISPLAY -ac +bs +kb -fp /usr/share/fonts/misc/ >$TMP_DIR/null 2>&1 & sleep 1");
-        if($?) {
+        if($?)
+        {
             print STDERR "ERROR: can't start Xvfb: $?\n";
             exit(1);
         }
@@ -1330,7 +1338,7 @@ sub runXvfb()
     }
     else
     {
-        #Xvfb is running, determine the display number
+        # Xvfb is running, determine the display number
         my $CMD_XVFB=`$PsCmd -p "$running" -f | tail -n 1`;
         chomp($CMD_XVFB);
         $CMD_XVFB=~/(\:\d+\.0)/;
@@ -1385,7 +1393,7 @@ sub parseTag($$)
 sub add_os_spectypes()
 {
     if($OSgroup eq "beos")
-    {#http://www.haiku-os.org/legacy-docs/bebook/TheKernelKit_Miscellaneous.html
+    { # http://www.haiku-os.org/legacy-docs/bebook/TheKernelKit_Miscellaneous.html
         readSpecTypes("
         <spec_type>
             <name>
@@ -1414,7 +1422,7 @@ sub add_os_spectypes()
 
 sub read_annotations_Splint()
 {
-    #reading interface specifications
+    # read interface specifications
     my (%HeaderInts, %InterfaceAnnotations,
     %TypeAnnotations, %ParamTypes, %HeaderTypes) = ();
     foreach my $Interface (keys(%Interface_Library))
@@ -1439,13 +1447,13 @@ sub read_annotations_Splint()
                 my $Section = $Lines[$IntLine];
                 my $LineNum = $IntLine;
                 while($LineNum<=$#Lines-1 and $Lines[$LineNum]!~/;/)
-                {#forward search
+                { # forward search
                     $LineNum+=1;
                     $Section .= "\n".$Lines[$LineNum];
                 }
                 $LineNum = $IntLine-1;
                 while($LineNum>=0 and $Lines[$LineNum]!~/;/)
-                {#backward search
+                { # backward search
                     $Section = $Lines[$LineNum]."\n".$Section;
                     $LineNum-=1;
                 }
@@ -1455,14 +1463,16 @@ sub read_annotations_Splint()
                     foreach my $ParamPos (sort {int($a) <=> int($b)} keys(%{$CompleteSignature{$Interface}{"Param"}}))
                     {
                         my $ParamName = $CompleteSignature{$Interface}{"Param"}{$ParamPos}{"name"};
-                        if($Section=~/(,|\()\s*([^,()]+?)\W$ParamName\s*(,|\)|\*)/) {
+                        if($Section=~/(,|\()\s*([^,()]+?)\W$ParamName\s*(,|\)|\*)/)
+                        {
                             my $ParamInfo = $2;
                             while($ParamInfo=~s/\/\*\s*\@\s*(returned|out|notnull|null)\s*\@\s*\*\///) {
                                 $InterfaceAnnotations{$Interface}{"Param"}{$ParamPos}{$1} = 1;
                             }
                         }
                     }
-                    if($Section=~/\/\*\s*\@\s*modifies\s*(.+?)\s*\@\s*\*\//) {
+                    if($Section=~/\/\*\s*\@\s*modifies\s*(.+?)\s*\@\s*\*\//)
+                    {
                         foreach my $Arg (split(/\s*,\s*/, $1)) {
                             $InterfaceAnnotations{$Interface}{"modifies"}{$Arg} = 1;
                         }
@@ -1479,13 +1489,14 @@ sub read_annotations_Splint()
     }
     foreach my $TypeId (keys(%ParamTypes))
     {
-        if(my $Header = get_TypeHeader($TypeId)) {
+        if(my $Header = get_TypeHeader($TypeId))
+        {
             if($DependencyHeaders_All{$Header}) {
                 $HeaderTypes{$Header}{$TypeId} = 1;
             }
         }
     }
-    #reading data type specifications
+    # read data type specifications
     foreach my $Header (keys(%HeaderTypes))
     {
         if(my ($Inc, $Path) = identify_header($Header))
@@ -1524,7 +1535,8 @@ sub read_annotations_Splint()
             $Interface_PostCondition{$Interface}{condition_to_template($Interface, $PostCondition)} = 1;
         }
     }
-    foreach my $TypeId (keys(%TypeAnnotations)) {
+    foreach my $TypeId (keys(%TypeAnnotations))
+    {
         if($TypeAnnotations{$TypeId}{"abstract"}) {
             $OpaqueTypes{get_TypeName($TypeId)} = 1;
         }
@@ -1539,7 +1551,8 @@ sub condition_to_template($$$)
     foreach my $ParamPos (sort {int($b) <=> int($a)} keys(%{$CompleteSignature{$Interface}{"Param"}}))
     {
         my $ParamName = $CompleteSignature{$Interface}{"Param"}{$ParamPos}{"name"};
-        if($Condition=~/(\A|\W)$ParamName(\Z|\W)/) {
+        if($Condition=~/(\A|\W)$ParamName(\Z|\W)/)
+        {
             my $ParamNum = $ParamPos+1;
             $Condition=~s/(\A|\W)$ParamName(\Z|\W)/$1\$$ParamNum$2/g;
         }
@@ -1602,11 +1615,11 @@ sub cmpVersions($$)
             $Part2 = $1;
         }
         if(my $CmpPartRes = mixedCmp($Part1, $Part2))
-        {# compare first parts
+        { # compare first parts
             return $CmpPartRes;
         }
         else
-        {# compare other parts
+        { # compare other parts
             return cmpVersions($First, $Second);
         }
     }
@@ -1662,7 +1675,7 @@ sub mixedCmp($$)
         my $Second_Token = get_Token($Second);
         my $CmpRes = tokensCmp($First_Token, $Second_Token);
         if($CmpRes eq "undef")
-        {# safety lock
+        { # safety lock
             return 0;
         }
         elsif($CmpRes != 0) {
@@ -1772,15 +1785,15 @@ sub readSpecTypes($)
 {
     my $Package = $_[0];
     return if(not $Package);
-    $Package=~s/\/\*(.|\n)+?\*\///g;#removing C++ comments
-    $Package=~s/<\!--(.|\n)+?-->//g;#removing XML comments
+    $Package=~s/\/\*(.|\n)+?\*\///g; # remove C++ comments
+    $Package=~s/<\!--(.|\n)+?-->//g; # remove XML comments
     if($Package!~/<collection>/ or $Package!~/<\/collection>/)
-    {# add <collection> tag (support for old spectype packages)
+    { # add <collection> tag (support for old spectype packages)
         $Package = "<collection>\n".$Package."\n</collection>";
     }
     while(my $Collection = parseTag(\$Package, "collection"))
     {
-        # verifying library version
+        # verify library version
         my $Collection_Copy = $Collection;
         while(parseTag(\$Collection_Copy, "spec_type")){};
         if(my $Collection_VersionConstraints = parseTag(\$Collection_Copy, "lib_version"))
@@ -1796,7 +1809,7 @@ sub readSpecTypes($)
             }
             next if(not $Verified);
         }
-        # importing specialized types
+        # import specialized types
         while(my $SpecType = parseTag(\$Collection, "spec_type"))
         {
             if(my $SpecType_VersionConstraints = parseTag(\$SpecType, "lib_version"))
@@ -1818,13 +1831,14 @@ sub readSpecTypes($)
             $Attr{"Kind"} = "normal" if(not $Attr{"Kind"});
             foreach my $DataType (split(/\n/, parseTag(\$SpecType, "data_type")),
             split(/\n/, parseTag(\$SpecType, "data_types")))
-            {# data_type==data_types, support of <= 1.5 versions
+            { # data_type==data_types, support of <= 1.5 versions
                 $DataTypes{$DataType} = 1;
                 if(not get_TypeIdByName($DataType)) {
                     print STDERR "\nERROR: unknown data type \'$DataType\' in one of the \'".$Attr{"Kind"}."\' spectypes, try to define it more exactly\n";
                 }
             }
-            if(not keys(%DataTypes) and $Attr{"Kind"}=~/\A(normal|common_param|common_retval)\Z/) {
+            if(not keys(%DataTypes) and $Attr{"Kind"}=~/\A(normal|common_param|common_retval)\Z/)
+            {
                 print STDERR "\nERROR: missed \'data_type\' attribute in one of the \'".$Attr{"Kind"}."\' spectypes\n";
                 next;
             }
@@ -1833,7 +1847,7 @@ sub readSpecTypes($)
             $Attr{"PreCondition"} = parseTag(\$SpecType, "pre_condition");
             $Attr{"PostCondition"} = parseTag(\$SpecType, "post_condition");
             if(not $Attr{"PostCondition"})
-            {# constraint==post_condition, support of <= 1.6 versions
+            { # constraint==post_condition, support of <= 1.6 versions
                 $Attr{"PostCondition"} = parseTag(\$SpecType, "constraint");
             }
             $Attr{"InitCode"} = parseTag(\$SpecType, "init_code");
@@ -1855,7 +1869,8 @@ sub readSpecTypes($)
                     $Interface=~s/\A\s+|\s+\Z//g;
                     $Interfaces{$Interface} = 1;
                     $Common_SpecType_Exceptions{$Interface}{$ST_ID} = 0;
-                    if($Interface=~/\*/) {
+                    if($Interface=~/\*/)
+                    {
                         $Interface=~s/\*/.*/;
                         foreach my $Int (keys(%CompleteSignature))
                         {
@@ -1875,7 +1890,8 @@ sub readSpecTypes($)
                     $Interface=~s/\A\s+|\s+\Z//g;
                     $Except{$Interface} = 1;
                     $Common_SpecType_Exceptions{$Interface}{$ST_ID} = 1;
-                    if($Interface=~/\*/) {
+                    if($Interface=~/\*/)
+                    {
                         $Interface=~s/\*/.*/;
                         foreach my $Int (keys(%CompleteSignature))
                         {
@@ -1886,8 +1902,10 @@ sub readSpecTypes($)
                         }
                     }
                 }
-                if($Attr{"Kind"} eq "env") {
-                    foreach my $Interface (keys(%Interfaces)) {
+                if($Attr{"Kind"} eq "env")
+                {
+                    foreach my $Interface (keys(%Interfaces))
+                    {
                         next if($Except{$Interface});
                         $InterfaceSpecType{$Interface}{"SpecEnv"} = $ST_ID;
                     }
@@ -1967,7 +1985,8 @@ sub readSpecTypes($)
                                         foreach my $DataType (keys(%DataTypes))
                                         {
                                             my $TypeId = get_TypeIdByName($DataType);
-                                            if(my $FTypeId = get_FoundationTypeId($TypeId) and $FTypeId_Param) {
+                                            if(my $FTypeId = get_FoundationTypeId($TypeId) and $FTypeId_Param)
+                                            {
                                                 if($FTypeType_Param eq "Intrinsic"?$TypeId==$TypeId_Param:$FTypeId==$FTypeId_Param) {
                                                     $InterfaceSpecType{$Interface}{"SpecParam"}{$ParamPos} = $ST_ID;
                                                 }
@@ -1980,14 +1999,17 @@ sub readSpecTypes($)
                     }
                 }
             }
-            if($Attr{"Kind"}=~/\A(common_param|common_retval)\Z/) {
-                foreach my $DataType (keys(%DataTypes)) {
+            if($Attr{"Kind"}=~/\A(common_param|common_retval)\Z/)
+            {
+                foreach my $DataType (keys(%DataTypes))
+                {
                     $Attr{"DataType"} = $DataType;
                     %{$SpecType{$ST_ID}} = %Attr;
                     $ST_ID+=1;
                 }
             }
-            elsif($Attr{"Kind"} eq "normal") {
+            elsif($Attr{"Kind"} eq "normal")
+            {
                 $Attr{"DataType"} = (keys(%DataTypes))[0];
                 %{$SpecType{$ST_ID}} = %Attr;
             }
@@ -2046,16 +2068,19 @@ sub checkVersionNum($)
     foreach my $Part (split(/\s*,\s*/, $Path))
     {
         if($Part=~/\.$LIB_EXT[\d\.\-\_]*\Z/i
-        or is_header($Part, 1) or -d $Part) {
+        or is_header($Part, 1) or -d $Part)
+        {
             $UsedAltDescr = 1;
-            if(my $VerNum = readStringVersion($Part)) {
+            if(my $VerNum = readStringVersion($Part))
+            {
                 $TargetVersion = $VerNum;
                 print STDERR "WARNING: set version number to $VerNum (use -vnum <number> option to change it)\n";
                 return $TargetVersion;
             }
         }
     }
-    if($UsedAltDescr) {
+    if($UsedAltDescr)
+    {
         print STDERR "ERROR: version number is not set (use -vnum <number> option)\n";
         exit(1);
     }
@@ -2078,21 +2103,23 @@ sub createDescriptor($)
     my $Path = $_[0];
     return if(not $Path or not -e $Path);
     if($Path=~/\.deb\Z/i)
-    {# Deb "devel" package
+    { # Deb "devel" package
         my $ArCmd = get_CmdPath("ar");
-        if(not $ArCmd) {
+        if(not $ArCmd)
+        {
             print STDERR "ERROR: can't find \"ar\"\n";
             exit(1);
         }
         my $VirtualPath = "$TMP_DIR/package/";
         mkpath($VirtualPath);
         system("cd $VirtualPath && $ArCmd p ".abs_path($Path)." data.tar.gz | tar zx");
-        if($?) {
+        if($?)
+        {
             print STDERR "ERROR: can't extract package\n";
             exit(1);
         }
         if(not $TargetVersion)
-        {# auto detect version of Deb package
+        { # auto detect version of Deb package
             system("cd $VirtualPath && $ArCmd p ".abs_path($Path)." control.tar.gz | tar zx");
             if(-f "$VirtualPath/control")
             {
@@ -2105,37 +2132,42 @@ sub createDescriptor($)
         if(not $TargetVersion)
         {
             if($Path=~/_([\d\.\-\_]*\d)(.+?)\.deb\Z/i)
-            {# auto detect version of Deb package
+            { # auto detect version of Deb package
                 $TargetVersion = $1;
             }
         }
-        if(not $TargetVersion) {
+        if(not $TargetVersion)
+        {
             print STDERR "ERROR: specify version number (-vnum <number> option)\n";
             exit(1);
         }
         createDescriptor_Rpm_Deb($VirtualPath);
     }
     elsif($Path=~/\.rpm\Z/i)
-    {# RPM "devel" package
+    { # RPM "devel" package
         my $Rpm2CpioCmd = get_CmdPath("rpm2cpio");
-        if(not $Rpm2CpioCmd) {
+        if(not $Rpm2CpioCmd)
+        {
             print STDERR "ERROR: can't find \"rpm2cpio\"\n";
             exit(1);
         }
         my $CpioCmd = get_CmdPath("cpio");
-        if(not $CpioCmd) {
+        if(not $CpioCmd)
+        {
             print STDERR "ERROR: can't find \"cpio\"\n";
             exit(1);
         }
         my $VirtualPath = "$TMP_DIR/package/";
         mkpath($VirtualPath);
         system("cd $VirtualPath && $Rpm2CpioCmd ".abs_path($Path)." | cpio -id --quiet");
-        if($?) {
+        if($?)
+        {
             print STDERR "ERROR: can't extract package\n";
             exit(1);
         }
         my $RpmCmd = get_CmdPath("rpm");
-        if(not $RpmCmd) {
+        if(not $RpmCmd)
+        {
             print STDERR "ERROR: can't find \"rpm\"\n";
             exit(1);
         }
@@ -2145,18 +2177,19 @@ sub createDescriptor($)
         if(not $TargetVersion)
         {
             if($Path=~/-([\d\.\-\_]*\d)(.+?)\.rpm\Z/i)
-            {# auto detect version of Rpm package
+            { # auto detect version of Rpm package
                 $TargetVersion = $1;
             }
         }
-        if(not $TargetVersion) {
+        if(not $TargetVersion)
+        {
             print STDERR "ERROR: specify version number (-vnum <number> option)\n";
             exit(1);
         }
         createDescriptor_Rpm_Deb($VirtualPath);
     }
     elsif(-d $Path)
-    {# directory with headers files and shared objects
+    { # directory with headers files and shared objects
         readDescriptor("
           <version>
               ".$TargetVersion."
@@ -2171,9 +2204,9 @@ sub createDescriptor($)
           </libs>");
     }
     else
-    {# files
+    { # files
         if(is_header($Path, 1))
-        {# header file
+        { # header file
             readDescriptor("
               <version>
                   ".$TargetVersion."
@@ -2188,7 +2221,7 @@ sub createDescriptor($)
               </libs>");
         }
         elsif($Path=~/\.$LIB_EXT[\d\.\-\_]*\Z/)
-        {# shared object
+        { # shared object
             readDescriptor("
               <version>
                   ".$TargetVersion."
@@ -2203,7 +2236,7 @@ sub createDescriptor($)
               </libs>");
         }
         else
-        {# standard XML-descriptor
+        { # standard XML-descriptor
             readDescriptor(readFile($Path));
         }
     }
@@ -2212,11 +2245,13 @@ sub createDescriptor($)
 sub readDescriptor($)
 {
     my $Content = $_[0];
-    if(not $Content) {
+    if(not $Content)
+    {
         print STDERR "ERROR: library descriptor is empty\n";
         exit(1);
     }
-    if($Content!~/\</) {
+    if($Content!~/\</)
+    {
         print STDERR "ERROR: descriptor should be one of the following: XML-descriptor or directory with headers and $SHARED libraries.\n";
         exit(1);
     }
@@ -2234,7 +2269,8 @@ sub readDescriptor($)
         if($RelativeDirectory)  {
             $Content =~ s/{RELPATH}/$RelativeDirectory/g;
         }
-        else {
+        else
+        {
             print STDERR "ERROR: you have not specified -relpath option, but the descriptor contains {RELPATH} macro\n";
             exit(1);
         }
@@ -2245,7 +2281,8 @@ sub readDescriptor($)
             $Descriptor{"Headers"} .= "\n".$DHeaders;
         }
     }
-    if(not $Descriptor{"Headers"}) {
+    if(not $Descriptor{"Headers"})
+    {
         print STDERR "ERROR: header files in the descriptor were not specified (section <headers>)\n";
         exit(1);
     }
@@ -2413,7 +2450,8 @@ sub getArch()
     {
         $Arch = `$UnameCmd -m`;
         chomp($Arch);
-        if(not $Arch) {
+        if(not $Arch)
+        {
             $Arch = `$UnameCmd -p`;
             chomp($Arch);
         }
@@ -2647,7 +2685,8 @@ sub get_IntNameSpace($)
         my $FounNameSpace = 0;
         foreach my $NameSpace (sort {get_depth_symbol($b,"::")<=>get_depth_symbol($a,"::")} keys(%NestedNameSpaces))
         {
-            if(get_Signature($Interface)=~/\A\Q$NameSpace\E\:\:/) {
+            if(get_Signature($Interface)=~/\A\Q$NameSpace\E\:\:/)
+            {
                 $Cache{"get_IntNameSpace"}{$Interface} = $NameSpace;
                 return $NameSpace;
             }
@@ -2905,7 +2944,7 @@ sub create_Index()
     </style>";
     my $SuiteHeader = get_TestSuite_Header();
     if(my $SuiteList = get_TestSuite_List())
-    {# initialized $STAT_FIRST_LINE variable
+    { # initialized $STAT_FIRST_LINE variable
         my $Title = $TargetLibraryFullName."-".$Descriptor{"Version"}.": Test suite";
         my $Keywords = "$TargetLibraryFullName, tests, API";
         my $Description = "Test suite for the $TargetLibraryFullName-".$Descriptor{"Version"}." library on ".getArch();
@@ -3114,7 +3153,7 @@ sub create_HtmlReport()
     }
     -->
     </script>";
-    my $Summary = get_Summary();# initialized $STAT_FIRST_LINE variable
+    my $Summary = get_Summary(); # initialized $STAT_FIRST_LINE variable
     my $Title = $TargetLibraryFullName."-".$Descriptor{"Version"}.": test results";
     my $Keywords = "$TargetLibraryFullName, test, API";
     my $Description = "Test results for the $TargetLibraryFullName-".$Descriptor{"Version"}." library on ".getArch();
@@ -3165,7 +3204,7 @@ sub detect_include_default_paths()
     return if(not $GCC_PATH);
     writeFile("$TMP_DIR/empty.h", "");
     foreach my $Line (split(/\n/, `$GCC_PATH -v -x c++ -E $TMP_DIR/empty.h 2>&1`))
-    {# detecting gcc default include paths
+    { # detect gcc default include paths
         if($Line=~/\A[ \t]*((\/|\w+:\\)[^ ]+)[ \t]*\Z/)
         {
             my $Path = $1;
@@ -3211,8 +3250,9 @@ sub getSymbols()
     print "\rlibrary(ies) analysis: [10.00%]";
     my @SoLibPaths = getSoPaths();
     print "\rlibrary(ies) analysis: [30.00%]";
-    if($#SoLibPaths==-1) {
-        if($OSgroup eq "windows") {# the tool searches for static *.lib in windows
+    if($#SoLibPaths==-1)
+    {
+        if($OSgroup eq "windows") { # the tool searches for static *.lib in windows
             print STDERR "\nERROR: libraries (*.$LIB_EXT) were not found\n";
         }
         else {
@@ -3226,7 +3266,7 @@ sub getSymbols()
         getSymbols_Lib($SoLibPath);
     }
     foreach my $SharedObject (keys(%SharedObject_UndefinedSymbols))
-    {# checking dependencies
+    { # check dependencies
         foreach my $Symbol (keys(%{$SharedObject_UndefinedSymbols{$SharedObject}}))
         {
             if((not $NeededInterfaceVersion_Library{$Symbol}
@@ -3287,7 +3327,7 @@ my %Symbol_Lib=(
 );
 
 sub find_symbol_libs($)
-{# FIXME: needed more appropriate patterns for symbols
+{ # FIXME: needed more appropriate patterns for symbols
     my $Symbol = $_[0];
     return () if(not $Symbol);
     if($InterfaceVersion_Library{$Symbol}) {
@@ -3325,7 +3365,7 @@ sub find_symbol_libs($)
     }
     return keys(%LibPaths) if(keys(%LibPaths));
     if(my $Prefix = getPrefix($Symbol))
-    {# try to find library by symbol prefix
+    { # try to find library by symbol prefix
         $Prefix=~s/[_]+\Z//g;
         if($Prefix eq "inotify" and
         get_symbol_version($Symbol)=~/GLIBC/)
@@ -3349,15 +3389,15 @@ sub find_solib_path_by_prefix($)
     my $Prefix = $_[0];
     return "" if(not $Prefix);
     if(my $SoPath = find_solib_path("lib$Prefix-2.$LIB_EXT"))
-    {# libgnome-2.so
+    { # libgnome-2.so
         return $SoPath;
     }
     elsif(my $SoPath = find_solib_path("lib$Prefix"."2.$LIB_EXT"))
-    {# libxml2.so
+    { # libxml2.so
         return $SoPath;
     }
     elsif(my $SoPath = find_solib_path("lib$Prefix-1.$LIB_EXT"))
-    {# libgsf-1.so, libdbus-1.so
+    { # libgsf-1.so, libdbus-1.so
         return $SoPath;
     }
     elsif(my $SoPath = find_solib_path("lib$Prefix.$LIB_EXT")) {
@@ -3429,7 +3469,8 @@ sub skip_header($)
 sub getSOPaths_Dest($)
 {
     my $Dest = $_[0];
-    if(-f $Dest) {
+    if(-f $Dest)
+    {
         $SharedObject_Paths{get_filename($Dest)}{$Dest} = 1;
         return ($Dest);
     }
@@ -3440,7 +3481,7 @@ sub getSOPaths_Dest($)
         if($SystemPaths{"lib"}{$Dest})
         {
             foreach my $Path (cmd_find($Dest,"","*".esc($TargetLibraryName)."*\.$LIB_EXT*",2))
-            {# all files and symlinks that match the name of a library
+            { # all files and symlinks that match the name of a library
                 if(get_filename($Path)=~/\A(|lib)\Q$TargetLibraryName\E[\d\-]*\.$LIB_EXT[\d\.]*\Z/i)
                 {
                     $SharedObject_Paths{get_filename($Path)}{$Path} = 1;
@@ -3449,7 +3490,7 @@ sub getSOPaths_Dest($)
             }
         }
         else
-        {# all files and symlinks
+        { # all files and symlinks
             foreach my $Path (cmd_find($Dest,"",".*\\.$LIB_EXT\[0-9.]*",""))
             {
                 next if(ignore_path($Dest, $Path));
@@ -3458,7 +3499,7 @@ sub getSOPaths_Dest($)
                 push(@AllObjects, resolve_symlink($Path));
             }
             if($OSgroup eq "macos")
-            {# shared libraries on MacOS may have no extension
+            { # shared libraries on MacOS may have no extension
                 foreach my $Path (cmd_find($Dest,"f","",""))
                 {
                     next if(ignore_path($Dest, $Path));
@@ -3767,27 +3808,27 @@ sub getSymbols_Lib($$)
             elsif(my ($fullname, $idx, $Ndx, $type) = readlile_ELF($_)) {
                 my ($realname, $version) = get_symbol_name_version($fullname);
                 $fullname=~s/\@\@/\@/g;
-                if( $Ndx eq "UND" ) {
-                    # ignore symbols that are exported form somewhere else
+                if( $Ndx eq "UND" )
+                { # ignore symbols that are exported form somewhere else
                     $SharedObject_UndefinedSymbols{$Lib_Path}{$fullname} = 1 if(not $IsNeededLib);
                     next;
                 }
                 if($type eq "NOTYPE") {
                     next;
                 }
-                if( $symtab == 1 ) {
-                    # do nothing with symtab (but there are some plans for the future)
+                if( $symtab == 1 )
+                { # do nothing with symtab (but there are some plans for the future)
                     next;
                 }
                 $InternalInterfaces{$realname} = 0;
                 if(not $SoLib_IntPrefix{$Lib_SoName})
-                {# collecting prefixes
+                { # collecting prefixes
                     $SoLib_IntPrefix{$Lib_SoName} = get_int_prefix($realname);
                 }
                 if($IsNeededLib)
                 {
                     if($SharedObject_Paths{get_filename($Lib_Path)}{$Lib_Path})
-                    {# other shared objects in the same package
+                    { # other shared objects in the same package
                         if(not $NeededInterface_Library{$realname})
                         {
                             $NeededInterface_Library{$realname} = $Lib_Path;
@@ -3846,11 +3887,12 @@ sub get_SONAME($)
     my $Path = $_[0];
     return "" if(not $Path or not -e $Path);
     if($OSgroup ne "linux" and $OSgroup ne "bsd")
-    {# linker search for exact file name and soname match
+    { # linker search for exact file name and soname match
         return get_filename($Path);
     }
     my $ObjdumpCmd = get_CmdPath("objdump");
-    if(not $ObjdumpCmd) {
+    if(not $ObjdumpCmd)
+    {
         print STDERR "ERROR: can't find \"objdump\"\n";
         exit(1);
     }
@@ -3887,7 +3929,7 @@ sub find_solib_path($)
     else
     {
         foreach my $Dir (sort keys(%DefaultLibPaths), sort keys(%{$SystemPaths{"lib"}}))
-        {#search in default linker paths and then in the all system paths
+        { # search in default linker paths and then in the all system paths
             if(-f $Dir."/".$SoName)
             {
                 $Cache{"find_solib_path"}{$SoName} = joinPath($Dir,$SoName);
@@ -3936,7 +3978,7 @@ sub getIncPaths(@)
     my @HeaderPaths = @_;
     my @IncludePaths = ();
     if($INC_PATH_AUTODETECT)
-    {# autodetecting dependencies
+    { # autodetecting dependencies
         my %Includes = ();
         foreach my $HPath (@HeaderPaths) {
             foreach my $Dir (get_HeaderDeps($HPath)) {
@@ -3953,7 +3995,7 @@ sub getIncPaths(@)
         }
     }
     else
-    {# user defined paths
+    { # user defined paths
         foreach my $Dir (sort {get_depth($a)<=>get_depth($b)}
         sort {$b cmp $a} keys(%Include_Paths)) {
             push(@IncludePaths, $Dir);
@@ -3996,7 +4038,8 @@ sub cmd_find($$$$)
     if($OSgroup eq "windows")
     {
         my $DirCmd = get_CmdPath("dir");
-        if(not $DirCmd) {
+        if(not $DirCmd)
+        {
             print STDERR "ERROR: can't find \"dir\" command\n";
             exit(1);
         }
@@ -4039,7 +4082,8 @@ sub cmd_find($$$$)
     else
     {
         my $FindCmd = get_CmdPath("find");
-        if(not $FindCmd) {
+        if(not $FindCmd)
+        {
             print STDERR "ERROR: can't find a \"find\" command\n";
             exit(1);
         }
@@ -4064,7 +4108,7 @@ sub cmd_find($$$$)
 }
 
 sub is_header_file($)
-{# allowed extensions for header files
+{ # allowed extensions for header files
     if($_[0]=~/\.(h|hh|hp|hxx|hpp|h\+\+|tcc)\Z/i) {
         return $_[0];
     }
@@ -4078,33 +4122,35 @@ sub is_header($$)
     if(-f $Header) {
         $Header = abs_path($Header);
     }
-    else {
-        if($Header=~/\A(\/|\w+:[\/\\])/) {
-            # incorrect absolute path
+    else
+    {
+        if($Header=~/\A(\/|\w+:[\/\\])/)
+        { # incorrect absolute path
             return 0;
         }
         if(my ($HInc, $HPath) = identify_header($Header)) {
             $Header = $HPath;
         }
-        else {
-            # can't find header
+        else
+        { # can't find header
             return 0;
         }
     }
-    if($Header=~/\.\w+\Z/) {
-        # have an extension
+    if($Header=~/\.\w+\Z/)
+    { # have an extension
         return is_header_file($Header);
     }
-    else {
-        if($UserDefined) {
-            # user defined file without extension
-            # treated as header file by default
+    else
+    {
+        if($UserDefined)
+        { # user defined file without extension
+          # treated as header file by default
             return $Header;
         }
-        else {
-            # directory content
-            if(cmd_file($Header)=~/C[\+]*\s+program/i) {
-                # !~/HTML|XML|shared|dynamic/i
+        else
+        { # directory content
+            if(cmd_file($Header)=~/C[\+]*\s+program/i)
+            { # !~/HTML|XML|shared|dynamic/i
                 return $Header;
             }
         }
@@ -4113,7 +4159,7 @@ sub is_header($$)
 }
 
 sub get_filename($)
-{# much faster than basename() from File::Basename module
+{ # much faster than basename() from File::Basename module
     return $Cache{"get_filename"}{$_[0]} if($Cache{"get_filename"}{$_[0]});
     if($_[0]=~/([^\/\\]+)\Z/) {
         return ($Cache{"get_filename"}{$_[0]} = $1);
@@ -4122,7 +4168,7 @@ sub get_filename($)
 }
 
 sub get_dirname($)
-{# much faster than dirname() from File::Basename module
+{ # much faster than dirname() from File::Basename module
     if($_[0]=~/\A(.*)[\/\\]+([^\/\\]*)\Z/) {
         return $1;
     }
@@ -4148,7 +4194,7 @@ sub find_in_dependencies($)
             return $Cache{"find_in_dependencies"}{$Header};
         }
         if($OSgroup eq "macos" and $Header=~/([^\/]+\.framework)\/Headers\/([^\/]+)/)
-        {# searching in frameworks
+        { # search in frameworks
             my ($HFramework, $HName) = ($1, $2);
             if(get_filename($Dependency) eq $HFramework
             and -e get_dirname($Dependency)."/".$Header)
@@ -4177,10 +4223,11 @@ sub find_in_defaults($)
 }
 
 sub register_header($$)
-{#input: header absolute path, relative path or name
+{ # input: header absolute path, relative path or name
     my ($Header, $Position) = @_;
     return if(not $Header);
-    if($Header=~/\A(\/|\w+:[\/\\])/ and not -f $Header) {
+    if($Header=~/\A(\/|\w+:[\/\\])/ and not -f $Header)
+    {
         print STDERR "\nERROR: can't access \'$Header\'\n";
         return;
     }
@@ -4246,11 +4293,11 @@ sub parse_includes($$)
     my ($Content, $Path) = @_;
     my %Includes = ();
     while($Content=~s/#([ \t]*)(include|import)([ \t]*)(<|")([^<>"]+)(>|")//)
-    {# C/C++: include, Objective C/C++: import directive
+    { # C/C++: include, Objective C/C++: import directive
         my ($Header, $Method) = ($5, $4);
         if(($Method eq "\"" and -e joinPath(get_dirname($Path),$Header))
-        or $Header=~/\A(\/|\w+:[\/\\])/) {
-        # include "path/header.h" that doesn't exist is equal to include <path/header.h>
+        or $Header=~/\A(\/|\w+:[\/\\])/)
+        { # include "path/header.h" that doesn't exist is equal to include <path/header.h>
             $Includes{$Header} = -1;
         }
         else {
@@ -4282,7 +4329,7 @@ sub register_directory($)
     }
     $RegisteredDirs{$Dir} = 1;
     if(get_filename($Dir) eq "include")
-    {# search for "lib/include" directory
+    { # search for "lib/include" directory
         my $LibDir = $Dir;
         if($LibDir=~s/([\/\\])include\Z/$1lib/g and -d $LibDir) {
             register_directory($LibDir);
@@ -4301,8 +4348,8 @@ sub ignore_path($$)
     my ($Prefix, $Path) = @_;
     return 1 if(not $Path or not -e $Path
       or not $Prefix or not -e $Prefix);
-    return 1 if($Path=~/\~\Z/);# skipping system backup files
-    # skipping hidden .svn, .git, .bzr, .hg and CVS directories
+    return 1 if($Path=~/\~\Z/); # skip system backup files
+    # skip hidden .svn, .git, .bzr, .hg and CVS directories
     return 1 if(cut_path_prefix($Path, $Prefix)=~/(\A|[\/\\]+)(\.(svn|git|bzr|hg)|CVS)([\/\\]+|\Z)/);
     return 0;
 }
@@ -4345,7 +4392,7 @@ sub register_dependency($)
 
 sub searchForHeaders()
 {
-    # detecting system header paths
+    # detect system header paths
     foreach my $Path (sort {get_depth($b) <=> get_depth($a)} keys(%DefaultGccPaths))
     {
         foreach my $HeaderPath (sort {get_depth($a) <=> get_depth($b)} cmd_find($Path,"f","",""))
@@ -4371,7 +4418,7 @@ sub searchForHeaders()
             detect_headers_array_includes(@AllCppHeaders);
         }
     }
-    # detecting library header paths
+    # detect library header paths
     foreach my $Dest (keys(%{$Descriptor{"IncludePaths"}}),
     keys(%{$Descriptor{"AddIncludePaths"}}))
     {
@@ -4404,7 +4451,7 @@ sub searchForHeaders()
     if(keys(%Include_Paths)) {
         $INC_PATH_AUTODETECT = 0;
     }
-    # registering directories
+    # register directories
     foreach my $Dest (split(/\n/, $Descriptor{"Headers"}))
     {
         $Dest=~s/\A\s+|\s+\Z//g;
@@ -4415,7 +4462,7 @@ sub searchForHeaders()
         if(-d $Dest)
         {
             if(register_directory($Dest))
-            {# register all sub directories
+            { # register all sub directories
                 register_dependency($Dest);
             }
         }
@@ -4426,11 +4473,11 @@ sub searchForHeaders()
             and not $LocalIncludes{$Dir})
             {
                 if(register_directory($Dir))
-                {# register all sub directories
+                { # register all sub directories
                     register_dependency($Dir);
                 }
                 if(my $OutDir = get_dirname($Dir))
-                {# registering the outer directory
+                { # registering the outer directory
                     if(not $SystemPaths{"include"}{$OutDir}
                     and not $LocalIncludes{$OutDir}) {
                         register_directory($OutDir);
@@ -4440,7 +4487,7 @@ sub searchForHeaders()
         }
     }
     foreach my $Prefix (sort {get_depth($b) <=> get_depth($a)} keys(%Header_Dependency))
-    {# remove default prefixes in DependencyHeaders_All
+    { # remove default prefixes in DependencyHeaders_All
         if($Prefix=~/\A(\/|\w+:[\/\\])/)
         {
             foreach my $Header (keys(%DependencyHeaders_All)) {
@@ -4448,7 +4495,7 @@ sub searchForHeaders()
             }
         }
     }
-    # detecting library header includes
+    # detect library header includes
     detect_headers_array_includes(values(%DependencyHeaders_All_FullPath));
     foreach my $Dir (keys(%DefaultIncPaths))
     {
@@ -4474,7 +4521,7 @@ sub searchForHeaders()
             }
         }
     }
-    # registering headers
+    # register headers
     my $Position = 0;
     foreach my $Dest (split(/\n/, $Descriptor{"Headers"}))
     {
@@ -4504,7 +4551,7 @@ sub searchForHeaders()
             print STDERR "\nERROR: can't identify \'$Dest\' as a header file\n";
         }
     }
-    #preparing preamble headers
+    # prepare preamble headers
     my $Preamble_Position=0;
     foreach my $Header (split(/\n/, $Descriptor{"IncludePreamble"}))
     {
@@ -4540,7 +4587,7 @@ sub searchForHeaders()
         detect_top_header($AbsPath);
     }
     foreach my $HeaderName (keys(%Include_Order))
-    {# ordering headers according to descriptor
+    { # ordering headers according to descriptor
         my $PairName=$Include_Order{$HeaderName};
         my ($Pos, $PairPos)=(-1, -1);
         my ($Path, $PairPath)=();
@@ -4586,7 +4633,7 @@ sub detect_header_includes($)
     return if($Cache{"detect_header_includes"}{$Path});
     my $Content = readFile($Path);
     if($Content=~/#[ \t]*error[ \t]+/ and (my $Redirect = parse_redirect($Content, $Path)))
-    {# detecting error directive in the headers
+    { # detecting error directive in the headers
         if(my ($RInc, $RPath) = identify_header($Redirect)) {
             if($RPath=~/\/usr\/include\// and $Path!~/\/usr\/include\//) {
                 ($RInc, $RPath) = identify_header(get_filename($Redirect));
@@ -4597,7 +4644,7 @@ sub detect_header_includes($)
     }
     my $Inc = parse_includes($Content, $Path);
     foreach my $Include (keys(%{$Inc}))
-    {# detecting includes
+    { # detecting includes
         $Header_Includes{$Path}{$Include} = $Inc->{$Include};
         if(my $Prefix = get_dirname($Include)) {
             $Header_Prefix{get_filename($Include)} = $Prefix;
@@ -4661,7 +4708,7 @@ sub detect_recursive_includes($)
         {
             if($GlibcHeader{get_filename($Dep)} and keys(%{$Header_Include_Prefix{$AbsPath}{$Dep}})>=2
             and defined $Header_Include_Prefix{$AbsPath}{$Dep}{""})
-            {# distinguish math.h from glibc and math.h from the tested library
+            { # distinguish math.h from glibc and math.h from the tested library
                 delete($Header_Include_Prefix{$AbsPath}{$Dep}{""});
                 last;
             }
@@ -4704,7 +4751,7 @@ sub get_depth_symbol($$)
 sub unmangleArray(@)
 {
     if(@_[0]=~/\A\?/)
-    {# "cl" mangling
+    { # "cl" mangling
         my $UndNameCmd = get_CmdPath("undname");
         if(not $UndNameCmd) {
             print STDERR "ERROR: can't find \"undname\"\n";
@@ -4714,10 +4761,10 @@ sub unmangleArray(@)
         return split(/\n/, `$UndNameCmd 0x8386 $TMP_DIR/unmangle`);
     }
     else
-    {# "gcc" mangling
+    { # "gcc" mangling
         my $CppFiltInfo = `$CPP_FILT -h 2>&1`;
         if($CppFiltInfo=~/\@<file>/)
-        {# new version of c++filt can take a file
+        { # new version of c++filt can take a file
             my $Und = ($OSgroup eq "macos" or $OSgroup eq "windows")?"_":"";
             writeFile("$TMP_DIR/unmangle", $Und.join("\n".$Und, @_));
             return split(/\n/, `$CPP_FILT \@\"$TMP_DIR/unmangle\"`);
@@ -4730,11 +4777,13 @@ sub unmangleArray(@)
 
 sub unmangleArray_Old(@)
 {
-    if($#_>$MAX_COMMAND_LINE_ARGUMENTS) {
+    if($#_>$MAX_COMMAND_LINE_ARGUMENTS)
+    {
         my @Half = splice(@_, 0, ($#_+1)/2);
         return (unmangleArray(@Half), unmangleArray(@_))
     }
-    else {
+    else
+    {
         my $Und = ($OSgroup eq "macos" or $OSgroup eq "windows")?"_":"";
         my $UnmangleCommand = $CPP_FILT." $Und".join(" $Und", @_);
         return split(/\n/, `$UnmangleCommand`);
@@ -4764,7 +4813,7 @@ sub translateSymbols(@)
         }
     }
     if($#MnglNames1 > -1)
-    {# gcc names
+    { # gcc names
         @UnMnglNames = reverse(unmangleArray(@MnglNames1));
         foreach my $MnglName (@MnglNames1)
         {
@@ -4773,7 +4822,7 @@ sub translateSymbols(@)
         }
     }
     if($#MnglNames2 > -1)
-    {# cl names
+    { # cl names
         @UnMnglNames = reverse(unmangleArray(@MnglNames2));
         foreach my $MnglName (@MnglNames2)
         {
@@ -4784,8 +4833,8 @@ sub translateSymbols(@)
 }
 
 sub canonifyName($)
-{# make TIFFStreamOpen(char const*, std::basic_ostream<char, std::char_traits<char> >*)
-# to be TIFFStreamOpen(char const*, std::basic_ostream<char>*)
+{ # make TIFFStreamOpen(char const*, std::basic_ostream<char, std::char_traits<char> >*)
+  # to be TIFFStreamOpen(char const*, std::basic_ostream<char>*)
     my $Name = $_[0];
     $Name=~s/,\s*std::(allocator|less|char_traits|regex_traits)<\w+> //g;
     return $Name;
@@ -4928,7 +4977,7 @@ sub renameTmplInst()
         {
             my $TypeName = $TypeDescr{$TDid}{$Tid}{"Name"};
             if($TypeName=~/>/)
-            {# template instances only
+            { # template instances only
                 foreach my $Base (sort {length($b)<=>length($a)}
                 keys(%Typedef_Equivalent))
                 {
@@ -5010,7 +5059,7 @@ sub pointTo($)
 sub getTypeDescr_All()
 {
     foreach (sort {int($a)<=>int($b)} keys(%LibInfo))
-    {# detecting explicit typedefs
+    { # detecting explicit typedefs
         if($LibInfo{$_}{"info_type"} eq "type_decl")
         {
             my $TypeId = getTreeAttr($_, "type");
@@ -5026,7 +5075,7 @@ sub getTypeDescr_All()
         }
     }
     foreach my $Tid (sort {int($a)<=>int($b)} keys(%ExplicitTypedef))
-    {# reflecting explicit typedefs to the parallel flatness
+    { # reflecting explicit typedefs to the parallel flatness
         foreach my $TDid (sort {int($a)<=>int($b)} keys(%{$ExplicitTypedef{$Tid}}))
         {
             getTypeDescr($TDid, $Tid);
@@ -5044,13 +5093,13 @@ sub getTypeDescr_All()
         }
     }
     foreach (sort {int($a)<=>int($b)} keys(%LibInfo))
-    {# enumerations
+    { # enumerations
         if($LibInfo{$_}{"info_type"} eq "const_decl") {
             getTypeDescr($_, getTreeAttr($_, "type"));
         }
     }
     foreach (sort {int($a)<=>int($b)} keys(%LibInfo))
-    {# other types
+    { # other types
         if($LibInfo{$_}{"info_type"}=~/_type\Z/
         and $LibInfo{$_}{"info_type"}!~/function_type|method_type/) {
             getTypeDescr(getTypeDeclId($_), $_);
@@ -5193,7 +5242,7 @@ sub getPrefix($)
         return $1;
     }
     elsif($Str=~/\A(([a-z])\2{1,})/i)
-    {# ffopen
+    { # ffopen
         return $1;
     }
     else {
@@ -5243,7 +5292,7 @@ sub getNodeIntCst($)
 }
 
 sub getNodeStrCst($)
-{# FIXME: identify spaces
+{ # FIXME: identify spaces
     if($LibInfo{$_[0]}{"info"}=~/strg[ ]*:[ ]*(.+)[ ]+lngt/
     and $1 ne " ") {
         return $1;
@@ -5328,10 +5377,10 @@ sub getTypeAttr($$)
                     return ();
                 }
                 elsif($Param_Pos>=1 and $Param=~/\Astd::(allocator|less|char_traits|regex_traits)\</)
-                {# template<typename _Tp, typename _Alloc = std::allocator<_Tp> >
-                 # template<typename _Key, typename _Compare = std::less<_Key>
-                 # template<typename _CharT, typename _Traits = std::char_traits<_CharT> >
-                 # template<typename _Ch_type, typename _Rx_traits = regex_traits<_Ch_type> >
+                { # template<typename _Tp, typename _Alloc = std::allocator<_Tp> >
+                  # template<typename _Key, typename _Compare = std::less<_Key>
+                  # template<typename _CharT, typename _Traits = std::char_traits<_CharT> >
+                  # template<typename _Ch_type, typename _Rx_traits = regex_traits<_Ch_type> >
                     next;
                 }
                 elsif($Param ne "\@skip\@") {
@@ -5360,7 +5409,7 @@ sub getTypeAttr($$)
     {
         ($TypeAttr{"BaseType"}{"Tid"}, $TypeAttr{"BaseType"}{"TDid"}, $BaseTypeSpec) = selectBaseType($TypeDeclId, $TypeId);
         if(not $ExplicitTypedef{$TypeId}{$TypeDeclId} and keys(%{$ExplicitTypedef{$TypeAttr{"BaseType"}{"Tid"}}})==1)
-        {# replace the type to according explicit typedef
+        { # replace the type to according explicit typedef
             my $NewBase_TDid = (keys(%{$ExplicitTypedef{$TypeAttr{"BaseType"}{"Tid"}}}))[0];
             my $NewBase_Tid = -$TypeAttr{"BaseType"}{"Tid"};
             if($TypeDescr{$NewBase_TDid}{$NewBase_Tid}{"Name"})
@@ -5379,7 +5428,7 @@ sub getTypeAttr($$)
             %BaseTypeAttr = getTypeAttr($TypeAttr{"BaseType"}{"TDid"}, $TypeAttr{"BaseType"}{"Tid"});
         }
         if($BaseTypeAttr{"Type"} eq "Typedef")
-        {# relinking typedefs
+        { # relinking typedefs
             my %BaseBase = get_Type($BaseTypeAttr{"BaseType"}{"TDid"},$BaseTypeAttr{"BaseType"}{"Tid"});
             if($BaseTypeAttr{"Name"} eq $BaseBase{"Name"}) {
                 ($TypeAttr{"BaseType"}{"Tid"},$TypeAttr{"BaseType"}{"TDid"}) = ($BaseBase{"Tid"},$BaseBase{"TDid"});
@@ -5414,7 +5463,7 @@ sub getTypeAttr($$)
             {
                 my $TypeName = $TypeAttr{"Name"};
                 if($NS=~/\A(struct |union |class |)((.+)::|)\Q$TypeName\E\Z/)
-                {# "some_type" is the typedef to "struct some_type" in C++
+                { # "some_type" is the typedef to "struct some_type" in C++
                     if($3) {
                         $TypeAttr{"Name"} = $3."::".$TypeName;
                     }
@@ -5423,7 +5472,7 @@ sub getTypeAttr($$)
                 {
                     $TypeAttr{"Name"} = $NS."::".$TypeAttr{"Name"};
                     if($TypeAttr{"Name"}!~/\A\Q$BaseTypeName\E/)
-                    {# skip v8::Handle<v8::Boolean>::Handle that is typedef to v8::Handle<v8::Boolean>
+                    { # skip v8::Handle<v8::Boolean>::Handle that is typedef to v8::Handle<v8::Boolean>
                         $Type_Typedef{$BaseTypeAttr{"Tid"}}{$TypeAttr{"Tid"}} = 1;
                     }
                 }
@@ -5525,7 +5574,7 @@ sub cover_stdcxx_typedef($)
 }
 
 sub getMemPtrAttr($$$$)
-{# function, method and field pointers
+{ # function, method and field pointers
     my ($PtrId, $TypeDeclId, $TypeId, $Type) = @_;
     my $MemInfo = $LibInfo{$PtrId}{"info"};
     if($Type eq "FieldPtr") {
@@ -5675,12 +5724,12 @@ sub selectBaseType($$)
     and $LibInfo{$TypeId}{"info"}=~/qual[ ]*:/
     and $LibInfo{$TypeId}{"info"}=~/name[ ]*:[ ]*\@(\d+) /
     and (getTypeId($1) ne $TypeId))
-    {# typedefs
+    { # typedefs
         return (getTypeId($1), $1, getQual($TypeId));
     }
     elsif($LibInfo{$TypeId}{"info"}!~/qual[ ]*:/
     and $LibInfo{$TypeId}{"info"}=~/unql[ ]*:[ ]*\@(\d+) /)
-    {# typedefs
+    { # typedefs
         return ($1, getTypeDeclId($1), "");
     }
     elsif($LibInfo{$TypeId}{"info"}=~/qual[ ]*:[ ]*c /
@@ -5948,7 +5997,7 @@ sub getTrivialTypeAttr($$)
     $TypeAttr{"Line"} = getLine($TypeInfoId) if(defined $SplintAnnotations);
     if($TypeAttr{"Name"} eq "__exception"
     and $TypeAttr{"Header"} eq "math.h")
-    {# libm
+    { # libm
         $TypeAttr{"Name"} = "exception";
     }
     $TypeAttr{"Size"} = getSize($TypeId)/8;
@@ -6038,7 +6087,7 @@ sub construct_signature($)
     if(not $FuncDescr{$InfoId}{"Data"})
     {
         foreach my $ParamPos (sort {int($a) <=> int($b)} keys(%{$FuncDescr{$InfoId}{"Param"}}))
-        {# checking parameters
+        { # checking parameters
             my $ParamType_Id = $FuncDescr{$InfoId}{"Param"}{$ParamPos}{"type"};
             my $ParamType_Name = uncover_typedefs(get_TypeName($ParamType_Id));
             if($OSgroup eq "windows") {
@@ -6165,7 +6214,7 @@ sub add_InlineConstructors()
     foreach my $ClassId (keys(%ClassesWithMethods))
     {
         if(not $ClassesWithConstructors{$ClassId})
-        {# classes without constructors
+        { # classes without constructors
             my %Descr = ();
             my %CInfo = get_Type($Tid_TDid{$ClassId}, $ClassId);
             $Descr{"Header"} = $CInfo{"Header"};
@@ -6201,7 +6250,7 @@ sub getFuncDescr($)
         return;
     }
     if(getFuncSpec($FuncInfoId) eq "PureVirt")
-    {# pure virtual methods
+    { # pure virtual methods
         $FuncDescr{$FuncInfoId}{"PureVirt"} = 1;
     }
     setFuncAccess($FuncInfoId);
@@ -6224,7 +6273,7 @@ sub getFuncDescr($)
     $FuncDescr{$FuncInfoId}{"Return"} = getFuncReturn($FuncInfoId);
     delete($FuncDescr{$FuncInfoId}{"Return"}) if(not $FuncDescr{$FuncInfoId}{"Return"});
     if(keys(%{$ExplicitTypedef{$FuncDescr{$FuncInfoId}{"Return"}}})==1)
-    {# replace the type to according explicit typedef
+    { # replace the type to according explicit typedef
         $FuncDescr{$FuncInfoId}{"Return"} = -$FuncDescr{$FuncInfoId}{"Return"};
     }
     $FuncDescr{$FuncInfoId}{"ShortName"} = getFuncShortName(getFuncOrig($FuncInfoId));
@@ -6262,14 +6311,15 @@ sub getFuncDescr($)
 # std symbols may used to generate tests for non-std symbols
 #     if($FuncDescr{$FuncInfoId}{"MnglName"} and not $STDCXX_TESTING and not $CheckStdCxx
 #     and (not $TargetInterfaceName or $FuncDescr{$FuncInfoId}{"MnglName"} ne $TargetInterfaceName))
-#     {# stdc++ symbols
+#     { # stdc++ symbols
 #         if($FuncDescr{$FuncInfoId}{"MnglName"}=~/\A(_ZS|_ZNS|_ZNKS)/) {
 #             delete($FuncDescr{$FuncInfoId});
 #             return;
 #         }
 #     }
     setFuncParams($FuncInfoId);
-    if($FuncDescr{$FuncInfoId}{"Skip"}) {
+    if($FuncDescr{$FuncInfoId}{"Skip"})
+    {
         delete($FuncDescr{$FuncInfoId});
         return;
     }
@@ -6277,15 +6327,15 @@ sub getFuncDescr($)
         $FuncDescr{$FuncInfoId}{"ShortName"} = get_TypeName($FuncDescr{$FuncInfoId}{"Class"});
     }
     if($Interface_Library{$FuncDescr{$FuncInfoId}{"ShortName"}}
-    and $FuncDescr{$FuncInfoId}{"Type"} eq "Function") {
-        # functions (C++): not mangled in library
+    and $FuncDescr{$FuncInfoId}{"Type"} eq "Function")
+    { # functions (C++): not mangled in library
         if(not $FuncDescr{$FuncInfoId}{"MnglName"}
           or not $Interface_Library{$FuncDescr{$FuncInfoId}{"MnglName"}}) {
             $FuncDescr{$FuncInfoId}{"MnglName"} = $FuncDescr{$FuncInfoId}{"ShortName"};
         }
     }
     if(not $FuncDescr{$FuncInfoId}{"MnglName"} and not $FuncDescr{$FuncInfoId}{"Class"})
-    {# functions (C++): mangled in library, but is not mangled in syntax tree
+    { # functions (C++): mangled in library, but is not mangled in syntax tree
         if(my $MangledByGcc = $mangled_name_gcc{construct_signature($FuncInfoId)}) {
             $FuncDescr{$FuncInfoId}{"MnglName"} = $MangledByGcc;
         }
@@ -6316,7 +6366,7 @@ sub getFuncDescr($)
         return;
     }
     if($MangledNames{$FuncDescr{$FuncInfoId}{"MnglName"}})
-    {# one instance for one mangled name only
+    { # one instance for one mangled name only
         delete($FuncDescr{$FuncInfoId});
         return;
     }
@@ -6333,7 +6383,7 @@ sub getFuncDescr($)
     if($FuncDescr{$FuncInfoId}{"MnglName"}=~/\A(_Z|\?)/ and $FuncDescr{$FuncInfoId}{"Class"})
     {
         if($FuncDescr{$FuncInfoId}{"Type"} eq "Function")
-        {# static methods
+        { # static methods
             $FuncDescr{$FuncInfoId}{"Static"} = 1;
         }
     }
@@ -6362,7 +6412,7 @@ sub getFuncDescr($)
     }
     if($Interface_Library{$FuncDescr{$FuncInfoId}{"MnglName"}}
     and $GlibcHeader{$FuncDescr{$FuncInfoId}{"Header"}} and not $GLIBC_TESTING)
-    {# solve collisions with simple name of headers (error.h)
+    { # solve collisions with simple name of headers (error.h)
         if(my $HeaderDir = find_in_dependencies($FuncDescr{$FuncInfoId}{"Header"})) {
             $FuncDescr{$FuncInfoId}{"Header"} = joinPath(get_filename($HeaderDir),$FuncDescr{$FuncInfoId}{"Header"});
         }
@@ -6460,12 +6510,12 @@ sub setTypeMemb($$)
             }
             my $StructMembName = getStructMembName($TypeMembInfoId);
             if($StructMembName=~/_vptr\./)
-            {#virtual tables
+            { # virtual tables
                 $TypeMembInfoId = getNextStructMembInfoId($TypeMembInfoId);
                 next;
             }
             if(not $StructMembName)
-            {#base classes
+            { # base classes
                 $TypeMembInfoId = getNextStructMembInfoId($TypeMembInfoId);
                 next;
             }
@@ -6526,11 +6576,11 @@ sub setFuncParams($)
         my $ParamName = getFuncParamName($ParamInfoId);
         last if(get_TypeName($ParamTypeId) eq "void");
         if(get_TypeType($ParamTypeId) eq "Restrict")
-        {# delete restrict spec
+        { # delete restrict spec
             $ParamTypeId = getRestrictBase($ParamTypeId);
         }
         if(keys(%{$ExplicitTypedef{$ParamTypeId}})==1)
-        {# replace the type to according explicit typedef
+        { # replace the type to according explicit typedef
             $ParamTypeId = -$ParamTypeId;
         }
         if(not get_TypeName($ParamTypeId))
@@ -6656,11 +6706,11 @@ sub getTreeAccess($)
         }
     }
     elsif($LibInfo{$InfoId}{"info"}=~/ protected /)
-    {# support for old GCC versions
+    { # support for old GCC versions
         return "protected";
     }
     elsif($LibInfo{$InfoId}{"info"}=~/ private /)
-    {# support for old GCC versions
+    { # support for old GCC versions
         return "private";
     }
     return "public";
@@ -6716,11 +6766,11 @@ sub getFuncSpec($)
         return "Virt";
     }
     elsif($FuncInfo=~/ pure virtual /)
-    {# support for old GCC versions
+    { # support for old GCC versions
         return "PureVirt";
     }
     elsif($FuncInfo=~/ virtual /)
-    {# support for old GCC versions
+    { # support for old GCC versions
         return "Virt";
     }
     return "";
@@ -6905,11 +6955,11 @@ sub getEnumMembVal($)
     if($LibInfo{$_[0]}{"info"}=~/valu\s*:\s*\@(\d+)/)
     {
         if($LibInfo{$1}{"info"}=~/cnst\s*:\s*\@(\d+)/)
-        {# in newer versions of GCC the value is in the "const_decl->cnst" node
+        { # in newer versions of GCC the value is in the "const_decl->cnst" node
             return getTreeValue($1);
         }
         else
-        {# some old versions of GCC (3.3) have the value in the "integer_cst" node
+        { # some old versions of GCC (3.3) have the value in the "integer_cst" node
             return getTreeValue($1);
         }
     }
@@ -7058,7 +7108,7 @@ sub getNameByInfo($)
     my $TypeInfo = $LibInfo{$_[0]}{"info"};
     return "" if($TypeInfo!~/name[ ]*:[ ]*@(\d+) /);
     if($LibInfo{$1}{"info"}=~/strg[ ]*:[ ]*(.*?)[ ]+lngt/)
-    {# short unsigned int (may include spaces)
+    { # short unsigned int (may include spaces)
         return $1;
     }
     else {
@@ -7072,7 +7122,8 @@ sub getTreeStr($)
     if($Info=~/strg[ ]*:[ ]*([^ ]*)/)
     {
         my $Str = $1;
-        if($C99Mode and $Str=~/\Ac99_(.+)\Z/) {
+        if($C99Mode and $Str=~/\Ac99_(.+)\Z/)
+        {
             if($CppKeywords_A{$1}) {
                 $Str=$1;
             }
@@ -7127,15 +7178,15 @@ sub getFuncReturn($)
     return "" if($LibInfo{$FuncTypeInfoId}{"info"}!~/retn[ ]*:[ ]*@(\d+) /);
     my $FuncReturnTypeId = $1;
     if(get_TypeType($FuncReturnTypeId) eq "Restrict")
-    {#delete restrict spec
+    { #delete restrict spec
         $FuncReturnTypeId = getRestrictBase($FuncReturnTypeId);
     }
     return $FuncReturnTypeId;
 }
 
 sub isInline($)
-{# "body: undefined" in the tree
- # -fkeep-inline-functions GCC option should be specified
+{ # "body: undefined" in the tree
+  # -fkeep-inline-functions GCC option should be specified
     my $FuncInfo = $LibInfo{$_[0]}{"info"};
     if($FuncInfo=~/ undefined /i) {
         return 0;
@@ -7492,7 +7543,7 @@ sub unmangled_Compact($)
 sub unmangled_PostProcess($)
 {
     my $result = $_[0];
-    #s/\bunsigned int\b/unsigned/g;
+    # s/\bunsigned int\b/unsigned/g;
     $result=~s/\bshort unsigned int\b/unsigned short/g;
     $result=~s/\bshort int\b/short/g;
     $result=~s/\blong long unsigned int\b/unsigned long long/g;
@@ -7506,7 +7557,7 @@ sub unmangled_PostProcess($)
 }
 
 sub correctName($)
-{# type name correction
+{ # type name correction
     my $CorrectName = $_[0];
     $CorrectName = unmangled_Compact($CorrectName);
     $CorrectName = unmangled_PostProcess($CorrectName);
@@ -7542,7 +7593,7 @@ sub get_namespace_additions($)
 }
 
 sub forward_slash($)
-{# forward slash to pass into MinGW GCC
+{ # forward slash to pass into MinGW GCC
     my $Path = $_[0];
     if($OSgroup eq "windows") {
         $Path=~s/\\/\//g;
@@ -7554,14 +7605,14 @@ sub inc_opt($$)
 {
     my ($Path, $Style) = @_;
     if($Style eq "GCC")
-    {# GCC options
+    { # GCC options
         if($OSgroup eq "windows")
-        {# to MinGW GCC
+        { # to MinGW GCC
             return "-I\"".forward_slash($Path)."\"";
         }
         elsif($OSgroup eq "macos"
         and $Path=~/\.framework\Z/)
-        {# to Apple's GCC
+        { # to Apple's GCC
             return "-F".esc(get_dirname($Path));
         }
         else {
@@ -7579,7 +7630,7 @@ sub getPlatformOpts()
     my $Arch = getArch();
     my $Options = "";    
     if($OSgroup eq "windows")
-    {# emulate the CL compiler
+    { # emulate the CL compiler
         if($Arch eq "x86") {
             $Options .= " -D_M_IX86=300";
         }
@@ -7662,11 +7713,11 @@ sub getCompileCmd($$$)
     }
     $GccCall .= " ".esc($Path);
     if($CompilerOptions_Headers)
-    {# user-defined options
+    { # user-defined options
         $GccCall .= " ".$CompilerOptions_Headers;
     }
     if($Inc)
-    {# include paths
+    { # include paths
         $GccCall .= " ".$Inc;
     }
     if(my $PlatformOpts = getPlatformOpts()) {
@@ -7766,7 +7817,7 @@ sub getDump()
         }
     }
     if($COMMON_LANGUAGE eq "C++" or $CheckHeadersOnly)
-    {# add classes and namespaces to the dump
+    { # add classes and namespaces to the dump
         my $CHdump = "-fdump-class-hierarchy -c";
         if($C99Mode==1) {
             $CHdump .= " -fpreprocessed";
@@ -7787,11 +7838,11 @@ sub getDump()
                     next if($CName=~/\A(__|_objc_|_opaque_)/);
                     $TUnit_NameSpaces{$CName} = -1;
                     if($CName=~/\A[\w:]+\Z/)
-                    {# classes
+                    { # classes
                         $AddClasses{$CName} = 1;
                     }
                     if($CName=~/(\w[\w:]*)::/)
-                    {# namespaces
+                    { # namespaces
                         my $NS = $1;
                         if(not defined $TUnit_NameSpaces{$NS}) {
                             $TUnit_NameSpaces{$NS} = 1;
@@ -7856,7 +7907,7 @@ sub checkPreprocessedUnit($)
     my $CurHeader = "";
     open(PREPROC, "$Path");
     while(<PREPROC>)
-    {# detecting public and private constants
+    { # detecting public and private constants
         chomp($_);
         if(/#[ \t]+\d+[ \t]+\"(.+)\"/) {
             $CurHeader=$1;
@@ -7875,7 +7926,8 @@ sub checkPreprocessedUnit($)
                 $Constants{$Name}{"HeaderName"} = get_filename($CurHeader);
             }
         }
-        elsif(/\#[ \t]*undef[ \t]+([_A-Z]+)[ \t]*/) {
+        elsif(/\#[ \t]*undef[ \t]+([_A-Z]+)[ \t]*/)
+        {
             my $Name = $1;
             $Constants{$Name}{"Access"} = "private";
         }
@@ -7942,17 +7994,18 @@ sub prepareInterfaces()
     }
     %FuncDescr=();
     if($OSgroup eq "windows")
-    {# translate symbols from CL mangling to GCC
+    { # translate symbols from CL mangling to GCC
         foreach my $MnglName (keys(%CompleteSignature))
         {
             if($MnglName=~/\A_Z/)
             {
-                if(my $TargetMangled = $mangled_name{synchTr($tr_name{$MnglName})}) {
+                if(my $TargetMangled = $mangled_name{synchTr($tr_name{$MnglName})})
+                {
                     %{$CompleteSignature{$TargetMangled}} = %{$CompleteSignature{$MnglName}};
                     delete($CompleteSignature{$MnglName});
                 }
-                else {
-                    # pure virtual methods go here
+                else
+                { # pure virtual methods go here
                 }
             }
         }
@@ -7998,7 +8051,8 @@ sub setRelationships($)
                         next if($InterfaceSpecType{$Interface}{"SpecParam"}{$Pos});
                         my $Param_FId = get_FoundationTypeId($CompleteSignature{$Interface}{"Param"}{$Pos}{"type"});
                         if(($CompleteSignature{$Interface}{"Param"}{$Pos}{"type"} eq $CompleteSignature{$Interface}{"Return"})
-                        or (get_TypeType($Return_FId)!~/\A(Intrinsic|Enum|Array)\Z/ and $Return_FId eq $Param_FId)) {
+                        or (get_TypeType($Return_FId)!~/\A(Intrinsic|Enum|Array)\Z/ and $Return_FId eq $Param_FId))
+                        {
                             $DoNotUseReturn = 1;
                             last;
                         }
@@ -8050,10 +8104,10 @@ sub setOutParams_Simple($)
     while($ReturnType_Name_Short=~s/(\*|\&)([^<>()]+|)\Z/$2/g){};
     my ($ParamName_Prev, $ParamTypeId_Prev) = ();
     foreach my $ParamPos (sort {int($a)<=>int($b)} keys(%{$CompleteSignature{$Interface}{"Param"}}))
-    {# detecting out-parameters by name
+    { # detecting out-parameters by name
         if($CompleteSignature{$Interface}{"Param"}{$ParamPos}{"name"}=~/\Ap\d+\Z/
         and (my $NewParamName = $AddIntParams{$Interface}{$ParamPos}))
-        {# names from the external file
+        { # names from the external file
             $CompleteSignature{$Interface}{"Param"}{$ParamPos}{"name"} = $NewParamName;
         }
         my $ParamName = $CompleteSignature{$Interface}{"Param"}{$ParamPos}{"name"};
@@ -8065,7 +8119,7 @@ sub setOutParams_Simple($)
         
         if($UserDefinedOutParam{$Interface}{$ParamPos+1}
         or $UserDefinedOutParam{$Interface}{$ParamName})
-        {# user defined by <out_params> section in the descriptor
+        { # user defined by <out_params> section in the descriptor
             register_out_param($Interface, $ParamPos, $ParamName, $ParamTypeId);
             next;
         }
@@ -8073,28 +8127,28 @@ sub setOutParams_Simple($)
         # particular accept
         if($ParamPLevel>=2 and isCharType($ParamFTypeName)
         and not is_const_type($ParamTypeName) and $ParamName!~/argv/i and $ParamName!~/\A(s|str|string)\Z/i)
-        {# soup_form_decode_multipart ( SoupMessage* msg, char const* file_control_name, char** filename, char** content_type, SoupBuffer** file )
-         # direct_trim ( char** s )
+        { # soup_form_decode_multipart ( SoupMessage* msg, char const* file_control_name, char** filename, char** content_type, SoupBuffer** file )
+          # direct_trim ( char** s )
             register_out_param($Interface, $ParamPos, $ParamName, $ParamTypeId);
             next;
         }
         if($ParamPLevel>=2 and not is_const_type($ParamTypeName) and $ParamName=~/handle/i and $CompleteSignature{$Interface}{"ShortName"}=~/_init\Z/i)
-        {# gnutls_cipher_init ( gnutls_cipher_hd_t* handle, gnutls_cipher_algorithm_t cipher, gnutls_datum_t const* key, gnutls_datum_t const* iv )
+        { # gnutls_cipher_init ( gnutls_cipher_hd_t* handle, gnutls_cipher_algorithm_t cipher, gnutls_datum_t const* key, gnutls_datum_t const* iv )
             register_out_param($Interface, $ParamPos, $ParamName, $ParamTypeId);
             next;
         }
         if($ParamPLevel==1 and isNumericType($ParamFTypeName)
         and not is_const_type($ParamTypeName) and ($ParamName=~/((\A|_)(x|y|(lat|long|alt)itude)(\Z|_))|errnum|errcode|used|horizontal|vertical|width|height|error|length|count|time|status|state|min|max|weight|\An[_]*(row|col|axe|found|memb|key|space)|\An_/i or $ParamTypeName=~/bool/i
         or $ParamName=~/(\A|_)n(_|)(elem|item)/i or is_out_word($ParamName) or $ParamName=~/\Ais/i))
-        {# gail_misc_get_origins ( GtkWidget* widget, gint* x_window, gint* y_window, gint* x_toplevel, gint* y_toplevel )
-         # glXGetFBConfigs ( Display* dpy, int screen, int* nelements )
+        { # gail_misc_get_origins ( GtkWidget* widget, gint* x_window, gint* y_window, gint* x_toplevel, gint* y_toplevel )
+          # glXGetFBConfigs ( Display* dpy, int screen, int* nelements )
             register_out_param($Interface, $ParamPos, $ParamName, $ParamTypeId);
             next;
         }
         if(($ParamName=~/err/i and $ParamPLevel>=2 and $ParamTypeName=~/err/i)
         or ($ParamName=~/\A(error|err)(_|)(p|ptr)\Z/i and $ParamPLevel>=1))
-        {# g_app_info_add_supports_type ( GAppInfo* appinfo, char const* content_type, GError** error )
-         # rsvg_handle_new_from_data ( guint8 const* data, gsize data_len, GError** error )
+        { # g_app_info_add_supports_type ( GAppInfo* appinfo, char const* content_type, GError** error )
+          # rsvg_handle_new_from_data ( guint8 const* data, gsize data_len, GError** error )
             register_out_param($Interface, $ParamPos, $ParamName, $ParamTypeId);
             next;
         }
@@ -8140,12 +8194,14 @@ sub setOutParams_Simple($)
                 my $OtherParamName = $CompleteSignature{$Interface}{"Param"}{$Pos}{"name"};
                 next if($OtherParamName eq $ParamName);
                 my $OtherParamFTypeId = get_FoundationTypeId($OtherParamTypeId);
-                if($ParamFTypeId eq $OtherParamFTypeId) {
+                if($ParamFTypeId eq $OtherParamFTypeId)
+                {
                     $IsTransit = 1;
                     last;
                 }
             }
-            if($IsTransit or get_TypeType($ParamFTypeId)=~/\A(Intrinsic|Enum|Array)\Z/) {
+            if($IsTransit or get_TypeType($ParamFTypeId)=~/\A(Intrinsic|Enum|Array)\Z/)
+            {
                 $OutParamInterface_Pos_NoUsing{$Interface}{$ParamPos}=1;
                 $Interface_OutParam_NoUsing{$Interface}{$ParamName}=1;
             }
@@ -8158,7 +8214,7 @@ sub setOutParams_Simple($)
 }
 
 sub setOutParams_Complex($)
-{# detect out-parameters by function name and parameter type
+{ # detect out-parameters by function name and parameter type
     my $Interface = $_[0];
     my $Func_ShortName = $CompleteSignature{$Interface}{"ShortName"};
     my $ReturnType_Id = $CompleteSignature{$Interface}{"Return"};
@@ -8166,8 +8222,8 @@ sub setOutParams_Complex($)
     while($ReturnType_Name_Short=~s/(\*|\&)([^<>()]+|)\Z/$2/g){};
     return if(get_TypeType(get_FoundationTypeId($ReturnType_Id))!~/\A(Intrinsic|Enum)\Z/
     or $Func_ShortName=~/\Q$ReturnType_Name_Short\E/);
-    if(get_TypeName($ReturnType_Id) eq "void*" and $Func_ShortName=~/data/i) {
-        # void* repo_sidedata_create ( Repo* repo, size_t size )
+    if(get_TypeName($ReturnType_Id) eq "void*" and $Func_ShortName=~/data/i)
+    { # void* repo_sidedata_create ( Repo* repo, size_t size )
         return;
     }
     return if($Func_ShortName!~/(new|create|open|top|update|start)/i and not is_alloc_func($Func_ShortName)
@@ -8196,7 +8252,8 @@ sub detect_out_parameters($$)
     {
         my $ParamTypeId = $CompleteSignature{$Interface}{"Param"}{$ParamPos}{"type"};
         my $ParamName = $CompleteSignature{$Interface}{"Param"}{$ParamPos}{"name"};
-        if(isOutParam($ParamTypeId, $ParamPos, $Interface, $Strong)) {
+        if(isOutParam($ParamTypeId, $ParamPos, $Interface, $Strong))
+        {
             register_out_param($Interface, $ParamPos, $ParamName, $ParamTypeId);
             return 1;
         }
@@ -8208,12 +8265,14 @@ sub get_outparam_candidate($$)
 {
     my ($Interface, $Right) = @_;
     my $Func_ShortName = $CompleteSignature{$Interface}{"ShortName"};
-    if($Right) {
+    if($Right)
+    {
         if($Func_ShortName=~/([a-z0-9]+)(_|)(new|open|init)\Z/i) {
             return $1;
         }
     }
-    else {
+    else
+    {
         if($Func_ShortName=~/(new|open|init)(_|)([a-z0-9]+)/i) {
             return $3;
         }
@@ -8238,7 +8297,8 @@ sub isOutParam($$$$)
     return 0 if(is_const_type($TypeName));
     my $Func_ShortName = $CompleteSignature{$Interface}{"ShortName"};
     return 1 if($Func_ShortName=~/\A\Q$Param_FTypeName\E(_|)init/);
-    if($Strong) {
+    if($Strong)
+    {
         if(my $Candidate = get_outparam_candidate($Interface, 1)) {
             return ($Param_Name=~/\Q$Candidate\E/i);
         }
@@ -8254,7 +8314,8 @@ sub isOutParam($$$$)
     or $UserDefinedOutParam{$Interface}{$ParamPos+1});
     return 1 if($Func_ShortName=~/update/i and $Func_ShortName!~/add|append/i
     and $Func_ShortName=~/$Param_Name/i and $PLevel>=1);
-    if($Func_ShortName=~/init/i) {
+    if($Func_ShortName=~/init/i)
+    {
         if(keys(%{$CompleteSignature{$Interface}{"Param"}})==1
         or number_of_simple_params($Interface)==keys(%{$CompleteSignature{$Interface}{"Param"}})-1) {
             return 1;
@@ -8315,7 +8376,8 @@ sub is_alloc_func($)
 
 sub markAbstractClasses()
 {
-    foreach my $Interface (keys(%CompleteSignature)) {
+    foreach my $Interface (keys(%CompleteSignature))
+    {
         if($CompleteSignature{$Interface}{"PureVirt"}) {
             markAbstractSubClasses($CompleteSignature{$Interface}{"Class"}, $Interface);
         }
@@ -8360,7 +8422,8 @@ sub cleanName($)
 {
     my $Name = $_[0];
     return "" if(not $Name);
-    foreach my $Token (sort keys(%Operator_Indication)) {
+    foreach my $Token (sort keys(%Operator_Indication))
+    {
         my $Token_Translate = $Operator_Indication{$Token};
         $Name=~s/\Q$Token_Translate\E/\_$Token\_/g;
     }
@@ -8411,7 +8474,8 @@ sub getLibGroupPath($$$)
     my ($C1, $C2, $TwoComponets) = @_;
     return () if(not $C1);
     $C1=clean_libgroup_name($C1);
-    if($TwoComponets) {
+    if($TwoComponets)
+    {
         if($C2) {
             return ($TEST_SUITE_PATH."/$TargetLibraryName-t2c/", $C1, $C2);
         }
@@ -8452,7 +8516,7 @@ sub get_signature_center($)
     my ($Bracket_Num, $Bracket2_Num) = (0, 0);
     my $Center = 0;
     if($Signature=~s/(operator([<>\-\=\*]+|\(\)))//g)
-    {# operators: (),->,->*,<,<=,<<,<<=,>,>=,>>,>>=
+    { # operators: (),->,->*,<,<=,<<,<<=,>,>=,>>,>>=
         $Center+=length($1);
     }
     foreach my $Pos (0 .. length($Signature)-1)
@@ -8482,7 +8546,7 @@ sub interfaceFilter($)
     return 0 if(not $CompleteSignature{$Interface}{"Header"});
     return 0 if($CompleteSignature{$Interface}{"Data"});
     if(not $STDCXX_TESTING and not $CheckStdCxx and not $TargetInterfaceName)
-    {# stdc++ symbols
+    { # stdc++ symbols
         return 0 if($Interface=~/\A(_ZS|_ZNS|_ZNKS)/);
     }
     if($Interface=~/\A_ZN9__gnu_cxx\d/) {
@@ -8507,7 +8571,8 @@ sub addHeaders($$)
     $OldHeaders = [] if(not $OldHeaders);
     $NewHeaders = [] if(not $NewHeaders);
     my (%Old, @Result_Before, @Result_After) = ();
-    foreach (@{$OldHeaders}) {
+    foreach (@{$OldHeaders})
+    {
         $Old{$_} = 1;
         @Result_After = (@Result_After, $_) if($_);
     }
@@ -8648,7 +8713,7 @@ sub sort_byLibrary($$)
             push(@NewInterfaces1, $Interface);
         }
         elsif($Interface=~/environment/i)
-        {# functions to set evironment should NOT be sorted
+        { # functions to set evironment should NOT be sorted
             push(@NewInterfaces1, $Interface);
         }
         elsif($LibPrefix and ($LibPrefix eq $IntPrefix)) {
@@ -8699,9 +8764,10 @@ sub unique_array(@)
 {
     my %seen = ();
     my @uniq = ();
-    foreach my $item (@_) {
-        unless ($seen{$item}) {
-            # if we get here, we have not seen it before
+    foreach my $item (@_)
+    {
+        unless ($seen{$item})
+        { # if we get here, we have not seen it before
             $seen{$item} = 1;
             push(@uniq, $item);
         }
@@ -8775,7 +8841,7 @@ sub get_word_coinsidence($$)
         {
             if($WordTokens_Inc{$Token}==1
             and $Library_Prefixes{$Token}+$Library_Prefixes{$Token."_"}>=$LIBRARY_PREFIX_MAJORITY)
-            {# first token is usually a library prefix
+            { # first token is usually a library prefix
                 $WordCoincidence+=$Weight;
             }
             else {
@@ -8826,7 +8892,8 @@ sub compare_byCriteria($$)
     elsif($Criteria eq "FirstParam_Intrinsic")
     {
         if(defined $CompleteSignature{$Interface}{"Param"}
-        and defined $CompleteSignature{$Interface}{"Param"}{"0"}) {
+        and defined $CompleteSignature{$Interface}{"Param"}{"0"})
+        {
             my $FirstParamType_Id = $CompleteSignature{$Interface}{"Param"}{"0"}{"type"};
             return (get_TypeType(get_FoundationTypeId($FirstParamType_Id)) eq "Intrinsic");
         }
@@ -8837,7 +8904,8 @@ sub compare_byCriteria($$)
     elsif($Criteria eq "FirstParam_Enum")
     {
         if(defined $CompleteSignature{$Interface}{"Param"}
-        and defined $CompleteSignature{$Interface}{"Param"}{"0"}) {
+        and defined $CompleteSignature{$Interface}{"Param"}{"0"})
+        {
             my $FirstParamType_Id = $CompleteSignature{$Interface}{"Param"}{"0"}{"type"};
             return (get_TypeType(get_FoundationTypeId($FirstParamType_Id)) eq "Enum");
         }
@@ -8888,7 +8956,8 @@ sub compare_byCriteria($$)
         {
             my $ParamTypeId = $CompleteSignature{$Interface}{"Param"}{$ParamPos}{"type"};
             my $ParamName = $CompleteSignature{$Interface}{"Param"}{$ParamPos}{"name"};
-            if(isString($ParamTypeId, $ParamName, $Interface)) {
+            if(isString($ParamTypeId, $ParamName, $Interface))
+            {
                 return 0 if(isStr_FileName($ParamPos, $ParamName, $CompleteSignature{$Interface}{"ShortName"})
                 or isStr_Dir($ParamName, $CompleteSignature{$Interface}{"ShortName"}));
             }
@@ -9580,7 +9649,7 @@ sub restore_state_p($$)
             }
         }
         if(not $Saved_State)
-        {#restoring aux types
+        { # restore aux types
             foreach my $AuxType_Id (sort {int($a)<=>int($b)} keys(%AuxType))
             {
                 if(not $TypeDescr{""}{$AuxType_Id}{"Name_Old"})
@@ -9618,7 +9687,7 @@ sub restore_state_p($$)
         %SpecLibs, %UsedInterfaces, %IntSpecType, %RequirementsCatalog, %TraceFunc) = ();
     }
     if(not $Saved_State)
-    {#initializing
+    { # initializing
         %IntrinsicNum=(
             "Char"=>64,
             "Int"=>0,
@@ -9719,7 +9788,8 @@ sub parseCode($$)
     my ($Code, $Mode) = @_;
     my $Global_State = save_state();
     my %ParsedCode = parseCode_m($Code, $Mode);
-    if(not $ParsedCode{"IsCorrect"}) {
+    if(not $ParsedCode{"IsCorrect"})
+    {
         restore_state($Global_State);
         return ();
     }
@@ -9811,7 +9881,7 @@ sub detectParamsOrder($)
     my $Interface = $_[0];
     my ($SpecAttributes, %OrderParam) = ();
     foreach my $Param_Pos (keys(%{$InterfaceSpecType{$Interface}{"SpecParam"}}))
-    {#detect all dependencies
+    { # detect all dependencies
         my $SpecType_Id = $InterfaceSpecType{$Interface}{"SpecParam"}{$Param_Pos};
         my %SpecType = %{$SpecType{$SpecType_Id}};
         $SpecAttributes .= $SpecType{"Value"}.$SpecType{"PreCondition"}.$SpecType{"PostCondition"}.$SpecType{"InitCode"}.$SpecType{"DeclCode"}.$SpecType{"FinalCode"};
@@ -10071,16 +10141,16 @@ sub select_ValueFromCollection(@)
             if($Value!~/\A(argc|argv)\Z/)
             {
                 if(get_TypeName($Value_TypeId)=~/(string|date|time|file)/i and $Name!~/\Ap\d+\Z/)
-                {# date, time arguments
+                { # date, time arguments
                     unless($Name=~/_elem\Z/ and $PointerLevel_Value==0)
-                    {# array elements may be reused
+                    { # array elements may be reused
                         next;
                     }
                 }
                 next if($CreateChild and not $SubClass_Instance{$Value});
-                #next if(not $IsObj and $SubClass_Instance{$Value});
+                # next if(not $IsObj and $SubClass_Instance{$Value});
                 next if(($Interface eq $TestedInterface) and ($Name ne $Value)
-                and not $UseVarEveryWhere{$CurrentBlock}{$Value});#and $Name!~/\Ap\d+\Z/
+                and not $UseVarEveryWhere{$CurrentBlock}{$Value}); # and $Name!~/\Ap\d+\Z/
             }
             if($TypeName eq get_TypeName($Value_TypeId))
             {
@@ -10091,14 +10161,15 @@ sub select_ValueFromCollection(@)
                 {
                     if(isNumericType($TypeName)
                     and $Name!~/\Q$Value\E/i and $TypeName!~/[A-Z]|_t/)
-                    {# do not reuse intrinsic values
+                    { # do not reuse intrinsic values
                         next;
                     }
                 }
                 if($Name=~/\A[_]*$Value(|[_]*[a-zA-Z0-9]|[_]*ptr)\Z/i) {
                     push(@Name_Type_Coinsidence, $Value);
                 }
-                else {
+                else
+                {
                     next if($Value=~/\A(argc|argv)\Z/ and $CurrentBlock eq "main");
                     push(@Type_Coinsidence, $Value);
                 }
@@ -10111,7 +10182,7 @@ sub select_ValueFromCollection(@)
                 else
                 {
                     if(isNumericType($FTypeName) and $Name!~/\Q$Value\E/i)
-                    {# do not reuse intrinsic values
+                    { # do not reuse intrinsic values
                         next;
                     }
                     if($PointerLevel-$PointerLevel_Value!=1)
@@ -10138,7 +10209,8 @@ sub select_ValueFromCollection(@)
                     if($Name=~/\A[_]*\Q$Value\E(|[_]*[a-z0-9]|[_]*ptr)\Z/i) {
                         push(@Name_FType_Coinsidence, $Value);
                     }
-                    else {
+                    else
+                    {
                         next if($Value=~/\A(argc|argv)\Z/ and $CurrentBlock eq "main");
                         push(@FType_Coinsidence, $Value);
                     }
@@ -10188,7 +10260,7 @@ sub isArrayName($)
 }
 
 sub isArray($$$)
-{# detecting parameter semantic
+{ # detect parameter semantic
     my ($TypeId, $ParamName, $Interface) = @_;
     return 0 if(not $TypeId or not $ParamName);
     my $I_ShortName = $CompleteSignature{$Interface}{"ShortName"};
@@ -10231,8 +10303,8 @@ sub isArray($$$)
     if($ParamName!~/out|context|name/i and isArrayName($ParamName)
     and (getParamNameByTypeName($TypeName) ne $ParamName or $TypeName!~/\*/)
     and $TypeName!~/$ParamName/i)
-    {#  foo(struct type* list)
-     #! curl_slist_free_all ( struct curl_slist* p1 )
+    { #  foo(struct type* list)
+      #! curl_slist_free_all ( struct curl_slist* p1 )
         return 1;
     }
     # array of function pointers
@@ -10266,11 +10338,11 @@ sub check_type_returned($$)
     my ($TypeId, $Strong) = @_;
     return 0 if(not $TypeId);
     my $BaseTypeId = get_FoundationTypeId($TypeId);
-    if(get_TypeType($BaseTypeId) ne "Intrinsic") {
-        # by return value
+    if(get_TypeType($BaseTypeId) ne "Intrinsic")
+    { # by return value
         return 1 if(keys(%{$ReturnTypeId_Interface{$TypeId}}) or keys(%{$ReturnTypeId_Interface{$BaseTypeId}}));
-        if(not $Strong) {
-            # base type and plevel match
+        if(not $Strong)
+        { # base type and plevel match
             my $PLevel = get_PointerLevel($Tid_TDid{$TypeId}, $TypeId);
             foreach (0 .. $PLevel)
             {
@@ -10417,7 +10489,7 @@ sub isOpaque($)
 }
 
 sub isStr_FileName($$$)
-{#should be called after the "isString" function
+{ # should be called after the "isString" function
     my ($ParamPos, $ParamName, $Interface_ShortName) = @_;
     return 0 if(not $ParamName);
     if($ParamName=~/ext/i)
@@ -10529,7 +10601,7 @@ sub get_call_malloc($)
     else
     {
         if(isOpaque($FoundationTypeId))
-        {# opaque buffers
+        { # opaque buffers
             if(get_TypeType($FoundationTypeId) eq "Array") {
                 $BuffSize*=$BUFF_SIZE;
             }
@@ -10540,7 +10612,8 @@ sub get_call_malloc($)
         }
         else
         {
-            if($PointerLevel==1) {
+            if($PointerLevel==1)
+            {
                 my $ReducedTypeId = reduce_pointer_level($TypeId);
                 return $Conv.$MallocCall."(sizeof(".get_TypeName($ReducedTypeId).")".($BuffSize>1?"*$BuffSize":"").")";
             }
@@ -10580,7 +10653,7 @@ sub add_VirtualSpecType(@)
     my $BlockInterface_ShortName = $CompleteSignature{$CurrentBlock}{"ShortName"};
     if($Init_Desc{"Value"} eq "no value"
     or (defined $ValueCollection{$CurrentBlock}{$ParamName} and $ValueCollection{$CurrentBlock}{$ParamName}==$TypeId))
-    {# create value atribute
+    { # create value atribute
         if($CurrentBlock and keys(%{$ValueCollection{$CurrentBlock}}) and not $Init_Desc{"InLineArray"})
         {
             ($NewInit_Desc{"Value"}, $NewInit_Desc{"ValueTypeId"}) = select_ValueFromCollection(%Init_Desc);
@@ -10595,7 +10668,7 @@ sub add_VirtualSpecType(@)
                     "Destination"=>"Param",
                     "MustConvert"=>0));
                 if($Call and not $TmpPreamble)
-                {#try to create simple value
+                { # try to create simple value
                     $NewInit_Desc{"ValueTypeId"}=$TypeId;
                     $NewInit_Desc{"Value"} = $Call;
                 }
@@ -10620,26 +10693,26 @@ sub add_VirtualSpecType(@)
             $NewInit_Desc{"ValueTypeId"} = get_TypeIdByName("int");
         }
         elsif($I_ShortName eq "time" and $I_Header eq "time.h")
-        {# spectype for time_t time(time_t *t) from time.h
+        { # spectype for time_t time(time_t *t) from time.h
             $NewInit_Desc{"Value"} = get_null();
             $NewInit_Desc{"ValueTypeId"} = $TypeId;
         }
         elsif($ParamName=~/unused/i and $PointerLevel>=1)
-        {# curl_getdate ( char const* p, time_t const* unused )
+        { # curl_getdate ( char const* p, time_t const* unused )
             $NewInit_Desc{"Value"} = get_null();
             $NewInit_Desc{"ValueTypeId"} = $TypeId;
         }
         elsif($FoundationTypeName eq "int" and $ParamName=~/\Aargc(_|)(p|ptr|)\Z/i
         and not $Interface_OutParam{$Interface}{$ParamName} and $PointerLevel>=1
         and my $Value_TId = register_new_type(get_TypeIdByName("int"), 1))
-        {# gtk_init ( int* argc, char*** argv )
+        { # gtk_init ( int* argc, char*** argv )
             $NewInit_Desc{"Value"} = "&argc";
             $NewInit_Desc{"ValueTypeId"} = $Value_TId;
         }
         elsif($FoundationTypeName eq "char" and $ParamName=~/\Aargv(_|)(p|ptr|)\Z/i
         and not $Interface_OutParam{$Interface}{$ParamName} and $PointerLevel>=3
         and my $Value_TId = register_new_type(get_TypeIdByName("char"), 3))
-        {# gtk_init ( int* argc, char*** argv )
+        { # gtk_init ( int* argc, char*** argv )
             $NewInit_Desc{"Value"} = "&argv";
             $NewInit_Desc{"ValueTypeId"} = $Value_TId;
         }
@@ -10722,7 +10795,7 @@ sub add_VirtualSpecType(@)
                 }
             }
             if($IntParam and $PtrParam)
-            {# function has an integer parameter
+            { # function has an integer parameter
                 my $Conv = ($FoundationTypeName ne "void")?"(".get_TypeName($TypeId).") ":"";
                 $Conv=~s/\&//g;
                 my $VoidConv = (get_TypeName(get_FoundationTypeId($PtrTypeId)) ne "void")?"(void*)":"";
@@ -10741,7 +10814,8 @@ sub add_VirtualSpecType(@)
             if($LibraryMallocFunc and (not $IntParam or not $PtrParam)) {
                 $NewInit_Desc{"Headers"} = addHeaders([$CompleteSignature{$LibraryMallocFunc}{"Header"}], $NewInit_Desc{"Headers"});
             }
-            else {
+            else
+            {
                 $NewInit_Desc{"Headers"} = addHeaders(["stdlib.h"], $NewInit_Desc{"Headers"});
                 $AuxHeaders{"stdlib.h"} = 1;
             }
@@ -10763,7 +10837,7 @@ sub add_VirtualSpecType(@)
                 }
             }
             if($IntParam)
-            {# function has an integer parameter
+            { # function has an integer parameter
                 my $Conv = ($FoundationTypeName ne "void")?"(".get_TypeName($TypeId).") ":"";
                 $Conv=~s/\&//g;
                 $NewInit_Desc{"Value"} = $Conv."malloc($IntParam)";
@@ -10776,7 +10850,8 @@ sub add_VirtualSpecType(@)
             if($LibraryMallocFunc and not $IntParam) {
                 $NewInit_Desc{"Headers"} = addHeaders([$CompleteSignature{$LibraryMallocFunc}{"Header"}], $NewInit_Desc{"Headers"});
             }
-            else {
+            else
+            {
                 $NewInit_Desc{"Headers"} = addHeaders(["stdlib.h"], $NewInit_Desc{"Headers"});
                 $AuxHeaders{"stdlib.h"} = 1;
             }
@@ -10795,7 +10870,8 @@ sub add_VirtualSpecType(@)
             if($LibraryMallocFunc) {
                 $NewInit_Desc{"Headers"} = addHeaders([$CompleteSignature{$LibraryMallocFunc}{"Header"}], $NewInit_Desc{"Headers"});
             }
-            else {
+            else
+            {
                 $NewInit_Desc{"Headers"} = addHeaders(["stdlib.h"], $NewInit_Desc{"Headers"});
                 $AuxHeaders{"stdlib.h"} = 1;
             }
@@ -10847,7 +10923,7 @@ sub add_VirtualSpecType(@)
                         @Values = ("TG_TEST_DATA_HTML_FILE");
                     }
                     elsif($ParamName=~/path/i and $I_ShortName=~/\Asnd_/)
-                    {# ALSA
+                    { # ALSA
                         @Values = ("TG_TEST_DATA_ASOUNDRC_FILE");
                     }
                     else
@@ -10870,7 +10946,7 @@ sub add_VirtualSpecType(@)
                     @Values = ("TG_TEST_DATA_DIRECTORY");
                 }
                 elsif($ParamName=~/path/i and $I_ShortName=~/\Adbus_/)
-                {# D-Bus
+                { # D-Bus
                     @Values = ("TG_TEST_DATA_ABS_FILE");
                 }
                 elsif($ParamName=~/path/i) {
@@ -10880,7 +10956,7 @@ sub add_VirtualSpecType(@)
                     @Values = ("\".txt\"", "\".$LIB_EXT\"");
                 }
                 elsif($ParamName=~/mode/i and $I_ShortName=~/fopen/i)
-                {# FILE *fopen(const char *path, const char *mode)
+                { # FILE *fopen(const char *path, const char *mode)
                     @Values = ("\"r+\"");
                 }
                 elsif($ParamName=~/mode/i and $I_ShortName=~/open/i) {
@@ -10919,13 +10995,15 @@ sub add_VirtualSpecType(@)
                 and $CompleteSignature{$Interface}{"Class"}) {
                     @Values = ("\"".get_TypeName($CompleteSignature{$Interface}{"Class"})."\"");
                 }
-                elsif($I_ShortName=~/\Asnd_/ and $I_ShortName!~/\Asnd_seq_/ and $ParamName=~/name/i) {
-                    @Values = ("\"hw:0\"");# ALSA
+                elsif($I_ShortName=~/\Asnd_/ and $I_ShortName!~/\Asnd_seq_/ and $ParamName=~/name/i)
+                { # ALSA
+                    @Values = ("\"hw:0\"");
                 }
                 elsif($ParamName=~/var/i and $I_ShortName=~/env/i) {
                     @Values = ("\"HOME\"", "\"PATH\"");
                 }
-                elsif($ParamName=~/error_name/i and $I_ShortName=~/\Adbus_/) {# D-Bus
+                elsif($ParamName=~/error_name/i and $I_ShortName=~/\Adbus_/)
+                { # D-Bus
                     if($Constants{"DBUS_ERROR_FAILED"}{"Value"}) {
                         @Values = ("DBUS_ERROR_FAILED");
                     }
@@ -10933,14 +11011,15 @@ sub add_VirtualSpecType(@)
                         @Values = ("\"org.freedesktop.DBus.Error.Failed\"");
                     }
                 }
-                elsif($ParamName=~/name/i and $I_ShortName=~/\Adbus_/) {# D-Bus
+                elsif($ParamName=~/name/i and $I_ShortName=~/\Adbus_/)
+                { # D-Bus
                     @Values = ("\"sample.bus\"");
                 }
                 elsif($ParamName=~/interface/i and $I_ShortName=~/\Adbus_/) {
-                    @Values = ("\"sample.interface\"");# D-Bus
+                    @Values = ("\"sample.interface\""); # D-Bus
                 }
                 elsif($ParamName=~/address/i and $I_ShortName=~/\Adbus_server/) {
-                    @Values = ("\"unix:tmpdir=/tmp\"");# D-Bus
+                    @Values = ("\"unix:tmpdir=/tmp\""); # D-Bus
                 }
                 elsif($CompleteSignature{$Interface}{"Constructor"} and not $Init_Desc{"ParamRenamed"})
                 {
@@ -10989,12 +11068,12 @@ sub add_VirtualSpecType(@)
                 $NewInit_Desc{"ValueTypeId"} = get_TypeIdByName("char const*");
             }
             else
-            {# std::string
+            { # std::string
                 $NewInit_Desc{"ValueTypeId"} = $FoundationTypeId;
             }
             $NewInit_Desc{"Value"} = vary_values(\@Values, \%Init_Desc) if($#Values>=0);
             if(not is_const_type(uncover_typedefs(get_TypeName($TypeId))) and not $Init_Desc{"IsString"})
-            {# FIXME: inlining strings
+            { # FIXME: inlining strings
                 #$NewInit_Desc{"InLine"} = 0;
             }
         }
@@ -11113,8 +11192,7 @@ sub add_VirtualSpecType(@)
                     }
                     elsif(($ParamName=~/index|from|pos|field|line|column|row/i and $ParamName!~/[a-z][a-rt-z]s\Z/i)
                     or $ParamName=~/\A(i|j|k|icol)\Z/i)
-                    # gsl_vector_complex_float_get (gsl_vector_complex_float const* v, size_t const i)
-                    {
+                    { # gsl_vector_complex_float_get (gsl_vector_complex_float const* v, size_t const i)
                         if($Init_Desc{"OuterType_Type"} eq "Array") {
                             $NewInit_Desc{"Value"} = vary_values([$Init_Desc{"Index"}], \%Init_Desc);
                         }
@@ -11154,11 +11232,11 @@ sub add_VirtualSpecType(@)
                         $NewInit_Desc{"Value"} = vary_values(["1"], \%Init_Desc);
                     }
                     elsif($ParamName=~/channels|frames/i and $I_ShortName=~/\Asnd_/i)
-                    {# ALSA
+                    { # ALSA
                         $NewInit_Desc{"Value"} = vary_values([$DEFAULT_ARRAY_AMOUNT], \%Init_Desc);
                     }
                     elsif($ParamName=~/first/i and ($Init_Desc{"OuterType_Type"} eq "Struct" and get_TypeName($Init_Desc{"OuterType_Id"})=~/_snd_/i))
-                    {# ALSA
+                    { # ALSA
                         $NewInit_Desc{"Value"} = vary_values([8 * getIntrinsicValue($FoundationTypeName)], \%Init_Desc);
                     }
                     elsif(isFD($TypeId, $ParamName))
@@ -11172,7 +11250,7 @@ sub add_VirtualSpecType(@)
                     }
                     elsif(($TypeName=~/enum/i or $ParamName=~/message_type/i)
                     and my $EnumConstant = selectConstant($TypeName, $ParamName, $Interface))
-                    {# or ($TypeName eq "int" and $ParamName=~/\Amode|type\Z/i and $I_ShortName=~/\Asnd_/i) or $ParamName=~/mask/
+                    { # or ($TypeName eq "int" and $ParamName=~/\Amode|type\Z/i and $I_ShortName=~/\Asnd_/i) or $ParamName=~/mask/
                         $NewInit_Desc{"Value"} = vary_values([$EnumConstant], \%Init_Desc);
                         $NewInit_Desc{"Headers"} = addHeaders([$Constants{$EnumConstant}{"Header"}], $NewInit_Desc{"Headers"});
                     }
@@ -11190,7 +11268,8 @@ sub add_VirtualSpecType(@)
                         $NewInit_Desc{"Value"} = vary_values(["0"], \%Init_Desc);
                     }
                     elsif($ParamName=~/key/i
-                    and $I_ShortName=~/\A[_]*X/) {#X11
+                    and $I_ShortName=~/\A[_]*X/)
+                    { #X11
                         $NewInit_Desc{"Value"} = vary_values(["9"], \%Init_Desc);
                     }
                     elsif($ParamName=~/\Ap\d+\Z/
@@ -11251,7 +11330,7 @@ sub add_VirtualSpecType(@)
     else
     {
         if(not $NewInit_Desc{"ValueTypeId"})
-        {#for union spectypes
+        { # for union spectypes
             $NewInit_Desc{"ValueTypeId"} = $TypeId;
         }
     }
@@ -11301,7 +11380,7 @@ sub vary_values($$)
         return $Define;
     }
     else
-    {#standalone
+    { # standalone
         return $ValuesArray[0];
     }
 }
@@ -11387,7 +11466,7 @@ sub find_similar_type($$)
     @TypeNames = sort {lc($a) cmp lc($b)} @TypeNames;
     @TypeNames = sort {length($a)<=>length($b)} @TypeNames;
     @TypeNames = sort {$a=~/\*/<=>$b=~/\*/} @TypeNames;
-    #@TypeNames = sort {keys(%{$ReturnTypeId_Interface{$TName_Tid{$b}}})<=>keys(%{$ReturnTypeId_Interface{$TName_Tid{$a}}})} @TypeNames;
+    # @TypeNames = sort {keys(%{$ReturnTypeId_Interface{$TName_Tid{$b}}})<=>keys(%{$ReturnTypeId_Interface{$TName_Tid{$a}}})} @TypeNames;
     if($#TypeNames>=0)
     {
         $Cache{"find_similar_type"}{$TypeId}{$ParamName} = $TName_Tid{$TypeNames[0]};
@@ -11456,7 +11535,7 @@ sub convert_familiar_types(@)
         $ToCall = $ToCall.$Conv{"Value"};
     }
     else
-    {#this section must be deprecated in future
+    { # this section must be deprecated in future
         my $Stars = "**";
         if($Conv{"Value"}=~/\A\&/)
         {
@@ -11490,7 +11569,7 @@ sub convert_familiar_types(@)
     $NeedTypeConvertion = 0 if($OutputType_Name eq $Conv{"InputTypeName"});
     $NeedTypeConvertion = 0 if(uncover_typedefs($OutputType_Name)=~/\[(\d+|)\]/);#arrays
     
-    #type convertion
+    # type convertion
     if($NeedTypeConvertion and ($Conv{"Destination"} eq "Param"))
     {
         if($ToCall=~/\-\>/) {
@@ -11692,7 +11771,7 @@ sub emptyDeclaration(@)
     $Type_Init{"Headers"} = addHeaders($Headers, getTypeHeaders(get_FoundationTypeId($ETypeId))) if($InitializedType_PLevel==0);
     $Type_Init{"Init"} = $InitializedType_Name." ".$Var.";\n";
     $Block_Variable{$CurrentBlock}{$Var} = 1;
-    #create call
+    # create call
     my ($Call, $Preamble) = convert_familiar_types((
         "InputTypeName"=>$InitializedType_Name,
         "InputPointerLevel"=>$InitializedType_PLevel,
@@ -11703,7 +11782,7 @@ sub emptyDeclaration(@)
         "MustConvert"=>0));
     $Type_Init{"Init"} .= $Preamble;
     $Type_Init{"Call"} = $Call;
-    #call to constraint
+    # call to constraint
     if($Init_Desc{"TargetTypeId"}==$Init_Desc{"TypeId"}) {
         $Type_Init{"TargetCall"} = $Type_Init{"Call"};
     }
@@ -11735,7 +11814,7 @@ sub initializeByValue(@)
     $TName_Trivial=~s/&//g;
     my $TType = get_TypeType($Init_Desc{"TypeId"});
     my $FoundationType_Id = get_FoundationTypeId($Init_Desc{"TypeId"});
-    #$Type_Init{"Headers"} = addHeaders(getTypeHeaders($FoundationType_Id), $Type_Init{"Headers"});
+    # $Type_Init{"Headers"} = addHeaders(getTypeHeaders($FoundationType_Id), $Type_Init{"Headers"});
     $Type_Init{"Headers"} = addHeaders(getTypeHeaders($Init_Desc{"TypeId"}), $Type_Init{"Headers"});
     if(uncover_typedefs(get_TypeName($Init_Desc{"TypeId"}))=~/\&/
     and $Init_Desc{"OuterType_Type"}=~/\A(Struct|Union|Array)\Z/) {
@@ -11758,14 +11837,14 @@ sub initializeByValue(@)
     $Type_Init{"Code"} .= $Declarations;
     $Type_Init{"Headers"} = addHeaders($Headers, $Type_Init{"Headers"});
     if($FoundationType_Type eq "Class")
-    {# classes
+    { # classes
         my ($ChildCreated, $CallDestructor) = (0, 1);
         if(my $ValueClass = getValueClass($Init_Desc{"Value"}) and $Target_PointerLevel eq 0)
-        {#class object construction by constructor in value
+        { # class object construction by constructor in value
             if($FoundationType_Name eq $ValueClass)
             {
                 if(isAbstractClass($FoundationType_Id) or $Init_Desc{"CreateChild"})
-                {#when don't know constructor in value, so declaring all in the child
+                { # when don't know constructor in value, so declaring all in the child
                     my $ChildClassName = getSubClassName($FoundationType_Name);
                     my $FoundationChildName = getSubClassName($FoundationType_Name);
                     $ChildCreated = 1;
@@ -11782,7 +11861,7 @@ sub initializeByValue(@)
                 }
             }
             else
-            {#new class
+            { # new class
                 $FoundationType_Name = $ValueClass;
             }
             if($Init_Desc{"InLine"} and ($PointerLevel eq 0))
@@ -11813,7 +11892,7 @@ sub initializeByValue(@)
             }
         }
         else
-        {#class object returned by some interface in value
+        { # class object returned by some interface in value
             if($Init_Desc{"CreateChild"})
             {
                 $ChildCreated = 1;
@@ -11942,7 +12021,7 @@ sub initializeByValue(@)
         }
     }
     else
-    {# intrinsics, structs
+    { # intrinsics, structs
         if($Init_Desc{"InLine"} and ($PointerLevel eq $Value_PointerLevel))
         {
             if(($Init_Desc{"Value"} eq "NULL") or ($Init_Desc{"Value"} eq "0"))
@@ -11992,7 +12071,7 @@ sub initializeByValue(@)
             $Type_Init{"Call"} = $Call;
         }
     }
-    #call to constraint
+    # call to constraint
     if($Init_Desc{"TargetTypeId"}==$Init_Desc{"TypeId"})
     {
         $Type_Init{"TargetCall"} = $Type_Init{"Call"};
@@ -12012,7 +12091,7 @@ sub initializeByValue(@)
         $Type_Init{"Init"} .= $TargetPreamble;
     }
     if(get_TypeType($Init_Desc{"TypeId"}) eq "Ref")
-    {#ref handler
+    { # ref handler
         my $BaseRefId = get_OneStep_BaseTypeId($Tid_TDid{$Init_Desc{"TypeId"}}, $Init_Desc{"TypeId"});
         my $BaseRefName = get_TypeName($BaseRefId);
         if(get_PointerLevel($Tid_TDid{$BaseRefId}, $BaseRefId) > $Value_PointerLevel)
@@ -12181,7 +12260,7 @@ sub getIntrinsicValue($)
         }
     }
     else
-    {#void, "..." and other
+    { # void, "..." and other
         return "";
     }
 }
@@ -12193,11 +12272,11 @@ sub findInterface_OutParam($$$$$$)
     foreach my $FamilyTypeId (get_OutParamFamily($TypeId, 1))
     {
         foreach my $Interface (get_CompatibleInterfaces($FamilyTypeId, "OutParam", $ParamName))
-        {#find interface to create some type in the family as output parameter
+        { # find interface to create some type in the family as output parameter
             if($Strong)
             {
                 foreach my $PPos (keys(%{$CompleteSignature{$Interface}{"Param"}}))
-                {# only one possible structural out parameter
+                { # only one possible structural out parameter
                     my $PTypeId = $CompleteSignature{$Interface}{"Param"}{$PPos}{"type"};
                     my $P_FTypeId = get_FoundationTypeId($PTypeId);
                     return () if(get_TypeType($P_FTypeId)!~/\A(Intrinsic|Enum)\Z/
@@ -12260,7 +12339,7 @@ sub findInterface(@)
     }
     sort_byCriteria(\@Ints, "DeleteSmth");
     foreach my $Interface (@Ints)
-    {# find interface for returning some type in the family
+    { # find interface for returning some type in the family
         my %Interface_Init = callInterface((
             "Interface"=>$Interface, 
             "Key"=>$Key,
@@ -12295,7 +12374,7 @@ sub initializeByInterface_OutParam(@)
     $Type_Init{"Code"} .= $Interface_Init{"Code"};
     $Type_Init{"Headers"} = addHeaders($Interface_Init{"Headers"}, $Type_Init{"Headers"});
     
-    #initialization
+    # initialization
     my $OutParam_Pos = $Interface_Init{"OutParamPos"};
     my $OutParam_TypeId = $CompleteSignature{$Interface_Init{"Interface"}}{"Param"}{$OutParam_Pos}{"type"};
     my $PLevel_Out = get_PointerLevel($Tid_TDid{$OutParam_TypeId}, $OutParam_TypeId);
@@ -12368,7 +12447,7 @@ sub initializeByInterface_OutParam(@)
         $Type_Init{"Init"} .= "//final code\n";
         $Type_Init{"Init"} .= $Interface_Init{"FinalCode"}."\n";
     }
-    #create call
+    # create call
     my ($Call, $Preamble) = convert_familiar_types((
         "InputTypeName"=>$InitializedType_Name,
         "InputPointerLevel"=>$InitializedType_PointerLevel,
@@ -12379,7 +12458,7 @@ sub initializeByInterface_OutParam(@)
         "MustConvert"=>0));
     $Type_Init{"Init"} .= $Preamble;
     $Type_Init{"Call"} = $Call;
-    #create call to constraint
+    # create call to constraint
     if($Init_Desc{"TargetTypeId"}==$Init_Desc{"TypeId"})
     {
         $Type_Init{"TargetCall"} = $Type_Init{"Call"};
@@ -12398,7 +12477,7 @@ sub initializeByInterface_OutParam(@)
         $Type_Init{"Init"} .= $TargetPreamble;
     }
     if(get_TypeType($Init_Desc{"TypeId"}) eq "Ref")
-    {#ref handler
+    { # ref handler
         my $BaseRefTypeId = get_OneStep_BaseTypeId($Tid_TDid{$Init_Desc{"TypeId"}}, $Init_Desc{"TypeId"});
         if(get_PointerLevel($Tid_TDid{$BaseRefTypeId}, $BaseRefTypeId) > $InitializedType_PointerLevel)
         {
@@ -12489,7 +12568,7 @@ sub initializeByInterface(@)
     {
         $Init_Desc{"InLine"} = 0;
     }
-    #initialization
+    # initialization
     my $ReturnType_PointerLevel = get_PointerLevel($Tid_TDid{$Interface_Init{"ReturnTypeId"}}, $Interface_Init{"ReturnTypeId"});
     if($ReturnType_PointerLevel==$PointerLevel and $Init_Desc{"InLine"}
     and not $Interface_Init{"PreCondition"} and not $Interface_Init{"PostCondition"}
@@ -12534,7 +12613,7 @@ sub initializeByInterface(@)
         {
             $OpenStreams{$CurrentBlock}{$Var} = 1;
         }
-        #create call
+        # create call
         my ($Call, $Preamble) = convert_familiar_types((
             "InputTypeName"=>$InitializedType_Name,
             "InputPointerLevel"=>$ReturnType_PointerLevel,
@@ -12545,7 +12624,7 @@ sub initializeByInterface(@)
             "MustConvert"=>0));
         $Type_Init{"Init"} .= $Preamble;
         $Type_Init{"Call"} = $Call;
-        #create call to constraint
+        # create call to constraint
         if($Init_Desc{"TargetTypeId"}==$Init_Desc{"TypeId"})
         {
             $Type_Init{"TargetCall"} = $Type_Init{"Call"};
@@ -12564,7 +12643,7 @@ sub initializeByInterface(@)
             $Type_Init{"Init"} .= $TargetPreamble;
         }
         if(get_TypeType($Init_Desc{"TypeId"}) eq "Ref")
-        {#ref handler
+        { # ref handler
             my $BaseRefTypeId = get_OneStep_BaseTypeId($Tid_TDid{$Init_Desc{"TypeId"}}, $Init_Desc{"TypeId"});
             if(get_PointerLevel($Tid_TDid{$BaseRefTypeId}, $BaseRefTypeId) > $ReturnType_PointerLevel)
             {
@@ -12637,7 +12716,8 @@ sub initializeArray(@)
         if($Type_Init{"IsCorrect"}) {
             return %Type_Init;
         }
-        else {
+        else
+        {
             $Init_Desc{"FoundationType_Type"} = get_TypeType(get_FoundationTypeId($Init_Desc{"TypeId"}));
             return selectInitializingWay(%Init_Desc);
         }
@@ -12655,7 +12735,8 @@ sub initializeArray(@)
             if($Type_Init{"IsCorrect"}) {
                 return %Type_Init;
             }
-            else {
+            else
+            {
                 $Init_Desc{"StrongTypeCompliance"} = 0;
                 return assembleArray(%Init_Desc);
             }
@@ -12735,7 +12816,7 @@ sub detectArrayTypeId($)
         return $ArrayType_Id;
     }
     else
-    {#this branch for types like arrays (char* like char[])
+    { # this branch for types like arrays (char* like char[])
         return get_PureTypeId($Tid_TDid{$TypeId}, $TypeId);
     }
 }
@@ -12752,7 +12833,7 @@ sub assembleArray(@)
     my %ArrayType = get_Type($Tid_TDid{$ArrayType_Id}, $ArrayType_Id);
     my $AmountArray = ($ArrayType{"Type"} eq "Array")?$ArrayType{"Size"}:(($Init_Desc{"ArraySize"})?$Init_Desc{"ArraySize"}:$DEFAULT_ARRAY_AMOUNT);
     if($AmountArray>1024)
-    {# such too long arrays should be initialized by other methods
+    { # such too long arrays should be initialized by other methods
         restore_state($Global_State);
         return ();
     }
@@ -12776,7 +12857,7 @@ sub assembleArray(@)
     }
     my @ElemStr = ();
     foreach my $Elem_Pos (1 .. $AmountArray)
-    {# initialize array members
+    { # initialize array members
         my $ElemName = "";
         if(isCharType(get_TypeName($ArrayElemFType_Id))
         and $ArrayElemType_PLevel==1) {
@@ -12816,7 +12897,7 @@ sub assembleArray(@)
         $Type_Init{"Code"} .= $Elem_Init{"Code"};
     }
     if(($ArrayType{"Type"} ne "Array") and not isNumericType($ArrayElemType_Name))
-    {# the last array element
+    { # the last array element
         if($ArrayElemType_PLevel==0
         and get_TypeName($ArrayElemFType_Id)=~/\A(char|unsigned char)\Z/) {
             @ElemStr = (@ElemStr, "\'\\0\'");
@@ -12842,7 +12923,7 @@ sub assembleArray(@)
         if(not defined $DisableReuse) {
             $ValueCollection{$CurrentBlock}{$Var} = $ArrayType_Id;
         }
-        #$Type_Init{"Init"} .= "//parameter initialization\n";
+        # $Type_Init{"Init"} .= "//parameter initialization\n";
         $Type_Init{"Init"} .= $ArrayElemType_Name." $Var [".(($ArrayType{"Type"} eq "Array")?$AmountArray:"")."] = {".create_matrix(\@ElemStr, "    ")."};\n";
         #create call
         my ($Call, $TmpPreamble) =
@@ -12970,7 +13051,8 @@ sub create_matrix($$)
 sub aligh_str($$)
 {
     my ($Str, $Length) = @_;
-    if(length($Str)<$Length) {
+    if(length($Str)<$Length)
+    {
         foreach (1 .. $Length - length($Str)) {
             $Str = " ".$Str;
         }
@@ -13062,11 +13144,11 @@ sub assembleFuncPtr(@)
         {
             my @FuncParams = ();
             $AuxFuncName = select_func_name($LongVarNames?$Init_Desc{"Key"}:(($Init_Desc{"ParamName"}=~/\Ap\d+\Z/)?"aux_func":$Init_Desc{"ParamName"}));
-            #global
+            # global
             $AuxFunc{$FuncPtr_TypeId} = $AuxFuncName;
             my $PreviousBlock = $CurrentBlock;
             $CurrentBlock = $AuxFuncName;
-            #function declaration
+            # function declaration
             my $FuncReturnType_Id = $FuncPtrType{"Return"};
             my $FuncReturnFType_Id = get_FoundationTypeId($FuncReturnType_Id);
             my $FuncReturnFType_Type = get_TypeType($FuncReturnFType_Id);
@@ -13076,10 +13158,10 @@ sub assembleFuncPtr(@)
                 $Type_Init{"Headers"} = addHeaders(getTypeHeaders($ParamTypeId), $Type_Init{"Headers"});
                 my $ParamName = $FuncPtrType{"Param"}{$ParamPos}{"name"};
                 $ParamName = "p".($ParamPos+1) if(not $ParamName);
-                #my ($ParamEType_Id, $Param_Declarations, $Param_Headers) = get_ExtTypeId($LongVarNames?$Init_Desc{"Key"}:$Init_Desc{"ParamName"}, $ParamTypeId);
+                # my ($ParamEType_Id, $Param_Declarations, $Param_Headers) = get_ExtTypeId($LongVarNames?$Init_Desc{"Key"}:$Init_Desc{"ParamName"}, $ParamTypeId);
                 my $ParamTypeName = get_TypeName($ParamTypeId);#get_TypeName($ParamEType_Id);
-                #$Type_Init{"Header"} = addHeaders($Param_Headers, $Type_Init{"Header"});
-                #$Type_Init{"Code"} .= $Param_Declarations;
+                # $Type_Init{"Header"} = addHeaders($Param_Headers, $Type_Init{"Header"});
+                # $Type_Init{"Code"} .= $Param_Declarations;
                 if($ParamTypeName and ($ParamTypeName ne "..."))
                 {
                     my $Field = create_member_decl($ParamTypeName, $ParamName);
@@ -13089,7 +13171,7 @@ sub assembleFuncPtr(@)
                 $Block_Param{$AuxFuncName}{$ParamName} = $ParamTypeId;
                 $Block_Variable{$CurrentBlock}{$ParamName} = 1;
             }
-            #definition of function
+            # definition of function
             if(get_TypeName($FuncReturnType_Id) eq "void")
             {
                 my $FuncDef = "//auxiliary function\n";
@@ -13168,7 +13250,7 @@ sub assembleFuncPtr(@)
     $Init_Desc{"Var"} = select_var_name($LongVarNames?$Init_Desc{"Key"}:$Init_Desc{"ParamName"}, $Init_Desc{"ParamNameExt"});
     my $Var = $Init_Desc{"Var"};
     
-    #create call
+    # create call
     my ($Call, $TmpPreamble) =
     convert_familiar_types((
         "InputTypeName"=>$TypeName,
@@ -13180,9 +13262,9 @@ sub assembleFuncPtr(@)
         "MustConvert"=>0));
     $Type_Init{"Init"} .= $TmpPreamble;
     $Type_Init{"Call"} = $Call;
-    #create type
+    # create type
     $Type_Init{"TypeName"} = get_TypeName($Init_Desc{"TypeId"});
-    #create call to constraint
+    # create call to constraint
     if($Init_Desc{"TargetTypeId"}==$Init_Desc{"TypeId"}) {
         $Type_Init{"TargetCall"} = $Type_Init{"Call"};
     }
@@ -13201,7 +13283,7 @@ sub assembleFuncPtr(@)
         $Type_Init{"Init"} .= $Target_TmpPreamble;
     }
     
-    #ref handler
+    # ref handler
     if($Type{"Type"} eq "Ref")
     {
         my $BaseRefId = get_OneStep_BaseTypeId($Tid_TDid{$Init_Desc{"TypeId"}}, $Init_Desc{"TypeId"});
@@ -13225,7 +13307,7 @@ sub declare_anon_union($$)
     my @MembStr = ();
     my ($Headers, $Declarations) = ([], "");
     foreach my $Member_Pos (sort {int($a)<=>int($b)} keys(%{$Union{"Memb"}}))
-    {#create member types string
+    { # create member types string
         my $Member_Name = $Union{"Memb"}{$Member_Pos}{"name"};
         my $MemberType_Id = $Union{"Memb"}{$Member_Pos}{"type"};
         my $MemberFType_Id = get_FoundationTypeId($MemberType_Id);
@@ -13330,22 +13412,22 @@ sub assembleStruct(@)
     $Type_Init{"Headers"} = addHeaders([$Struct{"Header"}], $Type_Init{"Headers"});
     my @ParamStr = ();
     foreach my $Member_Pos (sort {int($a)<=>int($b)} keys(%{$Struct{"Memb"}}))
-    {# initialize members
+    { # initialize members
         my $Member_Name = $Struct{"Memb"}{$Member_Pos}{"name"};
         if(getIntLang($TestedInterface) eq "C")
         {
             if($Member_Name eq "c_class"
             and $StructName=~/\A(struct |)(XWindowAttributes|Visual|XVisualInfo)\Z/)
-            {# for X11
+            { # for X11
                 $Member_Name = "class";
             }
             elsif($Member_Name eq "c_explicit"
             and $StructName=~/\A(struct |)(_XkbServerMapRec)\Z/)
-            {# for X11
+            { # for X11
                 $Member_Name = "explicit";
             }
             elsif($Member_Name=~/\A(__|)fds_bits\Z/ and $StructName eq "fd_set")
-            {# for libc
+            { # for libc
                 if(defined $Constants{"__USE_XOPEN"}) {
                     $Member_Name = "fds_bits";
                 }
@@ -13373,7 +13455,7 @@ sub assembleStruct(@)
             }
         }
         my $Member_Access = $Struct{"Memb"}{$Member_Pos}{"access"};
-        #return () if($Member_Access eq "private" or $Member_Access eq "protected");
+        # return () if($Member_Access eq "private" or $Member_Access eq "protected");
         my $Memb_Key = "";
         if($Member_Name) {
             $Memb_Key = ($Init_Desc{"Key"})?$Init_Desc{"Key"}."_".$Member_Name:$Member_Name;
@@ -13412,7 +13494,7 @@ sub assembleStruct(@)
     if(my $Typedef_Id = get_type_typedef($StructId)) {
         $StructName = get_TypeName($Typedef_Id);
     }
-    #initialization
+    # initialization
     if($Type_PointerLevel==0 and ($Type{"Type"} ne "Ref") and $Init_Desc{"InLine"})
     {
         my $Conversion = (isNotAnon($StructName) and isNotAnon($Struct{"Name_Old"}))?"(".$Type{"Name"}.") ":"";
@@ -13654,7 +13736,7 @@ sub initializeStruct(@)
 {
     my %Init_Desc = @_;
     if(is_geometry_body($Init_Desc{"TypeId"}))
-    {# GdkRectangle
+    { # GdkRectangle
         return assembleStruct(%Init_Desc);
     }
 #     $Init_Desc{"Strong"}=1;
@@ -13729,8 +13811,8 @@ sub initializeStruct(@)
 }
 
 sub initializeByAlienInterface(@)
-{# GtkWidget*  gtk_plug_new (GdkNativeWindow socket_id)
- # return GtkPlug*
+{ # GtkWidget*  gtk_plug_new (GdkNativeWindow socket_id)
+  # return GtkPlug*
     my %Init_Desc = @_;
     if($Init_Desc{"ByInterface"} = find_alien_interface($Init_Desc{"TypeId"}))
     {
@@ -13767,7 +13849,7 @@ sub find_alien_interface($)
 }
 
 sub initializeByField(@)
-{# FIXME: write body of this function
+{ # FIXME: write body of this function
     my %Init_Desc = @_;
     my @Structs = keys(%{$Member_Struct{$Init_Desc{"TypeId"}}});
     return ();
@@ -13843,7 +13925,7 @@ sub assembleUnion(@)
     $Type_Init{"Headers"} = addHeaders([$UnionType{"Header"}], $Type_Init{"Headers"});
     my (%Memb_Init, $SelectedMember_Name) = ();
     foreach my $Member_Pos (sort {int($a)<=>int($b)} keys(%{$UnionType{"Memb"}}))
-    {#initialize members
+    { # initialize members
         my $Member_Name = $UnionType{"Memb"}{$Member_Pos}{"name"};
         my $MemberType_Id = $UnionType{"Memb"}{$Member_Pos}{"type"};
         my $Memb_Key = "";
@@ -13987,7 +14069,7 @@ sub initializeClass(@)
     else
     {
         if((get_TypeType($Init_Desc{"TypeId"}) eq "Typedef"))
-        {# try to initialize typedefs by interface return value
+        { # try to initialize typedefs by interface return value
             %Type_Init = initializeByInterface(%Init_Desc);
             if($Type_Init{"IsCorrect"}) {
                 return %Type_Init;
@@ -14119,7 +14201,7 @@ sub assembleClass(@)
     my %AutoFinalCode_Init = ();
     my $Typedef_Id = detect_typedef($Init_Desc{"TypeId"});
     if(get_TypeName($ClassId)=~/list/i or get_TypeName($Typedef_Id)=~/list/i)
-    {# auto final code
+    { # auto final code
         %AutoFinalCode_Init = get_AutoFinalCode($Obj_Init{"Interface"}, ($HeapStack eq "Stack")?$Var:"*".$Var);
         if($AutoFinalCode_Init{"IsCorrect"}) {
             $Init_Desc{"InLine"} = 0;
@@ -14280,7 +14362,7 @@ sub assembleClass(@)
         $Type_Init{"Init"} .= $Obj_Init{"FinalCode"}."\n";
     }
     if(get_TypeType($Init_Desc{"TypeId"}) eq "Ref")
-    {#obsolete
+    { # obsolete
         my $BaseRefId = get_OneStep_BaseTypeId($Tid_TDid{$Init_Desc{"TypeId"}}, $Init_Desc{"TypeId"});
         if($HeapStack eq "Heap")
         {
@@ -14502,7 +14584,7 @@ sub initializeType(@)
     }
     my $TypeStackId = get_TypeStackId($Init_Desc{"TypeId"});
     if(isCyclical(\@RecurTypeId, $TypeStackId))
-    {#initialize by null for cyclical types
+    { # initialize by null for cyclical types
         if($Init_Desc{"Value"} ne "no value" and $Init_Desc{"Value"} ne "")
         {
             return () if(get_TypeType($TypeStackId) eq "Typedef" and $TypeName!~/_t/);
@@ -14537,14 +14619,14 @@ sub initializeType(@)
         }
     }
     if(not $Init_Desc{"TargetTypeId"})
-    {#repair target type
+    { # repair target type
         $Init_Desc{"TargetTypeId"} = $Init_Desc{"TypeId"};
     }
     if($Init_Desc{"RetVal"} and get_PointerLevel($Tid_TDid{$Init_Desc{"TypeId"}}, $Init_Desc{"TypeId"})>=1
     and not $Init_Desc{"TypeType_Changed"} and $TypeName!~/(\W|\Z)const(\W|\Z)/)
-    {#return value
+    { # return value
         if(($Init_Desc{"Value"} ne "no value") and ($Init_Desc{"Value"} ne ""))
-        {#try to initialize type by value
+        { # try to initialize type by value
             %Type_Init = initializeByValue(%Init_Desc);
             if($Type_Init{"IsCorrect"})
             {
@@ -14580,13 +14662,13 @@ sub initializeType(@)
     my $RealTypeId = ($Init_Desc{"TypeId_Changed"})?$Init_Desc{"TypeId_Changed"}:$Init_Desc{"TypeId"};
     my $RealFTypeType = get_TypeType(get_FoundationTypeId($RealTypeId));
     if(($RealFTypeType eq "Intrinsic") and not $SpecValue and not $Init_Desc{"Reuse"} and not $Init_Desc{"OnlyByValue"} and $Init_Desc{"ParamName"}!~/num|width|height/i)
-    {#initializing intrinsics by the interface
+    { # initializing intrinsics by the interface
         my %BaseTypedef = goToFirst($Tid_TDid{$RealTypeId}, $RealTypeId, "Typedef");
         if(get_TypeType($BaseTypedef{"Tid"}) eq "Typedef"
-            and $BaseTypedef{"Name"}!~/(int|short|long|error|real|float|double|bool|boolean|pointer|count|byte|len)\d*(_t|)\Z/i
-            and $BaseTypedef{"Name"}!~/char|str|size|enum/i
-            and $BaseTypedef{"Name"}!~/(\A|::)u(32|64)/i)
-        {#try to initialize typedefs to intrinsic types
+        and $BaseTypedef{"Name"}!~/(int|short|long|error|real|float|double|bool|boolean|pointer|count|byte|len)\d*(_t|)\Z/i
+        and $BaseTypedef{"Name"}!~/char|str|size|enum/i
+        and $BaseTypedef{"Name"}!~/(\A|::)u(32|64)/i)
+        { # try to initialize typedefs to intrinsic types
             my $Global_State1 = save_state();
             my %Init_Desc_Copy = %Init_Desc;
             $Init_Desc_Copy{"InLine"} = 0 if($Init_Desc{"ParamName"}!~/\Ap\d+\Z/);
@@ -14606,7 +14688,7 @@ sub initializeType(@)
         }
     }
     if(($Init_Desc{"Value"} ne "no value") and ($Init_Desc{"Value"} ne ""))
-    {#try to initialize type by value
+    { # try to initialize type by value
         %Type_Init = initializeByValue(%Init_Desc);
         $Type_Init{"Headers"} = addHeaders($Init_Desc{"Headers"}, $Type_Init{"Headers"});
         if($Init_Desc{"FoundationType_Type"} ne "Array") {
@@ -14633,7 +14715,7 @@ sub initializeType(@)
         $Init_Desc{"TypeId"} = $Init_Desc{"TypeId_Changed"};
         %Init_Desc = add_VirtualSpecType(%Init_Desc);
         if(($Init_Desc{"Value"} ne "no value") and ($Init_Desc{"Value"} ne ""))
-        {#try to initialize type by value
+        { # try to initialize type by value
             %Type_Init = initializeByValue(%Init_Desc);
             $Type_Init{"Headers"} = addHeaders($Init_Desc{"Headers"}, $Type_Init{"Headers"});
             if($Init_Desc{"FoundationType_Type"} ne "Array") {
@@ -14642,7 +14724,7 @@ sub initializeType(@)
             return %Type_Init;
         }
     }
-    #finally initializing by null (0)
+    # finally initializing by null (0)
     %Init_Desc = add_NullSpecType(%Init_Desc);
     if($Init_Desc{"OnlyDecl"})
     {
@@ -14701,8 +14783,8 @@ sub selectInitializingWay(@)
 }
 
 sub is_const_type($)
-{# char const*
- #! char*const
+{ # char const*
+  #! char*const
     my $TypeName = uncover_typedefs($_[0]);
     return ($TypeName=~/(\W|\A)const(\W)/);
 }
@@ -14738,7 +14820,7 @@ sub apply_default_value($$)
     return 0 if(not $CompleteSignature{$Interface}{"Param"}{$ParamPos}{"default"});
     if($Interface eq $TestedInterface
     or replace_c2c1($Interface) eq replace_c2c1($TestedInterface))
-    {# do not use defaults for target symbol
+    { # do not use defaults for target symbol
         return 0;
     }
     return 1;
@@ -14878,7 +14960,7 @@ sub initializeParameter(@)
         $SpectypeValue = $ParamDesc{"Value"};
     }
     if($SpectypeValue=~/\$[^\(\[]/)
-    {# access to other parameters
+    { # access to other parameters
         foreach my $ParamKey (keys(%{$ParamDesc{"AccessToParam"}}))
         {
             my $AccessToParam_Value = $ParamDesc{"AccessToParam"}->{$ParamKey};
@@ -15289,7 +15371,8 @@ sub callInterfaceParameters_m(@)
             if($OverloadedInterface{$Interface})
             {
                 if(not isExactValueAble($TypeName_Uncovered)
-                and $TypeType ne "Enum") {
+                and $TypeType ne "Enum")
+                {
                     #$InLine = 0;
                     $StrongConvert = 1;
                 }
@@ -15306,7 +15389,7 @@ sub callInterfaceParameters_m(@)
             }
             # initialize parameter
             if(($Init_Desc{"OutParam"} ne "") and $Param_Pos==$Init_Desc{"OutParam"})
-            {# initializing out-parameter
+            { # initializing out-parameter
                 $AccessToParam{$TruePos+1} = $Init_Desc{"OutVar"};
                 $TargetAccessToParam{$TruePos+1} = $Init_Desc{"OutVar"};
                 if($SpecTypeId and ($SpecType{$SpecTypeId}{"InitCode"}.$SpecType{$SpecTypeId}{"FinalCode"}.$SpecType{$SpecTypeId}{"PreCondition"}.$SpecType{$SpecTypeId}{"PostCondition"})=~/\$0/)
@@ -15417,8 +15500,8 @@ sub callInterfaceParameters_m(@)
         my $LastTypeId = $CompleteSignature{$Interface}{"Param"}{$LastParamPos}{"type"};
         my $LastParamCall = $AccessToParam{$LastParamPos+1};
         if(get_TypeName($LastTypeId) eq "..." and $LastParamCall ne "0" and $LastParamCall ne "NULL")
-        {# add sentinel to function call
-         # http://www.linuxonly.nl/docs/2/2_GCC_4_warnings_about_sentinels.html
+        { # add sentinel to function call
+          # http://www.linuxonly.nl/docs/2/2_GCC_4_warnings_about_sentinels.html
             push(@ParamList, "(char*)0");
         }
         my $Parameters_Call = "(".create_list(\@ParamList, "    ").")";
@@ -15599,7 +15682,7 @@ sub parseCode_m($$)
         }
         my ($CodeBefore, $CodeAfter) = ();
         while($String=~/(\$\(([^\$\(\)]+)\))/)
-        {#parsing $(Type) constructions
+        { # parsing $(Type) constructions
             my $Replace = $1;
             my $TypeName = $2;
             my $TypeId = get_TypeIdByName($TypeName);
@@ -15638,19 +15721,19 @@ sub parseCode_m($$)
             $CodeAfter .= $Param_Init{"PostCondition"}.$Param_Init{"FinalCode"};
         }
         while($String=~/(\$\[([^\$\[\]]+)\])/)
-        {# parsing $[Interface] constructions
+        { # parsing $[Interface] constructions
             my $Replace = $1;
             my $InterfaceName = $2;
             my $RetvalName = "";
             if($InterfaceName=~/\A(.+):(\w+?)\Z/)
-            {# $[al_create_display:allegro_display]
+            { # $[al_create_display:allegro_display]
                 ($InterfaceName, $RetvalName) = ($1, $2);
             }
             my $NewKey = "_var".$Block_InsNum{$CurrentBlock};
             my %Interface_Init = ();
             return () if(not $InterfaceName or not $CompleteSignature{$InterfaceName});
             if($InterfaceName eq $TestedInterface)
-            {# recursive call of the target interface
+            { # recursive call of the target interface
                 substr($String, index($String, $Replace), pos($Replace) + length($Replace)) = "";
                 $String = "" if($String eq ";");
                 next;
@@ -15681,7 +15764,7 @@ sub parseCode_m($$)
             return () if(not $Interface_Init{"IsCorrect"});
             $Block_InsNum{$CurrentBlock} += 1 if(($Interface_Init{"Init"}.$Interface_Init{"FinalCode"}.$Interface_Init{"ReturnFinalCode"}.$Interface_Init{"Code"})=~/\Q$NewKey\E/);
             if(($CompleteSignature{$InterfaceName}{"Constructor"}) and (needToInherit($InterfaceName)))
-            {# for constructors in abstract classes
+            { # for constructors in abstract classes
                     my $ClassName = get_TypeName($CompleteSignature{$InterfaceName}{"Class"});
                     my $ClassNameChild = getSubClassName($ClassName);
                     if($Interface_Init{"Call"}=~/\A(\Q$ClassName\E([\n]*)\()/) {
@@ -15735,7 +15818,7 @@ sub callInterface_m(@)
     my ($CreateChild, $CallAsGlobalData, $MethodToInitObj) = (0, 0, "Common");
     
     if(needToInherit($Interface) and isInCharge($Interface))
-    {# impossible testing
+    { # impossible testing
         return ();
     }
     if($CompleteSignature{$Interface}{"Protected"})
@@ -16103,7 +16186,7 @@ sub highlight_code($$)
         $CommentNum += 1;
     }
     if(my $ShortName = ($CompleteSignature{$Interface}{"Constructor"})?get_TypeName($CompleteSignature{$Interface}{"Class"}):$CompleteSignature{$Interface}{"ShortName"})
-    {# target interface
+    { # target interface
         if($CompleteSignature{$Interface}{"Class"})
         {
             while($ShortName=~s/\A\w+\:\://g){ };
@@ -16283,10 +16366,11 @@ sub filt_output($)
 }
 
 sub createTestRunner()
-{# C-utility for running tests under Windows
+{ # C-utility to run tests under Windows
     rmtree("test_runner/");
     my $CL = get_CmdPath("cl");
-    if(not $CL) {
+    if(not $CL)
+    {
         print STDERR "ERROR: can't find \"cl\" compiler\n";
         exit(1);
     }
@@ -16441,7 +16525,7 @@ sub run_sanity_test($)
     my $ErrorOut = readFile("$TestDir/output");#checking test output
     $ErrorOut = filt_output($ErrorOut);
     if($ErrorOut)
-    {# reduce length of the test output
+    { # reduce length of the test output
         if(length($ErrorOut)>1200) {
             $ErrorOut = substr($ErrorOut, 0, 1200)." ...";
         }
@@ -16465,17 +16549,20 @@ sub run_sanity_test($)
         }
         else
         {
-            if ($R_1 == -1) {
+            if ($R_1 == -1)
+            {
                 $RunResult{$Interface}{"Info"} = "failed to execute: $R_2\n";
                 $RunResult{$Interface}{"Type"} = "Other_Problems";
             }
-            elsif (my $Signal_Num = ($R_1 & 127)) {
+            elsif (my $Signal_Num = ($R_1 & 127))
+            {
                 my $Signal_Name = $SigName{$Signal_Num};
                 $RunResult{$Interface}{"Info"} = "received signal $Signal_Name, ".(($R_1 & 128)?"with":"without")." coredump\n";
                 $RunResult{$Interface}{"Type"} = "Received_Signal";
                 $RunResult{$Interface}{"Value"} = ($R_1 & 127);
             }
-            else {
+            else
+            {
                 my $Signal_Num = ($R_1 >> 8)-128;
                 my $Signal_Name = $SigName{$Signal_Num};
                 if($Signal_Name)
@@ -16764,26 +16851,26 @@ sub testForDestructor($)
     elsif($Interface=~/D0/)
     {
         if(isAbstractClass($ClassId))
-        {#Impossible to call in-charge-deleting (D0) destructor in abstract class
+        { # Impossible to call in-charge-deleting (D0) destructor in abstract class
             return ();
         }
         if($CompleteSignature{$Interface}{"Protected"})
-        {#Impossible to call protected in-charge-deleting (D0) destructor
+        { # Impossible to call protected in-charge-deleting (D0) destructor
             return ();
         }
-        #push(@RecurTypeId, $ClassId);
+        # push(@RecurTypeId, $ClassId);
         my %Obj_Init = findConstructor($ClassId, "");
-        #pop(@RecurTypeId);
+        # pop(@RecurTypeId);
         return () if(not $Obj_Init{"IsCorrect"});
         if($CompleteSignature{$Obj_Init{"Interface"}}{"Protected"})
-        {#Impossible to call in-charge-deleting (D0) destructor in class with protected constructor
+        { # Impossible to call in-charge-deleting (D0) destructor in class with protected constructor
             return ();
         }
         $Interface_Init{"Init"} .= $Obj_Init{"Init"};
         if($Obj_Init{"PreCondition"}) {
             $Interface_Init{"Init"} .= $Obj_Init{"PreCondition"};
         }
-        #$Interface_Init{"Init"} .= "//parameter initialization\n";
+        # $Interface_Init{"Init"} .= "//parameter initialization\n";
         $Interface_Init{"Init"} .= $ClassName." *$Var = new ".$Obj_Init{"Call"}.";\n";
         if($Obj_Init{"PostCondition"}) {
             $Interface_Init{"Init"} .= $Obj_Init{"PostCondition"};
@@ -16805,23 +16892,23 @@ sub testForDestructor($)
     elsif($Interface=~/D1/)
     {
         if(isAbstractClass($ClassId))
-        {#Impossible to call in-charge (D1) destructor in abstract class
+        { # Impossible to call in-charge (D1) destructor in abstract class
             return ();
         }
         if($CompleteSignature{$Interface}{"Protected"})
-        {#Impossible to call protected in-charge (D1) destructor
+        { # Impossible to call protected in-charge (D1) destructor
             return ();
         }
-        #push(@RecurTypeId, $ClassId);
+        # push(@RecurTypeId, $ClassId);
         my %Obj_Init = findConstructor($ClassId, "");
-        #pop(@RecurTypeId);
+        # pop(@RecurTypeId);
         return () if(not $Obj_Init{"IsCorrect"});
         if($CompleteSignature{$Obj_Init{"Interface"}}{"Protected"})
-        {#Impossible to call in-charge (D1) destructor in class with protected constructor
+        { # Impossible to call in-charge (D1) destructor in class with protected constructor
             return ();
         }
         $Interface_Init{"Init"} .= $Obj_Init{"Init"};
-        #$Interface_Init{"Init"} .= "//parameter initialization\n";
+        # $Interface_Init{"Init"} .= "//parameter initialization\n";
         if($Obj_Init{"PreCondition"}) {
             $Interface_Init{"Init"} .= $Obj_Init{"PreCondition"};
         }
@@ -16841,7 +16928,7 @@ sub testForDestructor($)
         }
         $Interface_Init{"Headers"} = addHeaders($Obj_Init{"Headers"}, $Interface_Init{"Headers"});
         $Interface_Init{"Code"} .= $Obj_Init{"Code"};
-        $Interface_Init{"Call"} = "";#auto call after construction
+        $Interface_Init{"Call"} = ""; # auto call after construction
     }
     $Interface_Init{"Headers"} = addHeaders([$CompleteSignature{$Interface}{"Header"}], $Interface_Init{"Headers"});
     $Interface_Init{"IsCorrect"} = 1;
@@ -16871,11 +16958,11 @@ sub testForConstructor($)
     if(isInCharge($Interface))
     {
         if(isAbstractClass($ClassId))
-        {#Impossible to call in-charge constructor in abstract class
+        { # Impossible to call in-charge constructor in abstract class
             return ();
         }
         if($CompleteSignature{$Interface}{"Protected"})
-        {#Impossible to call in-charge protected constructor
+        { # Impossible to call in-charge protected constructor
             return ();
         }
     }
@@ -16924,7 +17011,7 @@ sub testForConstructor($)
     }
     if($Ispecobjecttype and my $PostCondition = $SpecType{$Ispecobjecttype}{"PostCondition"}
     and $ObjectCall ne "" and (not defined $Template2Code or $Interface eq $TestedInterface))
-    {# postcondition
+    { # postcondition
         $PostCondition=~s/(\$0|\$obj)/$ObjectCall/gi;
         $PostCondition = clearSyntax($PostCondition);
         my $NormalResult = $PostCondition;
@@ -16951,7 +17038,7 @@ sub add_VirtualTestData($$)
     my ($Code, $Path) = @_;
     my $RelPath = test_data_relpath("sample.txt");
     if($Code=~s/TG_TEST_DATA_(PLAIN|TEXT)_FILE/$RelPath/g)
-    {#plain text files
+    { # plain text files
         mkpath($Path);
         writeFile($Path."/sample.txt", "Where there's a will there's a way.");
     }
@@ -17157,9 +17244,9 @@ sub get_env_conditions($$)
     return %Conditions;
 }
 
-sub generate_sanity_test($)
+sub generateTest($)
 {
-    my %ResultComponents = ();
+    my %Result = ();
     my $Interface = $_[0];
     return () if(not $Interface);
     my $CommonCode = "";
@@ -17176,7 +17263,7 @@ sub generate_sanity_test($)
     
     my ($CommonPreamble, $Preamble, $Finalization, $Env_CommonCode, $Env_PreRequirements, $Env_PostRequirements) = ();
     foreach my $SpecEnv_Id (sort {int($a)<=>int($b)} (keys(%Common_SpecEnv)))
-    {# common environments
+    { # common environments
         next if($Common_SpecType_Exceptions{$Interface}{$SpecEnv_Id});
         my %Conditions = get_env_conditions($Interface, $SpecEnv_Id);
         $CommonPreamble .= $Conditions{"Preamble"};# in the direct order
@@ -17224,7 +17311,7 @@ sub generate_sanity_test($)
     }
     
     foreach my $SpecEnv_Id (sort {int($a)<=>int($b)} (keys(%SpecEnv)))
-    {# environments used in the test case
+    { # environments used in the test case
         my %Conditions = get_env_conditions($Interface, $SpecEnv_Id);
         $Preamble .= $Conditions{"Preamble"};# in the direct order
         $Finalization = $Conditions{"Finalization"}.$Finalization;# in the backward order
@@ -17253,11 +17340,11 @@ sub generate_sanity_test($)
     my ($SubClasses_Code, $SubClasses_Headers) = create_SubClasses(keys(%Create_SubClass));
     $TestComponents{"Headers"} = addHeaders($SubClasses_Headers, $TestComponents{"Headers"});
     $CommonCode = $SubClasses_Code.$CommonCode;
-    # closing streams
+    # close streams
     foreach my $Stream (keys(%{$OpenStreams{"main"}})) {
         $Finalization .= "fclose($Stream);\n";
     }
-    # test assembling
+    # assemble test
     my ($SanityTest, $SanityTestMain, $SanityTestBody) = ();
     if($CommonPreamble.$Preamble)
     {
@@ -17277,7 +17364,7 @@ sub generate_sanity_test($)
     if($TestComponents{"Call"})
     {
         if($TestComponents{"ReturnRequirement"} and $CompleteSignature{$Interface}{"Return"})
-        {#Call interface and check return value
+        { # call interface and check return value
             my $ReturnType_Id = $CompleteSignature{$Interface}{"Return"};
             my $ReturnType_Name = $TypeDescr{$Tid_TDid{$ReturnType_Id}}{$ReturnType_Id}{"Name"};
             my $ReturnType_PointerLevel = get_PointerLevel($Tid_TDid{$ReturnType_Id}, $ReturnType_Id);
@@ -17350,11 +17437,13 @@ sub generate_sanity_test($)
     $SanityTestMain = alignCode($SanityTestMain, "    ", 0);
     if(keys(%ConstraintNum)>0)
     {
-        if(getTestLang($Interface) eq "C++") {
+        if(getTestLang($Interface) eq "C++")
+        {
             $TestComponents{"Headers"} = addHeaders(["iostream"], $TestComponents{"Headers"});
             $AuxHeaders{"iostream"}=1;
         }
-        else {
+        else
+        {
             $TestComponents{"Headers"} = addHeaders(["stdio.h"], $TestComponents{"Headers"});
             $AuxHeaders{"stdio.h"}=1;
         }
@@ -17364,12 +17453,12 @@ sub generate_sanity_test($)
         @{$TestComponents{"Headers"}} = ($Header_Path, @{$TestComponents{"Headers"}});
     }
     my %HeadersList = unique_headers_list(add_prefixes(create_headers_list(order_headers_list(@{$TestComponents{"Headers"}}))));
-    $ResultComponents{"Headers"} = [];
+    $Result{"Headers"} = [];
     my $HList = "";
     foreach my $Pos (sort {int($a) <=> int($b)} keys(%HeadersList))
     {
         $HList .= "#include <".$HeadersList{$Pos}{"Inc"}.">\n";
-        @{$ResultComponents{"Headers"}} = (@{$ResultComponents{"Headers"}}, $HeadersList{$Pos}{"Inc"});
+        @{$Result{"Headers"}} = (@{$Result{"Headers"}}, $HeadersList{$Pos}{"Inc"});
         if($HeadersList{$Pos}{"Inc"}=~/\+\+(\.h|)\Z/) {
             $UsedInterfaces{"__gxx_personality"} = 1;
         }
@@ -17396,21 +17485,21 @@ sub generate_sanity_test($)
     if($CommonCode)
     {
         $SanityTest .= "\n$CommonCode\n\n";
-        $ResultComponents{"Code"} = $CommonCode;
+        $Result{"Code"} = $CommonCode;
     }
     $SanityTest .= "int main(int argc, char *argv[])\n";
     $SanityTest .= "{\n";
-    $ResultComponents{"main"} = correct_spaces($SanityTestMain);
+    $Result{"main"} = correct_spaces($SanityTestMain);
     $SanityTestMain .= "    return 0;\n";
     $SanityTest .= $SanityTestMain;
     $SanityTest .= "}\n";
-    $SanityTest = correct_spaces($SanityTest); #cleaning code
+    $SanityTest = correct_spaces($SanityTest); # cleaning code
     if(getTestLang($Interface) eq "C++" and getIntLang($Interface) eq "C")
-    {# removing extended initializer lists
+    { # removing extended initializer lists
         $SanityTest=~s/({\s*|\s)\.[a-z_][a-z_\d]*\s*=\s*/$1  /ig;
     }
     if(defined $Standalone)
-    {# creating stuff for building and running test
+    { # create stuff for building and running test
         my $TestFileName = (getTestLang($Interface) eq "C++" or $OSgroup eq "windows")?"test.cpp":"test.c";
         my $TestPath = getTestPath($Interface);
         if(-e $TestPath) {
@@ -17423,7 +17512,20 @@ sub generate_sanity_test($)
         writeFile("$TestPath/$TestFileName", $SanityTest);
         my $SharedObject = $Interface_Library{$Interface};
         $SharedObject = $NeededInterface_Library{$Interface} if(not $SharedObject);
-        writeFile("$TestPath/info", "Library: $TargetLibraryName-".$Descriptor{"Version"}."\nInterface: ".get_Signature($Interface)."\nSymbol: $Interface".(($Interface=~/\A(_Z|\?)/)?"\nShort Name: ".$CompleteSignature{$Interface}{"ShortName"}:"")."\nHeader: ".$CompleteSignature{$Interface}{"Header"}.(($SharedObject ne "WithoutLib")?"\nShared Object: ".get_filename($SharedObject):"").(get_IntNameSpace($Interface)?"\nNamespace: ".get_IntNameSpace($Interface):""));
+        my $TestInfo = "Library: $TargetLibraryName-".$Descriptor{"Version"};
+        $TestInfo .= "\nInterface: ".get_Signature($Interface);
+        $TestInfo .= "\nSymbol: $Interface";
+        if($Interface=~/\A(_Z|\?)/) {
+            $TestInfo .= "\nShort Name: ".$CompleteSignature{$Interface}{"ShortName"};
+        }
+        $TestInfo .= "\nHeader: ".$CompleteSignature{$Interface}{"Header"};
+        if($SharedObject ne "WithoutLib") {
+            $TestInfo .= "\nShared Object: ".get_filename($SharedObject);
+        }
+        if(my $NS = get_IntNameSpace($Interface)) {
+            $TestInfo .= "\nNamespace: ".$NS;
+        }
+        writeFile("$TestPath/info", $TestInfo);
         my $Signature = get_Signature($Interface);
         my $NameSpace = get_IntNameSpace($Interface);
         if($NameSpace) {
@@ -17505,8 +17607,8 @@ sub generate_sanity_test($)
     }
     $GenResult{$Interface}{"IsCorrect"} = 1;
     $ResultCounter{"Gen"}{"Success"} += 1;
-    $ResultComponents{"IsCorrect"} = 1;
-    return %ResultComponents;
+    $Result{"IsCorrect"} = 1;
+    return %Result;
 }
 
 sub getTestLang($)
@@ -17648,7 +17750,7 @@ sub unique_headers_list(@)
 }
 
 sub order_headers_list(@)
-{# ordering headers according to descriptor
+{ # ordering headers according to descriptor
     my @HeadersToInclude = @_;
     return @HeadersToInclude if(not keys(%Include_RevOrder));
     my @NewHeadersToInclude = ();
@@ -17896,7 +17998,7 @@ sub optimize_src_includes(@)
         {
             my %Includes = %{detect_real_includes($Header_TopHeader{$Header_Path})};
             if($Includes{$Header_Path})
-            {# additional check
+            { # additional check
                 my ($TopHeader_Inc, $TopHeader_Path) = identify_header($Header_TopHeader{$Header_Path});
                 next if($Included{$TopHeader_Inc});
                 $HeadersToInclude_New{$ResPos}{"Inc"} = $TopHeader_Inc;
@@ -17929,7 +18031,7 @@ sub identify_header($)
     return @{$Cache{"identify_header"}{$Header}} if(defined $Cache{"identify_header"}{$Header});
     my ($HInc, $HPath) = identify_header_m($Header);
     if(not $HPath and $OSgroup eq "macos" and $Header=~/\A([^\/]+)\/([^\/]+)/)
-    {# search in frameworks: "OpenGL/gl.h" is "OpenGL.framework/Headers/gl.h"
+    { # search in frameworks: "OpenGL/gl.h" is "OpenGL.framework/Headers/gl.h"
         my ($HFramework, $HName) = ($1, $2);
         my $RelPath = "$HFramework\.framework\/Headers\/$HName";
         if(my $HeaderDir = find_in_dependencies($RelPath)) {
@@ -17942,7 +18044,7 @@ sub identify_header($)
 }
 
 sub identify_header_m($)
-{# search for header by absolute path, relative path or name
+{ # search for header by absolute path, relative path or name
     my $Header = $_[0];
     $Header=~s/[\/\\]/$SLASH/g if($OSgroup eq "windows");
     if(not $Header
@@ -17956,18 +18058,19 @@ sub identify_header_m($)
         }
         my $Prefix = get_filename(get_dirname($Header));
         if(my @Prefixes = sort {get_depth($b) <=> get_depth($a)}
-        keys(%{$Include_Prefixes{$Header}})) {
-            # use a standard prefix (<openbabel/math/align.h>)
+        keys(%{$Include_Prefixes{$Header}}))
+        { # use a standard prefix (<openbabel/math/align.h>)
             $Prefix = $Prefixes[0];
         }
         elsif(my @Prefixes = sort {get_depth($b) <=> get_depth($a)}
-        keys(%{$IncDir_Prefixes{get_dirname($Header)}})) {
-            # use a standard prefix (<openbabel/math/align.h>)
+        keys(%{$IncDir_Prefixes{get_dirname($Header)}}))
+        { # use a standard prefix (<openbabel/math/align.h>)
             $Prefix = $Prefixes[0];
         }
         my $HeaderDir = find_in_dependencies(joinPath($Prefix, get_filename($Header)));
         if($HeaderDir and $Prefix!~/include/i
-        and $Header=~/\A\Q$HeaderDir\E([\/\\]|\Z)/) {
+        and $Header=~/\A\Q$HeaderDir\E([\/\\]|\Z)/)
+        {
             $Header = cut_path_prefix($Header, $HeaderDir);
             return ($Header, joinPath($HeaderDir,$Header));
         }
@@ -18002,7 +18105,7 @@ sub identify_header_m($)
     }
     elsif($Header_Prefix{$Header}
     and my $AnyPath = selectSystemHeader(joinPath($Header_Prefix{$Header},$Header)))
-    {# gfile.h in glib-2.0/gio/ and poppler/goo
+    { # gfile.h in glib-2.0/gio/ and poppler/goo
         return (joinPath($Header_Prefix{$Header},$Header), $AnyPath);
     }
     elsif(my $AnyPath = selectSystemHeader($Header)) {
@@ -18070,7 +18173,7 @@ sub selectSystemHeader($)
     if($FilePath!~/[\/\\]/)
     {
         foreach my $Path (keys(%{$SystemPaths{"include"}}))
-        {# search in default paths
+        { # search in default paths
             if(-f $Path."/".$FilePath)
             {
                 $Cache{"selectSystemHeader"}{$FilePath} = joinPath($Path,$FilePath);
@@ -18096,17 +18199,17 @@ sub selectSystemHeader($)
               # Allow to search for atk.h in /usr/include/atk-1.0/atk/
                 next;
             }
-            if($Path=~/[\/\\]asm-/ and $Path!~/[\/\\]asm-\Q$Arch\E/) {
-                # skip ../asm-arm/ if using x86 architecture
+            if($Path=~/[\/\\]asm-/ and $Path!~/[\/\\]asm-\Q$Arch\E/)
+            { # skip ../asm-arm/ if using x86 architecture
                 next;
             }
             if($Path=~/c\+\+[\/\\]\d+/ and $MAIN_CPP_DIR
-            and $Path!~/\A\Q$MAIN_CPP_DIR\E/) {
-                # skip ../c++/3.3.3/ if using ../c++/4.4.0/
+            and $Path!~/\A\Q$MAIN_CPP_DIR\E/)
+            { # skip ../c++/3.3.3/ if using ../c++/4.4.0/
                 next;
             }
-            if($FileName eq "parser.h" and $Path!~/\/libxml2\//) {
-                # select parser.h from xml2 library
+            if($FileName eq "parser.h" and $Path!~/\/libxml2\//)
+            { # select parser.h from xml2 library
                 next;
             }
             $Cache{"selectSystemHeader"}{$FilePath} = $Path;
@@ -18307,12 +18410,12 @@ sub get_HeaderDeps($)
                 if(not $Dep=~s/[\/\\]+\Q$Prefix\E\Z//g)
                 {
                     if($OSgroup eq "macos" and $HeaderPath=~/(.+\.framework)\/Headers\/([^\/]+)/)
-                    {# frameworks
+                    { # frameworks
                         my ($HFramework, $HName) = ($1, $2);
                         $Dep = $HFramework;
                     }
                     else
-                    {# mismatch
+                    { # mismatch
                         next;
                     }
                 }
@@ -18554,15 +18657,16 @@ sub cut_off_number($$)
     return $num;
 }
 
-sub generate_tests()
+sub generateTests()
 {
     rmtree($TEST_SUITE_PATH) if(-e $TEST_SUITE_PATH);
     mkpath($TEST_SUITE_PATH);
     ($ResultCounter{"Gen"}{"Success"}, $ResultCounter{"Gen"}{"Fail"}) = (0, 0);
     my %TargetInterfaces = ();
     if($TargetHeaderName)
-    {# from the header file
-        if(not $DependencyHeaders_All{$TargetHeaderName}) {
+    { # from the header file
+        if(not $DependencyHeaders_All{$TargetHeaderName})
+        {
             print STDERR "ERROR: specified header \'$TargetHeaderName\' is not found\n";
             return;
         }
@@ -18575,7 +18679,7 @@ sub generate_tests()
         }
     }
     elsif(keys(%InterfacesList))
-    {# from the list
+    { # from the list
         foreach my $Interface (keys(%InterfacesList))
         {
             if(interfaceFilter($Interface)) {
@@ -18584,7 +18688,7 @@ sub generate_tests()
         }
     }
     elsif($CheckHeadersOnly and keys(%CompleteSignature))
-    {# from the headers
+    { # from headers
         foreach my $Interface (keys(%CompleteSignature))
         {
             next if($Interface=~/\A__/ or $CompleteSignature{$Interface}{"ShortName"}=~/\A__/);
@@ -18595,7 +18699,7 @@ sub generate_tests()
         }
     }
     else
-    {# from the shared objects (default)
+    { # from shared objects (default)
         if(not keys(%Interface_Library))
         {
             print STDERR "ERROR: cannot generate tests because extracted list of symbols is empty\n";
@@ -18677,7 +18781,7 @@ sub generate_tests()
         writeFile("$TEST_SUITE_PATH/$TargetLibraryName-t2c/$TargetLibraryName.cfg", "# Custom compiler options\nCOMPILER_FLAGS = -DCHECK_EXT_REQS `pkg-config --cflags ".search_pkgconfig_name($TargetLibraryName)."` -D_GNU_SOURCE\n\n# Custom linker options\nLINKER_FLAGS = `pkg-config --libs ".search_pkgconfig_name($TargetLibraryName)."`\n\n# Maximum time (in seconds) each test is allowed to run\nWAIT_TIME = $HANGED_EXECUTION_TIME\n\n# Copyright holder\nCOPYRIGHT_HOLDER = Linux Foundation\n");
     }
     else
-    {#standalone
+    { # standalone
         my $Test_Num = 0;
         if(keys(%LibGroups))
         {
@@ -18692,13 +18796,13 @@ sub generate_tests()
         foreach my $Interface (sort {lc($a) cmp lc($b)} keys(%TargetInterfaces))
         {
             print "\r".get_one_step_title($Test_Num, $All_Count, "generating tests", $ResultCounter{"Gen"}{"Success"}, $ResultCounter{"Gen"}{"Fail"});
-            #resetting global state
+            # reset global state
             restore_state(());
             @RecurInterface = ();
             @RecurTypeId = ();
             @RecurSpecType = ();
             %SubClass_Created = ();
-            my %Result = generate_sanity_test($Interface);
+            my %Result = generateTest($Interface);
             if(not $Result{"IsCorrect"})
             {
                 print FAIL_LIST $Interface."\n";
@@ -18792,23 +18896,23 @@ sub t2c_group_generation($$$$$$)
     my $MaxLength = 0;
     my $LibGroupName = getLibGroupName($C1, $C2);
     my %TestComponents = ();
-    # resetting global state for section
+    # reset global state for section
     restore_state(());
     foreach my $Interface (@{$Interfaces})
     {
         print "\r".get_one_step_title(${$Test_NumRef}, $All_Count, "generating tests", $ResultCounter{"Gen"}{"Success"}, $ResultCounter{"Gen"}{"Fail"});
         restore_local_state(());
         %IntrinsicNum=(
-        "Char"=>64,
-        "Int"=>0,
-        "Str"=>0,
-        "Float"=>0);
+            "Char"=>64,
+            "Int"=>0,
+            "Str"=>0,
+            "Float"=>0);
         @RecurInterface = ();
         @RecurTypeId = ();
         @RecurSpecType = ();
         %SubClass_Created = ();
         my $Global_State = save_state();
-        my %Result = generate_sanity_test($Interface);
+        my %Result = generateTest($Interface);
         if(not $Result{"IsCorrect"})
         {
             restore_state($Global_State);
@@ -18918,9 +19022,11 @@ sub build_tests()
     { # building tests
         print "\r".get_one_step_title($Test_Num, $All_Count, "building tests", $ResultCounter{"Build"}{"Success"}, $ResultCounter{"Build"}{"Fail"});
         build_sanity_test($Interface);
-        if(not $BuildResult{$Interface}{"IsCorrect"}) {
+        if(not $BuildResult{$Interface}{"IsCorrect"})
+        {
             print FAIL_LIST $Interface_TestDir{$Interface}."\n";
-            if($StrictBuild) {
+            if($StrictBuild)
+            {
                 print STDERR "ERROR: can't build test for $Interface\n";
                 exit(1);
             }
@@ -18967,7 +19073,8 @@ sub run_tests()
         }
     }
     my $All_Count = keys(%ForRunning);
-    if($All_Count==0) {
+    if($All_Count==0)
+    {
         print STDERR "ERROR: tests were not built yet\n";
         return 1;
     }
@@ -18979,9 +19086,11 @@ sub run_tests()
     { # running tests
         print "\r".get_one_step_title($Test_Num, $All_Count, "running tests", $ResultCounter{"Run"}{"Success"}, $ResultCounter{"Run"}{"Fail"});
         run_sanity_test($Interface);
-        if(not $RunResult{$Interface}{"IsCorrect"}) {
+        if(not $RunResult{$Interface}{"IsCorrect"})
+        {
             print FAIL_LIST $Interface_TestDir{$Interface}."\n";
-            if($StrictRun) {
+            if($StrictRun)
+            {
                 print STDERR "ERROR: test run failed for $Interface\n";
                 exit(1);
             }
@@ -19570,22 +19679,25 @@ sub detect_default_paths()
 sub detect_gcc()
 {
     $GCC_PATH = get_CmdPath("gcc");
-    if(not $GCC_PATH) {
+    if(not $GCC_PATH)
+    {
         print STDERR "ERROR: can't find GCC >=3.0 in PATH\n";
         exit(1);
     }
     $GPP_PATH = get_CmdPath("g++");
-    if(not $GPP_PATH) {
+    if(not $GPP_PATH)
+    {
         print STDERR "ERROR: can't find G++ >=3.0 in PATH\n";
         exit(1);
     }
     $CPP_FILT = get_CmdPath("c++filt");
-    if(not $CPP_FILT) {
+    if(not $CPP_FILT)
+    {
         print STDERR "ERROR: can't find c++filt in PATH\n";
         exit(1);
     }
     if(not check_gcc_version($GCC_PATH, 4))
-    {# warning if GCC 3 is selected
+    { # warning if GCC 3 is selected
         print "Using GCC ".get_dumpversion($GCC_PATH)."\n";
     }
     detect_include_default_paths();
@@ -19668,14 +19780,14 @@ sub add_LibraryPreambleAndFinalization()
         my $RPLevel = get_PointerLevel($Tid_TDid{$ReturnId}, $ReturnId);
         my $RetValName = get_RetValName($Interface);
         if(defined $CompleteSignature{$Interface}{"Param"}{0})
-        {# should not have a complex parameter type
+        { # should not have a complex parameter type
             my $PTypeId = $CompleteSignature{$Interface}{"Param"}{0}{"type"};
             next if(get_TypeType(get_FoundationTypeId($PTypeId))!~/\A(Enum|Intrinsic)\Z/ and get_PointerLevel($Tid_TDid{$PTypeId}, $PTypeId)!=0);
         }
         if(get_TypeName($ReturnId) eq "void"
         or ($ReturnFTypeType=~/\A(Enum|Intrinsic)\Z/ and $RPLevel==0)
         or ($ReturnFTypeType eq "Struct" and $RPLevel>=1))
-        {# should return a simple type or structure pointer
+        { # should return a simple type or structure pointer
             readSpecTypes("
             <spec_type>
                 <name>
@@ -19717,14 +19829,14 @@ sub add_LibraryPreambleAndFinalization()
         my $PTypeId = (defined $CompleteSignature{$Interface}{"Param"}{0})?$CompleteSignature{$Interface}{"Param"}{0}{"type"}:0;
         my $Interface_Pair = 0;
         foreach my $Interface_Init (keys(%LibraryInitFunc))
-        {# search for a pair interface
+        { # search for a pair interface
             my $Prefix_Init = getPrefix($Interface_Init);
             my $ReturnId_Init = $CompleteSignature{$Interface_Init}{"Return"};
             my $PTypeId_Init = (defined $CompleteSignature{$Interface_Init}{"Param"}{0})?$CompleteSignature{$Interface_Init}{"Param"}{0}{"type"}:0;
             if($Prefix eq $Prefix_Init
             and ($PTypeId==0 or $PTypeId_Init==$ReturnId or $PTypeId==$ReturnId_Init or $PTypeId==$PTypeId_Init))
-            {# libraw_init ( unsigned int flags ):libraw_data_t*
-             # libraw_close ( libraw_data_t* p1 ):void
+            { # libraw_init ( unsigned int flags ):libraw_data_t*
+              # libraw_close ( libraw_data_t* p1 ):void
                 $Interface_Pair = $Interface_Init;
                 last;
             }
@@ -19822,7 +19934,8 @@ sub scenario()
     if($OSgroup eq "windows")
     {
         if(not $ENV{"DevEnvDir"}
-        or not $ENV{"LIB"}) {
+        or not $ENV{"LIB"})
+        {
             print "ERROR: can't start without VS environment (vsvars32.bat)";
             exit(1);
         }
@@ -19838,39 +19951,45 @@ sub scenario()
         print STDERR "\nERROR: library name is not selected (option -l <name>)\n";
         exit(1);
     }
-    else {
-        # validate library name
+    else
+    { # validate library name
         if($TargetLibraryName=~/[\*\/\\]/) {
             print STDERR "\nERROR: \"\\\", \"\/\" and \"*\" symbols are not allowed in the library name\n";
             exit(1);
         }
     }
-    if($TestDataPath and not -d $TestDataPath) {
+    if($TestDataPath and not -d $TestDataPath)
+    {
         print STDERR "\nERROR: can't access directory \'$TestDataPath\'\n";
         exit(1);
     }
-    if($SpecTypes_PackagePath and not -f $SpecTypes_PackagePath) {
+    if($SpecTypes_PackagePath and not -f $SpecTypes_PackagePath)
+    {
         print STDERR "\nERROR: can't access file \'$SpecTypes_PackagePath\'\n";
         exit(1);
     }
     if($InterfacesListPath)
     {
-        if(-f $InterfacesListPath) {
+        if(-f $InterfacesListPath)
+        {
             foreach my $Interface (split(/\n/, readFile($InterfacesListPath))) {
                 $InterfacesList{$Interface} = 1;
             }
         }
-        else {
+        else
+        {
             print STDERR "\nERROR: can't access file \'$InterfacesListPath\'\n";
             exit(1);
         }
     }
-    if(not $Descriptor{"Path"}) {
+    if(not $Descriptor{"Path"})
+    {
         print STDERR "ERROR: library descriptor is not selected (option -d <path>)\n";
         exit(1);
     }
     if(not $GenerateTests and not $BuildTests
-    and not $RunTests and not $CleanTests and not $CleanSources) {
+    and not $RunTests and not $CleanTests and not $CleanSources)
+    {
         print "specify appropriate option: -gen, -build, -run, -clean\n";
         exit(1);
     }
@@ -19887,7 +20006,8 @@ sub scenario()
                 if($Line=~s/\A(\w+)\;//)
                 {
                     my $Interface = $1;
-                    if($Line=~/;(\d+);/) {
+                    if($Line=~/;(\d+);/)
+                    {
                         while($Line=~s/(\d+);(\w+)//) {
                             $AddIntParams{$Interface}{$1}=$2;
                         }
@@ -19895,7 +20015,8 @@ sub scenario()
                     else
                     {
                         my $Num = 0;
-                        foreach my $Name (split(/;/, $Line)) {
+                        foreach my $Name (split(/;/, $Line))
+                        {
                             $AddIntParams{$Interface}{$Num}=$Name;
                             $Num+=1;
                         }
@@ -19903,17 +20024,20 @@ sub scenario()
                 }
             }
         }
-        else {
+        else
+        {
             print STDERR "\nERROR: can't access file \'$ParameterNamesFilePath\'\n";
             exit(1);
         }
     }
-    if($TargetInterfaceName and defined $Template2Code) {
+    if($TargetInterfaceName and defined $Template2Code)
+    {
         print STDERR "\nERROR: selecting of a symbol is not supported in the Template2Code format\n";
         exit(1);
     }
     if(($BuildTests or $RunTests or $CleanTests) and defined $Template2Code
-    and not defined $GenerateTests) {
+    and not defined $GenerateTests)
+    {
         print STDERR "\nERROR: see Template2Code technology documentation for building and running tests:\n       http://template2code.sourceforge.net/t2c-doc/index.html\n";
         exit(1);
     }
@@ -19948,7 +20072,7 @@ sub scenario()
         prepareInterfaces();
         print "\rheader(s) analysis: [95.00%]";
         if($CheckHeadersOnly)
-        {#detecting language
+        { # detect language
             foreach my $Interface (keys(%CompleteSignature))
             {
                 $Interface_Library{$Interface}="WithoutLib";
@@ -19969,7 +20093,7 @@ sub scenario()
         setRegularities();
         markAbstractClasses();
         if(not keys(%Common_SpecEnv))
-        {# automatic preamble and finalization
+        { # automatic preamble and finalization
             add_LibraryPreambleAndFinalization();
         }
         if($TargetInterfaceName)
@@ -19990,7 +20114,7 @@ sub scenario()
             }
             print "generating test for $TargetInterfaceName ... ";
             read_scenario();
-            generate_sanity_test($TargetInterfaceName);
+            generateTest($TargetInterfaceName);
             write_scenario();
             if($GenResult{$TargetInterfaceName}{"IsCorrect"}) {
                 print "success\n";
@@ -20002,7 +20126,7 @@ sub scenario()
         }
         else
         {
-            generate_tests();
+            generateTests();
             create_Index() if(not defined $Template2Code);
         }
         if($ResultCounter{"Gen"}{"Success"}>0)
@@ -20028,7 +20152,7 @@ sub scenario()
             }
         }
         if($DebugMode)
-        {# write debug log
+        { # write debug log
             writeDebugInfo();
         }
         remove_option(\@INPUT_OPTIONS, "gen");
@@ -20036,7 +20160,7 @@ sub scenario()
     }
     if($BuildTests and $GenerateTests and defined $Standalone)
     { # allocated memory for tests generation should be returned to OS
-        system("perl", $0, @INPUT_OPTIONS);# build + run
+        system("perl", $0, @INPUT_OPTIONS); # build + run
         exit($?>>8);
     }
     elsif($BuildTests and defined $Standalone)
@@ -20046,7 +20170,8 @@ sub scenario()
             createDescriptor($Part);
         }
         $TEST_SUITE_PATH = "tests/$TargetLibraryName/".$Descriptor{"Version"};
-        if(not -e $TEST_SUITE_PATH) {
+        if(not -e $TEST_SUITE_PATH)
+        {
             print STDERR "\nERROR: tests were not generated yet\n";
             exit(1);
         }
@@ -20085,7 +20210,8 @@ sub scenario()
             createDescriptor($Part);
         }
         $TEST_SUITE_PATH = "tests/$TargetLibraryName/".$Descriptor{"Version"};
-        if(not -e $TEST_SUITE_PATH) {
+        if(not -e $TEST_SUITE_PATH)
+        {
             print STDERR "\nERROR: tests were not generated yet\n";
             exit(1);
         }
@@ -20104,7 +20230,7 @@ sub scenario()
         
     }
     if($RunTests and $GenerateTests and defined $Standalone)
-    {#tests running requires creation of two processes, so allocated memory must be returned to the system
+    { # tests running requires creation of two processes, so allocated memory must be returned to the system
         system("perl", $0, @INPUT_OPTIONS);
         exit($ResultCounter{"Build"}{"Fail"}!=0 or $?>>8);
     }
@@ -20117,7 +20243,8 @@ sub scenario()
         }
         $TEST_SUITE_PATH = "tests/$TargetLibraryName/".$Descriptor{"Version"};
         $REPORT_PATH = "test_results/$TargetLibraryName/".$Descriptor{"Version"};
-        if(not -e $TEST_SUITE_PATH) {
+        if(not -e $TEST_SUITE_PATH)
+        {
             print STDERR "\nERROR: tests were not generated yet\n";
             exit(1);
         }
