@@ -3605,7 +3605,7 @@ sub readlile_ELF($)
                 $InternalInterfaces{$realname} = 1;
             }
         }
-        if($bind!~/\A(WEAK|GLOBAL)\Z/) {
+        if($bind!~/\A(GLOBAL)\Z/) {
             return ();
         }
         if($type!~/\A(FUNC|IFUNC|OBJECT|COMMON|NOTYPE)\Z/) {
