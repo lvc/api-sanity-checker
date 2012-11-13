@@ -6260,11 +6260,6 @@ sub getFuncDescr($)
     { # register relation between the constructor and class
         $ClassesWithConstructors{$FuncDescr{$FuncInfoId}{"Class"}} = 1;
     }
-    if($FuncDescr{$FuncInfoId}{"Private"}
-    and not $FuncDescr{$FuncInfoId}{"PureVirt"}) {
-        delete($FuncDescr{$FuncInfoId});
-        return;
-    }
     if($FuncDescr{$FuncInfoId}{"PseudoTemplate"}) {
         delete($FuncDescr{$FuncInfoId});
         return;
@@ -8544,6 +8539,7 @@ sub interfaceFilter($)
     }
     return 0 if($Interface=~/\A_tg_inln_tmpl_\d+/);# templates
     return 0 if(not $CompleteSignature{$Interface}{"Header"});
+    return 0 if($CompleteSignature{$Interface}{"Private"});
     return 0 if($CompleteSignature{$Interface}{"Data"});
     if(not $STDCXX_TESTING and not $CheckStdCxx and not $TargetInterfaceName)
     { # stdc++ symbols
@@ -8552,11 +8548,13 @@ sub interfaceFilter($)
     if($Interface=~/\A_ZN9__gnu_cxx\d/) {
         return 0;
     }
-    if($CompleteSignature{$Interface}{"Constructor"}) {
+    if($CompleteSignature{$Interface}{"Constructor"})
+    {
         my $ClassId = $CompleteSignature{$Interface}{"Class"};
         return ( not ($Interface=~/C1E/ and ($CompleteSignature{$Interface}{"Protected"} or isAbstractClass($ClassId))) );
     }
-    elsif($CompleteSignature{$Interface}{"Destructor"}) {
+    elsif($CompleteSignature{$Interface}{"Destructor"})
+    {
         my $ClassId = $CompleteSignature{$Interface}{"Class"};
         return ( not ($Interface=~/D0E|D1E/ and ($CompleteSignature{$Interface}{"Protected"} or isAbstractClass($ClassId))) );
     }

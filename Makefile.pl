@@ -201,7 +201,7 @@ sub scenario()
         print "-- Installing $EXE_PATH/$TOOL_SNAME\n";
         mkpath($EXE_PATH);
         writeFile($EXE_PATH."/".$TOOL_SNAME, $Content);
-        chmod(0755, $EXE_PATH."/".$TOOL_SNAME);
+        chmod(0775, $EXE_PATH."/".$TOOL_SNAME);
         
         # copy modules
         if(-d $ARCHIVE_DIR."/modules")
@@ -229,9 +229,6 @@ sub copyDir($$)
     }
     foreach my $Path (sort keys(%Files))
     {
-        if($Config{"osname"}!~/win/ and $Path=~/Targets\/(windows|symbian)/) {
-                next;
-        }
         my $Inst = $Path;
         $Inst=~s/\A\Q$ARCHIVE_DIR\E/$To/;
         if(-d $Path)
@@ -240,6 +237,7 @@ sub copyDir($$)
         }
         else
         { # files
+            mkpath(dirname($Inst));
             copy($Path, $Inst);
         }
     }
