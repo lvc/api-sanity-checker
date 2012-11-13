@@ -15433,8 +15433,9 @@ sub callInterfaceParameters_m(@)
             {
                 my $CreateChild = ($ShortName eq "operator="
                     and get_TypeName($FTypeId) eq get_TypeName($CompleteSignature{$Interface}{"Class"}) and $CompleteSignature{$Interface}{"Protected"});
-                if($IsWrapperCall and $CompleteSignature{$Interface}{"Class"}) {
-                    push(@RecurTypeId, $CompleteSignature{$Interface}{"Class"});
+                if($IsWrapperCall
+                and $CompleteSignature{$Interface}{"Class"}) {
+                    # push(@RecurTypeId, $CompleteSignature{$Interface}{"Class"});
                 }
                 my %Param_Init = initializeParameter((
                     "Interface" => $Interface,
@@ -15454,7 +15455,7 @@ sub callInterfaceParameters_m(@)
                     "MaxParamPos" => $MaxParamPos));
                 if($IsWrapperCall
                 and $CompleteSignature{$Interface}{"Class"}) {
-                    pop(@RecurTypeId);
+                    # pop(@RecurTypeId);
                 }
                 if(not $Param_Init{"IsCorrect"})
                 {
@@ -15557,7 +15558,7 @@ sub callInterfaceParameters_m(@)
             $Create_SubClass{$ClassId} = 1;
         }
     }
-    #check requirement for return value
+    # check requirement for return value
     my $SpecReturnType = $InterfaceSpecType{$Interface}{"SpecReturn"};
     if(not $SpecReturnType) {
         $SpecReturnType = chooseSpecType($CompleteSignature{$Interface}{"Return"}, "common_retval", $Interface);
@@ -15578,7 +15579,8 @@ sub callInterfaceParameters_m(@)
         if(my $ReturnFinalCode = $SpecType{$SpecReturnType}{"FinalCode"})
         {
             my %ParsedCode = ();
-            if($Init_Desc{"RetParam"}) {
+            if($Init_Desc{"RetParam"})
+            {
                 my $LastId = pop(@RecurTypeId);
                 # add temp $retval
                 $ValueCollection{$CurrentBlock}{"\$retval"} = $CompleteSignature{$Interface}{"Return"};
