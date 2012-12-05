@@ -1,0 +1,15 @@
+# Configuration file for continuous integration tests at travis-ci.org
+
+language: perl
+
+perl:
+#  - "5.16"
+#  - "5.14"
+  - "5.12"
+#  - "5.10"
+
+install:
+  - sudo perl Makefile.pl --install
+
+script:
+  - api-sanity-checker --test
