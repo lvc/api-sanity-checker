@@ -3,19 +3,17 @@
 language: perl
 
 perl:
-#  - "5.16"
+  - "5.16"
   - "5.14"
   - "5.12"
-#  - "5.10"
+  - "5.10"
 
 compiler:
   - clang
   - gcc
 
 install:
-  - echo "Using compiler: $CC"
-  - which perl
-  - perl --version
+  - echo $CC
   - sudo perl Makefile.pl --install
 
 script:
