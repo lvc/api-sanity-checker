@@ -29,11 +29,15 @@ use File::Spec qw(catfile file_name_is_absolute);
 use File::Copy qw(copy);
 use File::Basename qw(dirname);
 use Cwd qw(abs_path);
+use File::Find;
 use Config;
 use strict;
 
 my $TOOL_SNAME = "api-sanity-checker";
 my $ARCHIVE_DIR = abs_path(dirname($0));
+
+my $ABICC = "abi-compliance-checker";
+my $ABICC_VERSION = "1.98.7";
 
 my $HELP_MSG = "
 NAME:
@@ -100,6 +104,19 @@ sub scenario()
         print STDERR "ERROR: command is not selected (-install, -update or -remove)\n";
         exit(1);
     }
+    if(my $Version = `$ABICC -dumpversion`)
+    {
+        if(cmpVersions($Version, $ABICC_VERSION)<0)
+        {
+            print STDERR "ERROR: requires $ABICC_VERSION or newer version of \'$ABICC\'\n";
+            exit(1);
+        }
+    }
+    else
+    {
+        print STDERR "ERROR: cannot find \'$ABICC\'\n";
+        exit(1);
+    }
     if($PREFIX ne "/") {
         $PREFIX=~s/[\/]+\Z//g;
     }
@@ -154,6 +171,8 @@ sub scenario()
     
     # paths
     my $EXE_PATH = catFile($PREFIX, "bin");
+    my $MODULES_PATH = catFile($PREFIX, "share", $TOOL_SNAME);
+    my $REL_PATH = catFile("..", "share", $TOOL_SNAME);
     my $TOOL_PATH = catFile($EXE_PATH, $TOOL_SNAME);
     
     if(not -w $PREFIX)
@@ -168,10 +187,16 @@ sub scenario()
             print "-- Removing $TOOL_PATH\n";
             unlink($EXE_PATH."/".$TOOL_SNAME);
         }
+        
+        if(-d $MODULES_PATH)
+        { # remove modules
+            print "-- Removing $MODULES_PATH\n";
+            rmtree($MODULES_PATH);
+        }
     }
     if($Install or $Update)
     {
-        if(-e $EXE_PATH."/".$TOOL_SNAME)
+        if(-e $EXE_PATH."/".$TOOL_SNAME or -e $MODULES_PATH)
         { # check installed
             if(not $Remove)
             {
@@ -180,14 +205,31 @@ sub scenario()
             }
         }
         
+        # configure
+        my $Content = readFile($ARCHIVE_DIR."/".$TOOL_SNAME.".pl");
+        if($DESTDIR) { # relative path
+            $Content=~s/MODULES_INSTALL_PATH/$REL_PATH/;
+        }
+        else { # absolute path
+            $Content=~s/MODULES_INSTALL_PATH/$MODULES_PATH/;
+        }
+        
         # copy executable
         print "-- Installing $TOOL_PATH\n";
         mkpath($EXE_PATH);
-        copy($ARCHIVE_DIR."/".$TOOL_SNAME.".pl", $EXE_PATH."/".$TOOL_SNAME);
+        writeFile($EXE_PATH."/".$TOOL_SNAME, $Content);
         chmod(0775, $EXE_PATH."/".$TOOL_SNAME);
         
         if($Config{"osname"}=~/win/i) {
             writeFile($EXE_PATH."/".$TOOL_SNAME.".cmd", "\@perl \"$TOOL_PATH\" \%*");
+        }
+        
+        # copy modules
+        if(-d $ARCHIVE_DIR."/modules")
+        {
+                print "-- Installing $MODULES_PATH\n";
+                mkpath($MODULES_PATH);
+                copyDir($ARCHIVE_DIR."/modules", $MODULES_PATH);
         }
         
         # check PATH
@@ -198,12 +240,63 @@ sub scenario()
     exit(0);
 }
 
+sub cmpVersions($$)
+{ # compare two versions in dotted-numeric format
+    my ($V1, $V2) = @_;
+    return 0 if($V1 eq $V2);
+    my @V1Parts = split(/\./, $V1);
+    my @V2Parts = split(/\./, $V2);
+    for (my $i = 0; $i <= $#V1Parts && $i <= $#V2Parts; $i++)
+    {
+        return -1 if(int($V1Parts[$i]) < int($V2Parts[$i]));
+        return 1 if(int($V1Parts[$i]) > int($V2Parts[$i]));
+    }
+    return -1 if($#V1Parts < $#V2Parts);
+    return 1 if($#V1Parts > $#V2Parts);
+    return 0;
+}
+
 sub catFile(@) {
     return File::Spec->catfile(@_);
 }
 
 sub isAbs($) {
     return File::Spec->file_name_is_absolute($_[0]);
+}
+
+sub copyDir($$)
+{
+    my ($From, $To) = @_;
+    my %Files;
+    find(\&wanted, $From);
+    sub wanted {
+        $Files{$File::Find::dir."/$_"} = 1 if($_ ne ".");
+    }
+    foreach my $Path (sort keys(%Files))
+    {
+        my $Inst = $Path;
+        $Inst=~s/\A\Q$ARCHIVE_DIR\E/$To/;
+        if(-d $Path)
+        { # directories
+            mkpath($Inst);
+        }
+        else
+        { # files
+            mkpath(dirname($Inst));
+            copy($Path, $Inst);
+        }
+    }
+}
+
+sub readFile($)
+{
+    my $Path = $_[0];
+    return "" if(not $Path or not -f $Path);
+    open(FILE, $Path) || die ("can't open file \'$Path\': $!\n");
+    local $/ = undef;
+    my $Content = <FILE>;
+    close(FILE);
+    return $Content;
 }
 
 sub writeFile($$)

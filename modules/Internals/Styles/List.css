@@ -1,0 +1,70 @@
+body {
+    font-family:Arial;
+}
+hr {
+    color:Black;
+    background-color:Black;
+    height:1px;
+    border:0;
+}
+h1 {
+    margin-bottom:0px;
+    padding-bottom:0px;
+    font-size:26px;
+}
+h2 {
+    margin-bottom:0px;
+    padding-bottom:0px;
+    font-size:20px;
+}
+span.int {
+    font-weight:bold;
+    cursor:pointer;
+    margin-left:7px;
+    font-size:16px;
+    font-family:Arial;
+    color:#003E69;
+}
+span.int_p {
+    font-weight:normal;
+}
+span:hover.int {
+    color:#336699;
+}
+span.header {
+    color:#cc3300;
+    font-size:14px;
+    font-weight:bold;
+}
+span.ns {
+    color:#408080;
+    font-size:15px;
+}
+span.lib_name {
+    color:Green;
+    font-size:14px;
+    font-weight:bold;
+}
+span.libgroup {
+    color:Black;
+    font-size:14px;
+    font-family:Arial;
+    font-weight:bold;
+}
+span.mangled {
+    padding-left:15px;
+    font-size:14px;
+    cursor:text;
+    color:#444444;
+}
+span.color_p {
+    font-style:italic;
+    color:Brown;
+}
+span.focus_p {
+    font-style:italic;
+    color:Red;
+}
+a.link {
+    text-decoration:none;
+}

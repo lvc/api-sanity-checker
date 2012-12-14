@@ -21,7 +21,7 @@
 </style>
 <script src="/load.php?debug=false&amp;lang=en&amp;modules=startup&amp;only=scripts&amp;skin=monobook&amp;*"></script>
 <script>if(window.mw){
-	mw.config.set({"wgCanonicalNamespace": "", "wgCanonicalSpecialPageName": false, "wgNamespaceNumber": 0, "wgPageName": "API_Sanity_Checker_Options", "wgTitle": "API Sanity Checker Options", "wgCurRevisionId": 8141, "wgArticleId": 2419, "wgIsArticle": true, "wgAction": "view", "wgUserName": null, "wgUserGroups": ["*"], "wgCategories": ["API Sanity Checker"], "wgBreakFrames": false, "wgRestrictionEdit": [], "wgRestrictionMove": []});
+	mw.config.set({"wgCanonicalNamespace": "", "wgCanonicalSpecialPageName": false, "wgNamespaceNumber": 0, "wgPageName": "API_Sanity_Checker_Options", "wgTitle": "API Sanity Checker Options", "wgCurRevisionId": 8216, "wgArticleId": 2419, "wgIsArticle": true, "wgAction": "view", "wgUserName": null, "wgUserGroups": ["*"], "wgCategories": ["API Sanity Checker"], "wgBreakFrames": false, "wgRestrictionEdit": [], "wgRestrictionMove": []});
 }
 </script><script>if(window.mw){
 	mw.loader.load(["mediawiki.page.startup"]);
@@ -63,7 +63,7 @@
 <h2> <span class="mw-headline" id="General_Options"> General Options </span></h2>
 <ul><li><b>-l|-lib|-library NAME</b>
 </li></ul>
-<div style="padding-left:40px;">Library name (without version). It affects only on the path and the title of the reports.</div><br />
+<div style="padding-left:40px;">Library name (without version).</div><br />
 <ul><li><b>-d|-descriptor PATH</b>
 </li></ul>
 <div style="padding-left:40px;">Path to the <a href="Descriptor.html" title="Library Descriptor">library descriptor</a>.</div><br />
@@ -79,7 +79,14 @@
 <ul><li><b>-clean</b>
 </li></ul>
 <div style="padding-left:40px;">Clean test(s). Options -l and -d should be specified. To clean test for the particular function use it with -f option.</div><br />
-<ul><li><b>-vnum VERSION</b>
+<h2> <span class="mw-headline" id="Extra_Options"> Extra Options </span></h2>
+<ul><li><b>-d-tmpl|-descriptor-template</b>
+</li></ul>
+<div style="padding-left:40px;">Create library descriptor template ./VERSION.xml</div><br />
+<ul><li><b>-s-tmpl|-specialized-type-template</b>
+</li></ul>
+<div style="padding-left:40px;">Create specialized type template ./SPECTYPES.xml</div><br />
+<ul><li><b>-vnum NUM</b>
 </li></ul>
 <div style="padding-left:40px;">Specify library version outside the descriptor.</div><br />
 <ul><li><b>-s|-symbol NAME</b>
@@ -87,13 +94,13 @@
 <div style="padding-left:40px;">Generate/Build/Run test for specified interface (mangled name in C++).</div><br />
 <ul><li><b>-symbols-list PATH</b>
 </li></ul>
-<div style="padding-left:40px;">This option allow to specify a file with a list of functions (one per line, mangled/symbol names in C++) that should be tested, other library interfaces will not be tested.</div><br />
+<div style="padding-left:40px;">This option allow to specify a file with a list of functions (one per line, mangled names in C++) that should be tested, other library interfaces will not be tested.</div><br />
 <ul><li><b>-header NAME</b>
 </li></ul>
 <div style="padding-left:40px;">This option allows to restrict a list of functions that should be tested by providing a header file name in which they are declared. This option was introduced for step-by-step tests development.</div><br />
 <ul><li><b>-xvfb</b>
 </li></ul>
-<div style="padding-left:40px;">Use <a rel="nofollow" class="external text" href="http://en.wikipedia.org/wiki/Xvfb">Xvfb-server</a> instead of current X-server (default) for running tests.</div><br />
+<div style="padding-left:40px;">Use Xvfb-server instead of current X-server (default) for running tests.</div><br />
 <ul><li><b>-t2c|-template2code</b>
 </li></ul>
 <div style="padding-left:40px;">Generate tests in the universal <a rel="nofollow" class="external text" href="http://sourceforge.net/projects/template2code/">Template2Code</a> format.</div><br />
@@ -109,13 +116,6 @@
 <ul><li><b>-strict</b>
 </li></ul>
 <div style="padding-left:40px;">This option enables all -strict-* options.</div><br />
-<h2> <span class="mw-headline" id="Extra_Options"> Extra Options </span></h2>
-<ul><li><b>-d-tmpl|-descriptor-template</b>
-</li></ul>
-<div style="padding-left:40px;">Create library descriptor template ./VERSION.xml</div><br />
-<ul><li><b>-s-tmpl|-specialized-type-template</b>
-</li></ul>
-<div style="padding-left:40px;">Create specialized type template ./SPECTYPES.xml</div><br />
 <ul><li><b>-r|-random</b>
 </li></ul>
 <div style="padding-left:40px;">Random tests generating mode.</div><br />
@@ -139,7 +139,13 @@
 <div style="padding-left:40px;">Path to the directory with <a href="http://ispras.linuxbase.org/index.php/Specialized_Type#Using_Test_Data" title="Specialized Type">test data</a>.</div><br />
 <ul><li><b>-headers-only</b>
 </li></ul>
-<div style="padding-left:40px;">If the library is header-based and has no shared objects this option allows to generate tests for headers only.</div><br />
+<div style="padding-left:40px;">If the library consists of inline functions only and has no shared objects then you should specify this option.</div><br />
+<ul><li><b>-no-inline</b>
+</li></ul>
+<div style="padding-left:40px;">Don't generate tests for inline functions.</div><br />
+<ul><li><b>-keep-internal</b>
+</li></ul>
+<div style="padding-left:40px;">Generate tests for internal symbols (functions with '__' prefix and methods of classes declared inside other classes).</div><br />
 <ul><li><b>-isolated</b>
 </li></ul>
 <div style="padding-left:40px;">Allow to restrict functions usage by the lists specified by the -functions-list option<br />or by the group devision in the descriptor.</div><br />
@@ -149,19 +155,28 @@
 <ul><li><b>-disable-default-values</b>
 </li></ul>
 <div style="padding-left:40px;">Disable usage of default values for function parameters.</div><br />
+<ul><li><b>-optimize-includes LEVEL</b>
+</li></ul>
+<div style="padding-left:40px;">Enable optimization of the list of included headers in each test case. Available levels: High (default), Medium, Low, None - disable.</div><br />
 <ul><li><b>-p|-params PATH</b>
 </li></ul>
 <div style="padding-left:40px;">Path to file with the function parameter names. It can be used for improving generated tests if the library header files don't contain parameter names. File format:</div>
 <div style="padding-left:80px;">func1;param1;param2;param3 ...<br />func2;param1;param2;param3 ...<br />...</div><br />
-<ul><li><b>-library-full-name NAME</b>
+<ul><li><b>-l-full|-lib-full NAME</b>
 </li></ul>
 <div style="padding-left:40px;">Library name in the report title.</div><br />
 <ul><li><b>-relpath|-reldir PATH</b>
 </li></ul>
 <div style="padding-left:40px;">Replace {RELPATH} in the library descriptor by PATH.</div><br />
+<ul><li><b>-lang LANG</b>
+</li></ul>
+<div style="padding-left:40px;">Set library language (C or C++). You can use this option if the tool cannot auto-detect a language.</div><br />
 <ul><li><b>-debug</b>
 </li></ul>
 <div style="padding-left:40px;">Write extended log for debugging.</div><br />
+<ul><li><b>-cache</b>
+</li></ul>
+<div style="padding-left:40px;">Cache the ABI dump and use it on the next run.</div><br />
 <h2> <span class="mw-headline" id="Other_Options"> Other Options </span></h2>
 <ul><li><b>-test</b>
 </li></ul>
@@ -172,14 +187,20 @@
 <ul><li><b>-long-variable-names</b>
 </li></ul>
 <div style="padding-left:40px;">Enable long (complex) variable names instead of short names (default).</div><br />
+<ul><li><b>-b|-browse PROGRAM</b>
+</li></ul>
+<div style="padding-left:40px;">Open report(s) in the browser (firefox, opera, etc.).</div><br />
+<ul><li><b>-open</b>
+</li></ul>
+<div style="padding-left:40px;">Open report(s) in the default browser.</div><br />
 
 <!-- 
 NewPP limit report
-Preprocessor node count: 55/1000000
+Preprocessor node count: 62/1000000
 Post-expand include size: 0/2097152 bytes
 Template argument size: 0/2097152 bytes
 Expensive parser function count: 0/100
 -->
 
-<!-- Saved in parser cache with key rasispdb:pcache:idhash:2419-0!*!0!!en!*!* and timestamp 20121214090756 -->
+<!-- Saved in parser cache with key rasispdb:pcache:idhash:2419-0!*!0!!en!*!* and timestamp 20121214121946 -->
 </div></div></div></div></div></body></html>
