@@ -3592,7 +3592,7 @@ sub get_ShortName($)
     return substr($MnglName, length($Prefix)+length($Length), $Length);
 }
 
-sub readlile_ELF($)
+sub readline_ELF($)
 {
     if($_[0]=~/\s*\d+:\s+(\w*)\s+\w+\s+(\w+)\s+(\w+)\s+(\w+)\s+(\w+)\s((\w|@|\.)+)/)
     { # the line of 'readelf' output corresponding to the symbol
@@ -3619,9 +3619,7 @@ sub readlile_ELF($)
         }
         return ($fullname, $value, $Ndx, $type);
     }
-    else {
-        return ();
-    }
+    return ();
 }
 
 sub get_symbol_name_version($)
@@ -3657,6 +3655,15 @@ sub getSymbols_Lib($$)
         open(DYLIB, "$NM -g \"$Lib_Path\" 2>\"$TMP_DIR/null\" |");
         while(<DYLIB>)
         {
+            if(not $IsNeededLib)
+            {
+                if(/ U _([\w\$]+)\s*\Z/)
+                {
+                    $SharedObject_UndefinedSymbols{$Lib_Path}{$1} = 1;
+                    next;
+                }
+            }
+            
             if(/ [STD] _([\w\$]+)\s*\Z/)
             {
                 my $fullname = $1;
@@ -3805,7 +3812,8 @@ sub getSymbols_Lib($$)
             elsif(/'.symtab'/) {
                 $symtab=1;
             }
-            elsif(my ($fullname, $idx, $Ndx, $type) = readlile_ELF($_)) {
+            elsif(my ($fullname, $idx, $Ndx, $type) = readline_ELF($_))
+            {
                 my ($realname, $version) = get_symbol_name_version($fullname);
                 $fullname=~s/\@\@/\@/g;
                 if( $Ndx eq "UND" )
