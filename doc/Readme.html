@@ -21,7 +21,7 @@
 </style>
 <script src="/load.php?debug=false&amp;lang=en&amp;modules=startup&amp;only=scripts&amp;skin=monobook&amp;*"></script>
 <script>if(window.mw){
-	mw.config.set({"wgCanonicalNamespace": "", "wgCanonicalSpecialPageName": false, "wgNamespaceNumber": 0, "wgPageName": "API_Sanity_Checker", "wgTitle": "API Sanity Checker", "wgCurRevisionId": 8105, "wgArticleId": 2411, "wgIsArticle": true, "wgAction": "view", "wgUserName": null, "wgUserGroups": ["*"], "wgCategories": ["API Sanity Checker"], "wgBreakFrames": false, "wgRestrictionEdit": [], "wgRestrictionMove": []});
+	mw.config.set({"wgCanonicalNamespace": "", "wgCanonicalSpecialPageName": false, "wgNamespaceNumber": 0, "wgPageName": "API_Sanity_Checker", "wgTitle": "API Sanity Checker", "wgCurRevisionId": 8204, "wgArticleId": 2411, "wgIsArticle": true, "wgAction": "view", "wgUserName": null, "wgUserGroups": ["*"], "wgCategories": ["API Sanity Checker"], "wgBreakFrames": false, "wgRestrictionEdit": [], "wgRestrictionMove": []});
 }
 </script><script>if(window.mw){
 	mw.loader.load(["mediawiki.page.startup"]);
@@ -85,8 +85,8 @@
 </td></tr></table>
 <h2> <span class="mw-headline" id="Downloads"> Downloads </span></h2>
 <h3> <span class="mw-headline" id="Releases"> Releases </span></h3>
-<p>All releases can be downloaded from <b><a href="Changes.html" title="API Sanity Checker Downloads">this page</a></b> or <b><a rel="nofollow" class="external text" href="https://github.com/lvc/api-sanity-checker/downloads">github.com</a></b>.
-</p><p>Latest release: <a rel="nofollow" class="external text" href="https://github.com/downloads/lvc/api-sanity-checker/api-sanity-checker-1.12.10.tar.gz">1.12.10</a>
+<p>All releases can be downloaded from <b><a href="Changes.html" title="API Sanity Checker Downloads">this page</a></b> or <b><a rel="nofollow" class="external text" href="https://github.com/lvc/api-sanity-checker/">github.com</a></b>.
+</p><p>Latest release: <a rel="nofollow" class="external text" href="https://github.com/lvc/api-sanity-checker/archive/api-sanity-checker-1.12.11.tar.gz">1.12.11</a>
 </p>
 <h3> <span class="mw-headline" id="Git"> Git </span></h3>
 <p>Read-only access to the latest development version:<br />
@@ -169,6 +169,9 @@
 <code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;cd api-sanity-checker-x.y.z/&#160;</code><br /><br />
 <code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;sudo perl Makefile.pl -install --prefix=PREFIX [/usr, /usr/local, ...]&#160;</code>
 </p><p>This command will install an <code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;api-sanity-checker&#160;</code> program in the <code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;PREFIX/bin&#160;</code> system directory.
+</p><p>To verify that the tool is installed correctly and it works on your host run:<br />
+<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;cd tmp/&#160;</code><br /><br />
+<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;api-sanity-checker -test&#160;</code><br /><br />
 </p>
 <h2> <span class="mw-headline" id="Usage"> Usage </span></h2>
 <p>For generating, building and running tests you should provide the <b><a href="Descriptor.html" title="Library Descriptor">XML descriptor</a></b> for your library version. It is a simple XML-file that specifies version number, paths to header files and shared libraries and optionally some other information. An example of the descriptor is the following (0.3.4.xml):
@@ -262,7 +265,7 @@ Generate tests using the <a rel="nofollow" class="external text" href="http://ww
 <p>In this test case the parameter "size" of target function FT_Activate_Size is initialized through the call of FT_New_Size function using its 2nd out-parameter. The first parameter "face" of FT_New_Size function is recursively initialized by the use of FT_New_Face function's 4th out-parameter. And finally the first parameter "alibrary" of FT_New_Face is initialized by the call of FT_Init_FreeType function on the 3rd recursion step. Other parameters of FT_New_Face function are initialized by intrinsic values.
 </p>
 <h2> <span class="mw-headline" id="Bugs"> Bugs </span></h2>
-<p>Please post your bug reports, feature requests and questions to the <a rel="nofollow" class="external text" href="http://forge.ispras.ru/projects/api-sanity-autotest">issue tracker</a> or send to <a rel="nofollow" class="external text" href="mailto:aponomarenko@rosalab.ru">this address</a>.
+<p>Please post your bug reports, feature requests and questions to the <a rel="nofollow" class="external text" href="https://github.com/lvc/api-sanity-checker/issues">issue tracker</a> or send to <a rel="nofollow" class="external text" href="mailto:aponomarenko@rosalab.ru">this address</a>.
 </p>
 <h2> <span class="mw-headline" id="Applications"> Applications </span></h2>
 <p>LSB 4.0 certification test suites for Qt3 (9792 interfaces tested), Qt4 (10803 interfaces tested) and libxml2 (1284 interfaces tested) libraries were developed with the help of this tool, also known as <a href="http://ispras.linuxbase.org/index.php/AZOV_Framework" title="AZOV Framework">AZOV Code Generator</a> in the past (2007-2009).
@@ -288,11 +291,11 @@ Generate tests using the <a rel="nofollow" class="external text" href="http://ww
 
 <!-- 
 NewPP limit report
-Preprocessor node count: 143/1000000
+Preprocessor node count: 145/1000000
 Post-expand include size: 0/2097152 bytes
 Template argument size: 0/2097152 bytes
 Expensive parser function count: 0/100
 -->
 
-<!-- Saved in parser cache with key rasispdb:pcache:idhash:2411-0!*!0!!en!*!* and timestamp 20121106204503 -->
+<!-- Saved in parser cache with key rasispdb:pcache:idhash:2411-0!*!0!!en!*!* and timestamp 20121214090727 -->
 </div></div></div></div></div></body></html>

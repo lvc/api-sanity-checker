@@ -21,7 +21,7 @@
 </style>
 <script src="/load.php?debug=false&amp;lang=en&amp;modules=startup&amp;only=scripts&amp;skin=monobook&amp;*"></script>
 <script>if(window.mw){
-	mw.config.set({"wgCanonicalNamespace": "", "wgCanonicalSpecialPageName": false, "wgNamespaceNumber": 0, "wgPageName": "API_Sanity_Checker_Options", "wgTitle": "API Sanity Checker Options", "wgCurRevisionId": 8095, "wgArticleId": 2419, "wgIsArticle": true, "wgAction": "view", "wgUserName": null, "wgUserGroups": ["*"], "wgCategories": ["API Sanity Checker"], "wgBreakFrames": false, "wgRestrictionEdit": [], "wgRestrictionMove": []});
+	mw.config.set({"wgCanonicalNamespace": "", "wgCanonicalSpecialPageName": false, "wgNamespaceNumber": 0, "wgPageName": "API_Sanity_Checker_Options", "wgTitle": "API Sanity Checker Options", "wgCurRevisionId": 8141, "wgArticleId": 2419, "wgIsArticle": true, "wgAction": "view", "wgUserName": null, "wgUserGroups": ["*"], "wgCategories": ["API Sanity Checker"], "wgBreakFrames": false, "wgRestrictionEdit": [], "wgRestrictionMove": []});
 }
 </script><script>if(window.mw){
 	mw.loader.load(["mediawiki.page.startup"]);
@@ -61,74 +61,61 @@
 </li></ul>
 <div style="padding-left:40px;">Print the tool version and don't do anything else.</div><br />
 <h2> <span class="mw-headline" id="General_Options"> General Options </span></h2>
-<ul><li><b>-l|-lib|-library &lt;name&gt;</b>
+<ul><li><b>-l|-lib|-library NAME</b>
 </li></ul>
 <div style="padding-left:40px;">Library name (without version). It affects only on the path and the title of the reports.</div><br />
-<ul><li><b>-d|-descriptor &lt;path&gt;</b>
+<ul><li><b>-d|-descriptor PATH</b>
 </li></ul>
-<div style="padding-left:40px;">Path to the library descriptor. It may be one of the following:<br />
-<p>1. <a href="Descriptor.html" title="Library Descriptor">XML-descriptor</a>,<br />
-2. Directory with headers and libraries:
-</p>
-<pre> api-sanity-checker -lib NAME -d DIR1.0/ -gen -build -run
-</pre>
-<p>3. Comma separated list of headers and libraries:
-</p>
-<pre> api-sanity-checker -lib NAME -d HEADER.h,LIB.so -gen -build -run
-</pre>
-If you are using an alternative descriptor type then you should specify a version number with -vnum option too.</div><br />
+<div style="padding-left:40px;">Path to the <a href="Descriptor.html" title="Library Descriptor">library descriptor</a>.</div><br />
 <ul><li><b>-gen|-generate</b>
 </li></ul>
-<div style="padding-left:40px;">Generate test(s). Options -l and -d should be specified. To generate test for the particular function use it with -f option. Exit code: number of test cases failed to build.</div><br />
+<div style="padding-left:40px;">Generate test(s). Options -l and -d should be specified. To generate test for the particular function use it with -f option.</div><br />
 <ul><li><b>-build|-make</b>
 </li></ul>
-<div style="padding-left:40px;">Build test(s). Options -l and -d should be specified. To build test for the particular function use it with -f option. Exit code: number of test cases failed to generate.</div><br />
+<div style="padding-left:40px;">Build test(s). Options -l and -d should be specified. To build test for the particular function use it with -f option.</div><br />
 <ul><li><b>-run</b>
 </li></ul>
-<div style="padding-left:40px;">Run test(s), create test report. Options -l and -d should be specified. To run test for the particular function use it with -f option. Exit code: number of failed test cases.</div><br />
+<div style="padding-left:40px;">Run test(s), create test report. Options -l and -d should be specified. To run test for the particular function use it with -f option.</div><br />
 <ul><li><b>-clean</b>
 </li></ul>
 <div style="padding-left:40px;">Clean test(s). Options -l and -d should be specified. To clean test for the particular function use it with -f option.</div><br />
-<ul><li><b>-vnum &lt;version&gt;</b>
+<ul><li><b>-vnum VERSION</b>
 </li></ul>
 <div style="padding-left:40px;">Specify library version outside the descriptor.</div><br />
-<ul><li><b>-s|-symbol &lt;name&gt;</b>
+<ul><li><b>-s|-symbol NAME</b>
 </li></ul>
-<div style="padding-left:40px;">Generate/Build/Run test for specified interface (mangled/symbol name in C++).</div><br />
-<ul><li><b>-symbols-list &lt;path&gt;</b>
+<div style="padding-left:40px;">Generate/Build/Run test for specified interface (mangled name in C++).</div><br />
+<ul><li><b>-symbols-list PATH</b>
 </li></ul>
 <div style="padding-left:40px;">This option allow to specify a file with a list of functions (one per line, mangled/symbol names in C++) that should be tested, other library interfaces will not be tested.</div><br />
-<ul><li><b>-header &lt;name&gt;</b>
+<ul><li><b>-header NAME</b>
 </li></ul>
 <div style="padding-left:40px;">This option allows to restrict a list of functions that should be tested by providing a header file name in which they are declared. This option was introduced for step-by-step tests development.</div><br />
 <ul><li><b>-xvfb</b>
 </li></ul>
-<div style="padding-left:40px;">Use <a rel="nofollow" class="external text" href="http://en.wikipedia.org/wiki/Xvfb">Xvfb-server</a> instead of current X-server (by default) for running tests.</div><br />
+<div style="padding-left:40px;">Use <a rel="nofollow" class="external text" href="http://en.wikipedia.org/wiki/Xvfb">Xvfb-server</a> instead of current X-server (default) for running tests.</div><br />
 <ul><li><b>-t2c|-template2code</b>
 </li></ul>
 <div style="padding-left:40px;">Generate tests in the universal <a rel="nofollow" class="external text" href="http://sourceforge.net/projects/template2code/">Template2Code</a> format.</div><br />
-<ul><li><b>-splint-specs</b>
-</li></ul>
-<div style="padding-left:40px;">Read <a rel="nofollow" class="external text" href="http://www.splint.org/manual/manual.html">splint</a> specifications (annotations) in the header files.</div><br />
 <ul><li><b>-strict-gen</b>
 </li></ul>
-<div style="padding-left:40px;">Terminate the process of generating tests and return error code '1' if cannot generate at least one test case.</div><br />
+<div style="padding-left:40px;">Terminate the process of generating tests if cannot generate at least one test case.</div><br />
 <ul><li><b>-strict-build</b>
 </li></ul>
-<div style="padding-left:40px;">Terminate the process of building tesst and return error code '1' if cannot build at least one test case.</div><br />
+<div style="padding-left:40px;">Terminate the process of building tests if cannot build at least one test case.</div><br />
 <ul><li><b>-strict-run</b>
 </li></ul>
-<div style="padding-left:40px;">Terminate the process of running tests and return error code '1' if at least one test case failed.</div><br />
+<div style="padding-left:40px;">Terminate the process of running tests if at least one test case is failed.</div><br />
 <ul><li><b>-strict</b>
 </li></ul>
 <div style="padding-left:40px;">This option enables all -strict-* options.</div><br />
 <h2> <span class="mw-headline" id="Extra_Options"> Extra Options </span></h2>
 <ul><li><b>-d-tmpl|-descriptor-template</b>
 </li></ul>
-<div style="padding-left:40px;">Create library descriptor template 'lib_ver.xml' in the current directory.</div><br />
+<div style="padding-left:40px;">Create library descriptor template ./VERSION.xml</div><br />
 <ul><li><b>-s-tmpl|-specialized-type-template</b>
 </li></ul>
-<div style="padding-left:40px;">Create specialized type template 'spectypes.xml' in the current directory.</div><br />
+<div style="padding-left:40px;">Create specialized type template ./SPECTYPES.xml</div><br />
 <ul><li><b>-r|-random</b>
 </li></ul>
 <div style="padding-left:40px;">Random tests generating mode.</div><br />
@@ -144,10 +131,10 @@ If you are using an alternative descriptor type then you should specify a versio
 <ul><li><b>-check-retval</b>
 </li></ul>
 <div style="padding-left:40px;">Insert requirements on return values (retval!=NULL) for each called interface.</div><br />
-<ul><li><b>-st|-specialized-types &lt;path&gt;</b>
+<ul><li><b>-st|-specialized-types PATH</b>
 </li></ul>
 <div style="padding-left:40px;">Path to the collection of <a href="SpecType.html" title="Specialized Type">specialized types</a>.</div><br />
-<ul><li><b>-td|-test-data &lt;path&gt;</b>
+<ul><li><b>-td|-test-data PATH</b>
 </li></ul>
 <div style="padding-left:40px;">Path to the directory with <a href="http://ispras.linuxbase.org/index.php/Specialized_Type#Using_Test_Data" title="Specialized Type">test data</a>.</div><br />
 <ul><li><b>-headers-only</b>
@@ -162,16 +149,16 @@ If you are using an alternative descriptor type then you should specify a versio
 <ul><li><b>-disable-default-values</b>
 </li></ul>
 <div style="padding-left:40px;">Disable usage of default values for function parameters.</div><br />
-<ul><li><b>-p|-params &lt;path&gt;</b>
+<ul><li><b>-p|-params PATH</b>
 </li></ul>
 <div style="padding-left:40px;">Path to file with the function parameter names. It can be used for improving generated tests if the library header files don't contain parameter names. File format:</div>
 <div style="padding-left:80px;">func1;param1;param2;param3 ...<br />func2;param1;param2;param3 ...<br />...</div><br />
-<ul><li><b>-library-full-name &lt;name&gt;</b>
+<ul><li><b>-library-full-name NAME</b>
 </li></ul>
 <div style="padding-left:40px;">Library name in the report title.</div><br />
-<ul><li><b>-relpath|-reldir &lt;path&gt;</b>
+<ul><li><b>-relpath|-reldir PATH</b>
 </li></ul>
-<div style="padding-left:40px;">Replace {RELPATH} in the library descriptor by &lt;path&gt;.</div><br />
+<div style="padding-left:40px;">Replace {RELPATH} in the library descriptor by PATH.</div><br />
 <ul><li><b>-debug</b>
 </li></ul>
 <div style="padding-left:40px;">Write extended log for debugging.</div><br />
@@ -179,26 +166,20 @@ If you are using an alternative descriptor type then you should specify a versio
 <ul><li><b>-test</b>
 </li></ul>
 <div style="padding-left:40px;">Run internal tests. Create a simple library and run the tool on it. This option allows to check if the tool works correctly on the system.</div><br />
-<ul><li><b>-time</b>
-</li></ul>
-<div style="padding-left:40px;">Show expend time for generating, building and running tests.</div><br />
-<ul><li><b>-check-stdcxx-symbols</b>
-</li></ul>
-<div style="padding-left:40px;">Enable checking of stdc++ interfaces from the library (for C++ libraries).</div><br />
 <ul><li><b>-disable-variable-reuse</b>
 </li></ul>
 <div style="padding-left:40px;">Disable reusing of previously created variables.</div><br />
 <ul><li><b>-long-variable-names</b>
 </li></ul>
-<div style="padding-left:40px;">Enable long (complex) variable names instead of short names (by default).</div><br />
+<div style="padding-left:40px;">Enable long (complex) variable names instead of short names (default).</div><br />
 
 <!-- 
 NewPP limit report
-Preprocessor node count: 58/1000000
+Preprocessor node count: 55/1000000
 Post-expand include size: 0/2097152 bytes
 Template argument size: 0/2097152 bytes
 Expensive parser function count: 0/100
 -->
 
-<!-- Saved in parser cache with key rasispdb:pcache:idhash:2419-0!*!0!!en!*!* and timestamp 20121107112923 -->
+<!-- Saved in parser cache with key rasispdb:pcache:idhash:2419-0!*!0!!en!*!* and timestamp 20121214090756 -->
 </div></div></div></div></div></body></html>
