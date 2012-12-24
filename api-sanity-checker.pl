@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 ###########################################################################
-# API Sanity Checker 1.98
+# API Sanity Checker 1.98.1
 # An automatic generator of basic unit tests for a C/C++ library API
 #
 # Copyright (C) 2009-2010 The Linux Foundation
@@ -58,7 +58,7 @@ use File::Copy qw(copy);
 use Cwd qw(abs_path cwd);
 use Config;
 
-my $TOOL_VERSION = "1.98";
+my $TOOL_VERSION = "1.98.1";
 my $OSgroup = get_OSgroup();
 my $ORIG_DIR = cwd();
 my $TMP_DIR = tempdir(CLEANUP=>1);
@@ -12648,7 +12648,7 @@ sub getLib_Deps($)
     push(@RecurLib, $Path);
     
     my %Deps = ();
-    foreach my $Sym (keys(%{$UndefinedSymbols{$Path}}))
+    foreach my $Sym (keys(%{$UndefinedSymbols{get_filename($Path)}}))
     {
         if(my $P = $Symbol_Library{$Sym}) {
             $Deps{$P} = 1;
@@ -14168,11 +14168,6 @@ sub read_ABI($)
         $COMMON_LANGUAGE = uc($UserLang);
     }
     
-    foreach my $Name (keys(%UndefinedSymbols))
-    {
-        
-    }
-    
     foreach my $P (keys(%DirectIncludes))
     {
         if(defined $RegisteredHeaders_R{$P})
@@ -14564,7 +14559,7 @@ sub scenario()
     and not $RunTests and not $CleanTests and not $CleanSources) {
         exitStatus("Error", "one of these options is not specified: -gen, -build, -run or -clean");
     }
-    $TOOL_SIGNATURE = "<hr/><div style='width:100%;font-family:Arial;font-size:11px;' align='right'><i>Generated on ".(localtime time)." for <b>$TargetLibraryFullName</b> by <a href='".$HomePage{"Dev"}."'>API Sanity Checker</a> $TOOL_VERSION &nbsp;<br/>Unit test generator for C/C++ library API&nbsp;&nbsp;</i></div>";
+    $TOOL_SIGNATURE = "<hr/><div style='width:100%;font-family:Arial;font-size:11px;' align='right'><i>Generated on ".(localtime time)." for <b>$TargetLibraryFullName</b> by <a href='".$HomePage{"Dev"}."'>API Sanity Checker</a> $TOOL_VERSION &nbsp;<br/>An automatic generator of basic unit tests for a C/C++ library API&nbsp;&nbsp;</i></div>";
     if($ParameterNamesFilePath)
     {
         if(-f $ParameterNamesFilePath)
