@@ -5,7 +5,7 @@
 #
 # Copyright (C) 2009-2010 The Linux Foundation
 # Copyright (C) 2009-2011 Institute for System Programming, RAS
-# Copyright (C) 2011-2012 ROSA Lab
+# Copyright (C) 2011-2013 ROSA Lab
 #
 # Written by Andrey Ponomarenko
 #

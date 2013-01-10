@@ -1,11 +1,11 @@
 #!/usr/bin/perl
 ###########################################################################
-# API Sanity Checker 1.98.1
+# API Sanity Checker 1.98.2
 # An automatic generator of basic unit tests for a C/C++ library API
 #
 # Copyright (C) 2009-2010 The Linux Foundation
 # Copyright (C) 2009-2011 Institute for System Programming, RAS
-# Copyright (C) 2011-2012 ROSA Lab
+# Copyright (C) 2011-2013 ROSA Lab
 #
 # Written by Andrey Ponomarenko
 #
@@ -58,7 +58,7 @@ use File::Copy qw(copy);
 use Cwd qw(abs_path cwd);
 use Config;
 
-my $TOOL_VERSION = "1.98.1";
+my $TOOL_VERSION = "1.98.2";
 my $OSgroup = get_OSgroup();
 my $ORIG_DIR = cwd();
 my $TMP_DIR = tempdir(CLEANUP=>1);
@@ -110,7 +110,7 @@ my %HomePage = (
 
 my $ShortUsage = "API Sanity Checker $TOOL_VERSION
 Unit test generator for a C/C++ library API
-Copyright (C) 2012 ROSA Lab
+Copyright (C) 2013 ROSA Lab
 License: GNU LGPL or GNU GPL
 
 Usage: $CmdName [options]
@@ -825,8 +825,9 @@ my $DEBUG_PATH;
 my $CACHE_PATH;
 my $LOG_PATH;
 my %Interface_TestDir;
-my %CompilerOptions_Libs;
-my $CompilerOptions_Headers;
+my %LibsDepend;
+my $CompilerOptions_Libs;
+my $CompilerOptions_Cflags;
 my %Language;
 my %Cache;
 my $TestedInterface;
@@ -1643,12 +1644,13 @@ sub readDescriptor($)
     
     foreach my $Option (split(/\s*\n\s*/, parseTag(\$Content, "gcc_options")))
     {
-        if($Option=~/\.$LIB_EXT[0-9.]*\Z/
-        or index($Option, "-Wl")!=-1) {
-            $CompilerOptions_Libs{$Option} = 1;
+        if($Option=~/\A\-(Wl|l|L)/
+        or $Option=~/\.$LIB_EXT[0-9.]*\Z/)
+        { # to linker
+            $CompilerOptions_Libs .= " ".$Option;
         }
         else {
-            $CompilerOptions_Headers .= " ".$Option;
+            $CompilerOptions_Cflags .= " ".$Option;
         }
     }
     if(my $DDefines = parseTag(\$Content, "test_defines"))
@@ -1661,7 +1663,7 @@ sub readDescriptor($)
             exitStatus("Access_Error", "can't access \'$Dep\': no such file");
         }
         $Dep = abs_path($Dep) if($Dep!~/\A(\/|\w+:[\/\\])/);
-        $CompilerOptions_Libs{$Dep} = 1;
+        $LibsDepend{$Dep} = 1;
     }
     foreach my $IntParam (split(/\s*\n\s*/, parseTag(\$Content, "out_params")))
     {
@@ -2595,9 +2597,10 @@ sub htmlSpecChars($)
     $Str=~s/\&/&amp;/g;
     $Str=~s/</&lt;/g;
     $Str=~s/>/&gt;/g;
-    $Str=~s/([^ ])( )([^ ])/$1\@ALONE_SP\@$3/g;
+    $Str=~s/([^ ]) ([^ ])/$1\@SP1\@$2/g;
+    $Str=~s/([^ ]) ([^ ])/$1\@SP1\@$2/g;
     $Str=~s/ /&nbsp;/g;
-    $Str=~s/\@ALONE_SP\@/ /g;
+    $Str=~s/\@SP1\@/ /g;
     $Str=~s/\n/<br\/>/g;
     return $Str;
 }
@@ -12875,7 +12878,7 @@ sub get_RunScript($)
 {
     my $Interface = $_[0];
     my @Paths = ();
-    foreach my $Path (sort (keys(%UsedSharedObjects), keys(%CompilerOptions_Libs), keys(%SpecLibs)))
+    foreach my $Path (sort (keys(%UsedSharedObjects), keys(%LibsDepend), keys(%SpecLibs)))
     {
         if(my $Dir = get_dirname($Path))
         {
@@ -13185,7 +13188,7 @@ sub get_Makefile($$)
     
     my (%LibPaths, %LibSuffixes) = ();
     my $LIBS = "";
-    foreach my $Path (sort (keys(%UsedSharedObjects), keys(%CompilerOptions_Libs), keys(%SpecLibs)))
+    foreach my $Path (sort (keys(%UsedSharedObjects), keys(%LibsDepend), keys(%SpecLibs)))
     {
         if($OSgroup eq "windows")
         {
@@ -13218,9 +13221,14 @@ sub get_Makefile($$)
     foreach my $Suffix (keys(%LibSuffixes)) {
         $LIBS .= " -l".$Suffix;
     }
+    
     if($LibString)
     { # undefined symbols
         $LIBS .= " ".$LibString;
+    }
+    
+    if($CompilerOptions_Libs) {
+        $LIBS .= $CompilerOptions_Libs;
     }
     
     my $IncStr = "";
@@ -13266,7 +13274,7 @@ sub get_Makefile($$)
         if(getTestLang($Interface) eq "C++")
         {
             my $Makefile = "CXX      = g++\n";
-            $Makefile .= "CXXFLAGS = -Wall$CompilerOptions_Headers";
+            $Makefile .= "CXXFLAGS = -Wall".$CompilerOptions_Cflags;
             if($IncStr) {
                 $Makefile .= "\nINCLUDES = $IncStr";
             }
@@ -13290,7 +13298,7 @@ sub get_Makefile($$)
         else
         {
             my $Makefile = "CC       = gcc\n";
-            $Makefile .= "CFLAGS   = -Wall$CompilerOptions_Headers";
+            $Makefile .= "CFLAGS   = -Wall".$CompilerOptions_Cflags;
             if($IncStr) {
                 $Makefile .= "\nINCLUDES = $IncStr";
             }
@@ -14480,7 +14488,7 @@ sub scenario()
     }
     if(defined $ShowVersion)
     {
-        printMsg("INFO", "API Sanity Checker $TOOL_VERSION\nCopyright (C) 2012 ROSA Lab\nLicense: LGPL or GPL <http://www.gnu.org/licenses/>\nThis program is free software: you can redistribute it and/or modify it.\n\nWritten by Andrey Ponomarenko.");
+        printMsg("INFO", "API Sanity Checker $TOOL_VERSION\nCopyright (C) 2013 ROSA Lab\nLicense: LGPL or GPL <http://www.gnu.org/licenses/>\nThis program is free software: you can redistribute it and/or modify it.\n\nWritten by Andrey Ponomarenko.");
         exit(0);
     }
     if(defined $DumpVersion)
