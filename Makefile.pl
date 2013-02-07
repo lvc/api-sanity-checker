@@ -233,8 +233,19 @@ sub scenario()
         }
         
         # check PATH
-        if($ENV{"PATH"}!~/(\A|[:;])\Q$EXE_PATH\E[\/\\]?(\Z|[:;])/) { 
-            print "WARNING: your PATH variable doesn't include \'$EXE_PATH\'\n";
+        my $Warn = "WARNING: your PATH variable doesn't include \'$EXE_PATH\'\n";
+        
+        if($Config{"osname"}=~/win/i)
+        {
+            if($ENV{"PATH"}!~/(\A|[:;])\Q$EXE_PATH\E[\/\\]?(\Z|[:;])/i) { 
+                print $Warn;
+            }
+        }
+        else
+        {
+            if($ENV{"PATH"}!~/(\A|[:;])\Q$EXE_PATH\E[\/\\]?(\Z|[:;])/) { 
+                print $Warn;
+            }
         }
     }
     exit(0);

@@ -25,7 +25,7 @@ span.int {
     font-family:Arial;
     color:#003E69;
 }
-span.int_p {
+span.sym_p {
     font-weight:normal;
 }
 span:hover.int {
@@ -57,9 +57,19 @@ span.mangled {
     cursor:text;
     color:#444444;
 }
+span.nowrap {
+    white-space:nowrap;
+}
+span.attr {
+    color:#333333;
+    font-weight:100;
+}
 span.color_p {
     font-style:italic;
     color:Brown;
+}
+span.param {
+    font-style:italic;
 }
 span.focus_p {
     font-style:italic;

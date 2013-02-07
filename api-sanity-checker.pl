@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 ###########################################################################
-# API Sanity Checker 1.98.2
+# API Sanity Checker 1.98.3
 # An automatic generator of basic unit tests for a C/C++ library API
 #
 # Copyright (C) 2009-2010 The Linux Foundation
@@ -58,7 +58,7 @@ use File::Copy qw(copy);
 use Cwd qw(abs_path cwd);
 use Config;
 
-my $TOOL_VERSION = "1.98.2";
+my $TOOL_VERSION = "1.98.3";
 my $OSgroup = get_OSgroup();
 my $ORIG_DIR = cwd();
 my $TMP_DIR = tempdir(CLEANUP=>1);
@@ -79,7 +79,7 @@ $CheckHeadersOnly, $Template2Code, $Standalone, $ShowVersion, $MakeIsolated,
 $ParameterNamesFilePath, $CleanSources, $DumpVersion, $TargetHeaderName,
 $RelativeDirectory, $TargetLibraryFullName, $TargetVersion, $StrictGen,
 $StrictBuild, $StrictRun, $Strict, $Debug, $UseCache, $NoInline, $Browse,
-$OpenReport, $UserLang, $OptimizeIncludes, $KeepInternal);
+$OpenReport, $UserLang, $OptimizeIncludes, $KeepInternal, $TargetCompiler);
 
 my $CmdName = get_filename($0);
 my %OS_LibExt=(
@@ -182,6 +182,7 @@ GetOptions("h|help!" => \$Help,
   "l-full|lib-full=s" => \$TargetLibraryFullName,
   "relpath|reldir=s" => \$RelativeDirectory,
   "lang=s" => \$UserLang,
+  "target=s" => \$TargetCompiler,
   "debug!" => \$Debug,
   "cache!" => \$UseCache,
 # other options
@@ -445,6 +446,12 @@ EXTRA OPTIONS:
   -lang LANG
       Set library language (C or C++). You can use this option if the tool
       cannot auto-detect a language.
+      
+  -target COMPILER
+      The compiler that should be used to build generated tests under Windows.
+      Supported:
+        gcc - GNU compiler
+        cl - MS compiler (default)
 
   -debug
       Write extended log for debugging.
@@ -2267,11 +2274,14 @@ sub cmd_find($;$$$$)
         }
         my @Files = split(/\n/, `$Cmd 2>\"$TMP_DIR/null\"`);
         if($Name)
-        { # FIXME: how to search file names in MS shell?
-            if(not $UseRegex) {
+        {
+            if(not $UseRegex)
+            { # FIXME: how to search file names in MS shell?
+              # wildcard to regexp
                 $Name=~s/\*/.*/g;
+                $Name='\A'.$Name.'\Z';
             }
-            @Files = grep { /\A$Name\Z/i } @Files;
+            @Files = grep { /$Name/i } @Files;
         }
         my @AbsPaths = ();
         foreach my $File (@Files)
@@ -2310,13 +2320,13 @@ sub cmd_find($;$$$$)
             $Cmd .= " -name \"$Name\"";
         }
         my $Res = `$Cmd 2>\"$TMP_DIR/null\"`;
-        if($?) {
+        if($? and $!) {
             printMsg("ERROR", "problem with \'find\' utility ($?): $!");
         }
         my @Files = split(/\n/, $Res);
         if($Name and $UseRegex)
         { # regex
-            @Files = grep { /\A$Name\Z/ } @Files;
+            @Files = grep { /$Name/ } @Files;
         }
         return @Files;
     }
@@ -2613,7 +2623,7 @@ sub highLight_Signature_Italic_Color($)
 
 sub highLight_Signature_PPos_Italic($$$$)
 {
-    my ($Signature, $Parameter_Position, $ItalicParams, $ColorParams) = @_;
+    my ($Signature, $Param_Pos, $ItalicParams, $ColorParams) = @_;
     my ($Begin, $End, $Return) = (substr($Signature, 0, find_center($Signature, "(")), "", "");
     if($ShowRetVal and $Signature=~s/([^:])\s*:([^:].+?)\Z/$1/g) {
         $Return = $2;
@@ -2622,9 +2632,10 @@ sub highLight_Signature_PPos_Italic($$$$)
         $End = $1;
     }
     my @Parts = ();
-    my $Part_Num = 0;
-    foreach my $Part (get_Signature_Parts($Signature, 1))
+    my @SParts = get_Signature_Parts($Signature, 1);
+    foreach my $Pos (0 .. $#SParts)
     {
+        my $Part = $SParts[$Pos];
         $Part=~s/\A\s+|\s+\Z//g;
         my ($Part_Styled, $ParamName) = (htmlSpecChars($Part), "");
         if($Part=~/\([\*]+(\w+)\)/i) {
@@ -2633,36 +2644,50 @@ sub highLight_Signature_PPos_Italic($$$$)
         elsif($Part=~/(\w+)[\,\)]*\Z/i) {
             $ParamName = $1;
         }
-        if(not $ParamName) {
-            push(@Parts, $Part);
+        if(not $ParamName)
+        {
+            push(@Parts, $Part_Styled);
             next;
         }
-        if($ItalicParams and not $TName_Tid{$Part})
+        if($ItalicParams
+        and not $TName_Tid{$Part})
         {
-            if($Parameter_Position ne "" and $Part_Num==$Parameter_Position) {
-                $Part_Styled =~ s!(\W)$ParamName([\,\)]|\Z)!$1<span class='focus_p'>$ParamName</span>$2!ig;
+            my $Style = "param";
+            if($Param_Pos ne ""
+            and $Pos==$Param_Pos) {
+                $Style = "focus_p";
             }
             elsif($ColorParams) {
-                $Part_Styled =~ s!(\W)$ParamName([\,\)]|\Z)!$1<span class='color_p'>$ParamName</span>$2!ig;
+                $Style = "color_p";
             }
-            else {
-                $Part_Styled =~ s!(\W)$ParamName([\,\)]|\Z)!$1<span style='font-style:italic;'>$ParamName</span>$2!ig;
-            }
+            $Part_Styled =~ s!(\W)$ParamName([\,\)]|\Z)!$1<span class=\'$Style\'>$ParamName</span>$2!ig;
         }
         $Part_Styled=~s/,(\w)/, $1/g;
-        if(length($Part)<=45) {
-            $Part_Styled = "<span style='white-space:nowrap;'>".$Part_Styled."</span>";
-        }
         push(@Parts, $Part_Styled);
-        $Part_Num += 1;
     }
-    $Signature = htmlSpecChars($Begin)."<span class='int_p'>"."(&nbsp;".join(" ", @Parts).(@Parts?"&nbsp;":"").")"."</span>".$End;
-    if($Return) {
-        $Signature .= "<span class='int_p' style='white-space:nowrap'> &nbsp;<b>:</b>&nbsp;&nbsp;".htmlSpecChars($Return)."</span>";
+    if(@Parts)
+    {
+        foreach my $Num (0 .. $#Parts)
+        {
+            if($Num==$#Parts)
+            { # add ")" to the last parameter
+                $Parts[$Num] = "<span class='nowrap'>".$Parts[$Num]." )</span>";
+            }
+            elsif(length($Parts[$Num])<=45) {
+                $Parts[$Num] = "<span class='nowrap'>".$Parts[$Num]."</span>";
+            }
+        }
+        $Signature = htmlSpecChars($Begin)."<span class='sym_p'>(&#160;".join(" ", @Parts)."</span>".$End;
     }
-    $Signature=~s!\[\]![<span style='padding-left:2px;'>]</span>!g;
-    $Signature=~s!operator=!operator<span style='padding-left:2px'>=</span>!g;
-    $Signature=~s!(\[in-charge\]|\[not-in-charge\]|\[in-charge-deleting\]|\[static\])!<span style='color:Black;font-weight:normal;'>$1</span>!g;
+    else {
+        $Signature = htmlSpecChars($Begin)."<span class='sym_p'>(&#160;)</span>".$End;
+    }
+    if($Return and $ShowRetVal) {
+        $Signature .= "<span class='sym_p nowrap'> &#160;<b>:</b>&#160;&#160;".htmlSpecChars($Return)."</span>";
+    }
+    $Signature=~s!\[\]![&#160;]!g;
+    $Signature=~s!operator=!operator&#160;=!g;
+    $Signature=~s!(\[in-charge\]|\[not-in-charge\]|\[in-charge-deleting\]|\[static\])!<span class='attr'>$1</span>!g;
     return $Signature;
 }
 
@@ -12123,6 +12148,8 @@ sub path_format($$)
 sub inc_opt($$)
 {
     my ($Path, $Style) = @_;
+    $Path=~s/\A\"//;
+    $Path=~s/\"\Z//;
     return "" if(not $Path);
     if($Style eq "GCC")
     { # GCC options
@@ -12141,6 +12168,26 @@ sub inc_opt($$)
     }
     elsif($Style eq "CL") {
         return "/I \"$Path\"";
+    }
+    return "";
+}
+
+sub esc_option($$)
+{
+    my ($Path, $Style) = @_;
+    return "" if(not $Path);
+    if($Style eq "GCC")
+    { # GCC options
+        if($OSgroup eq "windows")
+        { # to MinGW GCC
+            return "\"".path_format($Path, "unix")."\"";
+        }
+        else {
+            return esc($Path);
+        }
+    }
+    elsif($Style eq "CL") {
+        return "\"".$Path."\"";
     }
     return "";
 }
@@ -12370,13 +12417,8 @@ sub generateTest($)
             $UsedInterfaces{"__gxx_personality"} = 1;
         }
     }
-    if(getTestLang($Interface) eq "C"
-    and $OSgroup eq "windows") {
-        $SanityTest .= "extern \"C\" {\n$HList}\n";
-    }
-    else {
-        $SanityTest .= $HList;
-    }
+    $SanityTest .= $HList;
+    
     my %UsedNameSpaces = ();
     foreach my $NameSpace (add_namespaces(\$CommonCode), add_namespaces(\$SanityTestMain)) {
         $UsedNameSpaces{$NameSpace} = 1;
@@ -12407,7 +12449,7 @@ sub generateTest($)
     }
     if(defined $Standalone)
     { # create stuff for building and running test
-        my $TestFileName = (getTestLang($Interface) eq "C++" or $OSgroup eq "windows")?"test.cpp":"test.c";
+        my $TestFileName = (getTestLang($Interface) eq "C++")?"test.cpp":"test.c";
         my $TestPath = getTestPath($Interface);
         if(-e $TestPath) {
             rmtree($TestPath);
@@ -13190,7 +13232,7 @@ sub get_Makefile($$)
     my $LIBS = "";
     foreach my $Path (sort (keys(%UsedSharedObjects), keys(%LibsDepend), keys(%SpecLibs)))
     {
-        if($OSgroup eq "windows")
+        if($TestFormat eq "CL")
         {
             $Path=~s/\.dll\Z/.lib/;
             $LibPaths_All{"\"".get_dirname($Path)."\""} = 1;
@@ -13216,7 +13258,7 @@ sub get_Makefile($$)
     {
         next if(not $Path);
         next if(grep {$Path eq $_} @DefaultLibPaths);
-        $LIBS .= " -L".$Path;
+        $LIBS .= " -L".esc_option($Path, "GCC");
     }
     foreach my $Suffix (keys(%LibSuffixes)) {
         $LIBS .= " -l".$Suffix;
@@ -13243,7 +13285,28 @@ sub get_Makefile($$)
         $IncStr .= " ".$IncludeString;
     }
     
+    my $Source = "test.c";
+    my $Exe = "test";
+    my $Obj = "test.o";
+    my $Rm = "rm -f";
+    
+    if(getTestLang($Interface) eq "C++")
+    {
+        $Source = "test.cpp";
+    }
+    
     if($OSgroup eq "windows")
+    {
+        $Exe = "test.exe";
+        $Rm = "del";
+    }
+    
+    if($TestFormat eq "CL")
+    {
+        $Obj = "test.obj";
+    }
+    
+    if($TestFormat eq "CL")
     { # compiling using CL and NMake
         my $Makefile = "CC       = cl";
         if($IncStr) {
@@ -13252,8 +13315,8 @@ sub get_Makefile($$)
         if(keys(%LibNames_All)) {
             $Makefile .= "\nLIBS     = ".join(" ", keys(%LibNames_All));
         }
-        $Makefile .= "\n\nall: test.exe\n\n";
-        $Makefile .= "test.exe: test.cpp\n\t";
+        $Makefile .= "\n\nall: $Exe\n\n";
+        $Makefile .= "$Exe: $Source\n\t";
         if(keys(%LibNames_All)) {
             $Makefile .= "set LIB=".join(";", keys(%LibPaths_All)).";\$(LIB)\n\t";
         }
@@ -13261,12 +13324,12 @@ sub get_Makefile($$)
         if($IncStr) {
             $Makefile .= "\$(INCLUDES) ";
         }
-        $Makefile .= "test.cpp";
+        $Makefile .= $Source;
         if(keys(%LibNames_All)) {
             $Makefile .= " \$(LIBS)";
         }
         $Makefile .= "\n\n";
-        $Makefile .= "clean:\n\tdel test.exe test\.obj\n";
+        $Makefile .= "clean:\n\t$Rm $Exe $Obj\n";
         return $Makefile;
     }
     else
@@ -13281,18 +13344,18 @@ sub get_Makefile($$)
             if($LIBS) {
                 $Makefile .= "\nLIBS     = $LIBS";
             }
-            $Makefile .= "\n\nall: test\n\n";
-            $Makefile .= "test: test.cpp\n\t";
+            $Makefile .= "\n\nall: $Exe\n\n";
+            $Makefile .= "$Exe: $Source\n\t";
             $Makefile .= "\$(CXX) \$(CXXFLAGS)";
             if($IncStr) {
                 $Makefile .= " \$(INCLUDES)";
             }
-            $Makefile .= " test.cpp -o test";
+            $Makefile .= " $Source -o $Exe";
             if($LIBS) {
                 $Makefile .= " \$(LIBS)";
             }
             $Makefile .= "\n\n";
-            $Makefile .= "clean:\n\trm -f test test\.o\n";
+            $Makefile .= "clean:\n\t$Rm $Exe $Obj\n";
             return $Makefile;
         }
         else
@@ -13305,18 +13368,18 @@ sub get_Makefile($$)
             if($LIBS) {
                 $Makefile .= "\nLIBS     = $LIBS";
             }
-            $Makefile .= "\n\nall: test\n\n";
-            $Makefile .= "test: test.c\n\t";
+            $Makefile .= "\n\nall: $Exe\n\n";
+            $Makefile .= "$Exe: $Source\n\t";
             $Makefile .= "\$(CC) \$(CFLAGS)";
             if($IncStr) {
                 $Makefile .= " \$(INCLUDES)";
             }
-            $Makefile .= " test.c -o test";
+            $Makefile .= " $Source -o $Exe";
             if($LIBS) {
                 $Makefile .= " \$(LIBS)";
             }
             $Makefile .= "\n\n";
-            $Makefile .= "clean:\n\trm -f test test\.o\n";
+            $Makefile .= "clean:\n\t$Rm $Exe $Obj\n";
             return $Makefile;
         }
     }
@@ -14031,6 +14094,9 @@ sub read_ABI($)
         my $Cmd = $ABICC." -l $TargetLibraryName -dump \"$Path\" -dump-path \"".$ABI_Dir."/ABI.dump\"";
         $Cmd .= " -extra-info \"$Extra_Dir\""; # include paths and dependent libs
         $Cmd .= " -extra-dump"; # dump all symbols
+        if($TargetVersion) {
+            $Cmd .= " -vnum \"$TargetVersion\"";
+        }
         if($RelativeDirectory) {
             $Cmd .= " -relpath \"$RelativeDirectory\"";
         }
@@ -14516,10 +14582,21 @@ sub scenario()
             exitStatus("Error", "can't start without VS environment (vsvars32.bat)");
         }
     }
+    if(defined $TargetCompiler)
+    {
+        $TargetCompiler = uc($TargetCompiler);
+        if($TargetCompiler!~/\A(GCC|CL)\Z/) {
+            exitStatus("Error", "Target compiler is not either gcc or cl");
+        }
+    }
+    else
+    { # default
+        $TargetCompiler = "CL";
+    }
     if(defined $TestTool)
     {
         loadModule("RegTests");
-        testTool($Debug, $LIB_EXT, $OpenReport);
+        testTool($Debug, $LIB_EXT, $OpenReport, $TargetCompiler);
         exit(0);
     }
     if(not defined $TargetLibraryName) {
@@ -14615,7 +14692,9 @@ sub scenario()
         registerFiles();
         
         $TestFormat = "GCC";
-        if($OSgroup eq "windows") {
+        if($OSgroup eq "windows"
+        and $TargetCompiler eq "CL")
+        { # default for Windows
             $TestFormat = "CL";
         }
         

@@ -17,7 +17,7 @@ span.int {
     color:#003E69;
     font-size:16px;
 }
-span.int_p {
+span.sym_p {
     font-weight:normal;
 }
 hr {
@@ -65,9 +65,19 @@ span.targ {
 td.targ {
     background-color:#FFD1D1
 }
+span.nowrap {
+    white-space:nowrap;
+}
+span.attr {
+    color:#333333;
+    font-weight:100;
+}
 span.color_p {
     font-style:italic;
     color:Brown;
+}
+span.param {
+    font-style:italic;
 }
 span.focus_p {
     font-style:italic;

@@ -22,12 +22,12 @@
 ###########################################################################
 use strict;
 
-my ($Debug, $LIB_EXT, $OpenReport);
+my ($Debug, $LIB_EXT, $OpenReport, $TargetCompiler);
 my $OSgroup = get_OSgroup();
 
-sub testTool($$$)
+sub testTool($$$$)
 {
-    ($Debug, $LIB_EXT, $OpenReport) = @_;
+    ($Debug, $LIB_EXT, $OpenReport, $TargetCompiler) = @_;
     
     testC();
     testCpp();
@@ -348,7 +348,6 @@ sub testC()
         $DeclSpec int operator();";
     $Sources .= "
         int operator() {
-            
             return 1;
         }";
     
@@ -396,51 +395,77 @@ sub runTests($$$$$$)
         <skip_symbols>
             $Private
         </skip_symbols>\n");
-    my $BuildCmd = "";
-    if($OSgroup eq "windows") {
-        $BuildCmd = "cl /LD libsample.$Ext >build_out 2>&1";
+    my @BuildCmds = ();
+    if($OSgroup eq "windows")
+    {
+        if($TargetCompiler eq "CL")
+        {
+            push(@BuildCmds, "cl /LD libsample.$Ext >build_out 2>&1");
+        }
+        else
+        {
+            if($Lang eq "C++")
+            {
+                push(@BuildCmds, "g++ -shared libsample.$Ext -o libsample.$LIB_EXT");
+                push(@BuildCmds, "g++ -c libsample.$Ext -o libsample.obj");
+            }
+            else
+            {
+                push(@BuildCmds, "gcc -shared libsample.$Ext -o libsample.$LIB_EXT");
+                push(@BuildCmds, "gcc -c libsample.$Ext -o libsample.obj");
+                push(@BuildCmds, "lib libsample.obj >build_out 2>&1");
+            }
+        }
     }
     elsif($OSgroup eq "linux")
     {
         writeFile("$LibName/version", "VERSION_1.0 {\n};\nVERSION_2.0 {\n};\n");
+        my $BCmd = "";
         if($Lang eq "C++") {
-            $BuildCmd = "g++ -Wl,--version-script version -shared libsample.$Ext -o libsample.$LIB_EXT";
+            $BCmd = "g++ -Wl,--version-script version -shared libsample.$Ext -o libsample.$LIB_EXT";
         }
         else {
-            $BuildCmd = "gcc -Wl,--version-script version -shared libsample.$Ext -o libsample.$LIB_EXT";
+            $BCmd = "gcc -Wl,--version-script version -shared libsample.$Ext -o libsample.$LIB_EXT";
         }
         if(getArch()=~/\A(arm|x86_64)\Z/i)
         { # relocation R_X86_64_32S against `vtable for class' can not be used when making a shared object; recompile with -fPIC
-            $BuildCmd .= " -fPIC";
+            $BCmd .= " -fPIC";
         }
+        push(@BuildCmds, $BCmd);
     }
     elsif($OSgroup eq "macos")
     {
         if($Lang eq "C++") {
-            $BuildCmd = "g++ -dynamiclib libsample.$Ext -o libsample.$LIB_EXT";
+            push(@BuildCmds, "g++ -dynamiclib libsample.$Ext -o libsample.$LIB_EXT");
         }
         else {
-            $BuildCmd = "gcc -dynamiclib libsample.$Ext -o libsample.$LIB_EXT";
+            push(@BuildCmds, "gcc -dynamiclib libsample.$Ext -o libsample.$LIB_EXT");
         }
     }
     else
     {
         if($Lang eq "C++") {
-            $BuildCmd = "g++ -shared libsample.$Ext -o libsample.$LIB_EXT";
+            push(@BuildCmds, "g++ -shared libsample.$Ext -o libsample.$LIB_EXT");
         }
         else {
-            $BuildCmd = "gcc -shared libsample.$Ext -o libsample.$LIB_EXT";
+            push(@BuildCmds, "gcc -shared libsample.$Ext -o libsample.$LIB_EXT");
         }
     }
-    writeFile("$LibName/Makefile", "all:\n\t$BuildCmd\n");
-    system("cd $LibName && $BuildCmd");
-    if($?) {
-        exitStatus("Error", "can't compile \'$LibName/libsample.$Ext\'");
+    writeFile("$LibName/Makefile", "all:\n\t".join("\n\t", @BuildCmds)."\n");
+    foreach (@BuildCmds)
+    {
+        system("cd $LibName && $_");
+        if($?) {
+            exitStatus("Error", "can't compile \'$LibName/libsample.$Ext\'");
+        }
     }
     # running the tool
     my $Cmd = "perl $0 -l $LibName -d $LibName/descriptor.xml -gen -build -run -show-retval";
     if($OpenReport) {
         $Cmd .= " -open";
+    }
+    if($TargetCompiler) {
+        $Cmd .= " -target ".$TargetCompiler;
     }
     if($Debug)
     {
@@ -448,6 +473,14 @@ sub runTests($$$$$$)
         printMsg("INFO", "run $Cmd");
     }
     system($Cmd);
+    
+    my $ECode = $?>>8;
+    
+    if($ECode!~/\A[0-1]\Z/)
+    { # error
+        exitStatus("Error", "analysis has failed");
+    }
+    
     my ($Total, $Passed, $Failed) = (0, 0, 0);
     if(my $FLine = readFirstLine("test_results/$LibName/1.0/test_results.html"))
     {

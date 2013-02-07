@@ -66,7 +66,7 @@ span.libgroup {
     font-family:Arial;
     font-weight:bold;
 }
-span.int_p {
+span.sym_p {
     font-weight:normal;
 }
 table.summary {
@@ -148,9 +148,19 @@ span.targ {
 td.targ {
     background-color:#FFE4E1
 }
+span.nowrap {
+    white-space:nowrap;
+}
+span.attr {
+    color:#333333;
+    font-weight:100;
+}
 span.color_p {
     font-style:italic;
     color:Brown;
+}
+span.param {
+    font-style:italic;
 }
 span.focus_p {
     font-style:italic;
