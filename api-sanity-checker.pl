@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 ###########################################################################
 # API Sanity Checker 1.98.3
 # An automatic generator of basic unit tests for a C/C++ library API
