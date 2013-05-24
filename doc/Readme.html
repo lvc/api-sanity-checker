@@ -21,7 +21,7 @@
 </style>
 <script src="/load.php?debug=false&amp;lang=en&amp;modules=startup&amp;only=scripts&amp;skin=monobook&amp;*"></script>
 <script>if(window.mw){
-	mw.config.set({"wgCanonicalNamespace": "", "wgCanonicalSpecialPageName": false, "wgNamespaceNumber": 0, "wgPageName": "API_Sanity_Checker", "wgTitle": "API Sanity Checker", "wgCurRevisionId": 8252, "wgArticleId": 2411, "wgIsArticle": true, "wgAction": "view", "wgUserName": null, "wgUserGroups": ["*"], "wgCategories": ["API Sanity Checker"], "wgBreakFrames": false, "wgRestrictionEdit": [], "wgRestrictionMove": []});
+	mw.config.set({"wgCanonicalNamespace": "", "wgCanonicalSpecialPageName": false, "wgNamespaceNumber": 0, "wgPageName": "API_Sanity_Checker", "wgTitle": "API Sanity Checker", "wgCurRevisionId": 8281, "wgArticleId": 2411, "wgIsArticle": true, "wgAction": "view", "wgUserName": null, "wgUserGroups": ["*"], "wgCategories": ["API Sanity Checker"], "wgBreakFrames": false, "wgRestrictionEdit": [], "wgRestrictionMove": []});
 }
 </script><script>if(window.mw){
 	mw.loader.load(["mediawiki.page.startup"]);
@@ -86,7 +86,7 @@
 <h2> <span class="mw-headline" id="Downloads"> Downloads </span></h2>
 <h3> <span class="mw-headline" id="Releases"> Releases </span></h3>
 <p>All releases can be downloaded from <b><a href="Changes.html" title="API Sanity Checker Downloads">this page</a></b> or <b><a rel="nofollow" class="external text" href="https://github.com/lvc/api-sanity-checker/">github.com</a></b>.
-</p><p>Latest release: <a rel="nofollow" class="external text" href="https://github.com/lvc/api-sanity-checker/archive/1.98.3.tar.gz">1.98.3</a>
+</p><p>Latest release: <a rel="nofollow" class="external text" href="https://github.com/lvc/api-sanity-checker/archive/1.98.4.tar.gz">1.98.4</a>
 </p><p>Previous release: <a rel="nofollow" class="external text" href="https://github.com/lvc/api-sanity-checker/archive/1.12.11.tar.gz">1.12.11</a>
 </p>
 <h3> <span class="mw-headline" id="Git"> Git </span></h3>
@@ -220,7 +220,16 @@ After a time will be generated test report:<br />
 </p>
 <h3> <span class="mw-headline" id="Command-Line_Options"> Command-Line Options </span></h3>
 <p>The tool has many useful options for manipulating with the test generation and execution processes. See the list of all options on <b><a href="Options.html" title="API Sanity Autotest Options" class="mw-redirect">this page</a></b>.
+</p><p>Most useful options:
 </p>
+<ul><li> <a href="Options.html" title="API Sanity Checker Options">-debug</a>
+</li><li> <a href="Options.html" title="API Sanity Checker Options">-header</a>
+</li><li> <a href="Options.html" title="API Sanity Checker Options">-random</a>
+</li><li> <a href="Options.html" title="API Sanity Checker Options">-check-retval</a>
+</li><li> <a href="Options.html" title="API Sanity Checker Options">-optimize-includes</a>
+</li><li> <a href="Options.html" title="API Sanity Checker Options">-cache</a>
+</li><li> <a href="Options.html" title="API Sanity Checker Options">-test</a>
+</li></ul>
 <h3> <span class="mw-headline" id="Examples"> Examples </span></h3>
 <p>Generate, build and execute the tests for the libssh library:<br />
 &#160;&#160;<code style="border: dashed 1px gray; background-color: #f0f0f0;">&#160;api-sanity-checker -l libssh -d 0.3.4.xml -gen -build -run&#160;</code><br /><br />
@@ -270,7 +279,7 @@ Execute the tests using the Xvfb server:<br />
 <p>In this test case the parameter "size" of target function FT_Activate_Size is initialized through the call of FT_New_Size function using its 2nd out-parameter. The first parameter "face" of FT_New_Size function is recursively initialized by the use of FT_New_Face function's 4th out-parameter. And finally the first parameter "alibrary" of FT_New_Face is initialized by the call of FT_Init_FreeType function on the 3rd recursion step. Other parameters of FT_New_Face function are initialized by intrinsic values.
 </p>
 <h2> <span class="mw-headline" id="Bugs"> Bugs </span></h2>
-<p>Please post your bug reports, feature requests and questions to the <a rel="nofollow" class="external text" href="https://github.com/lvc/api-sanity-checker/issues">issue tracker</a> or send to <a rel="nofollow" class="external text" href="mailto:aponomarenko@rosalab.ru">this address</a>.
+<p>Please send your bug reports, feature requests and questions to the <a rel="nofollow" class="external text" href="mailto:aponomarenko@rosalab.ru">the maintainer</a>, post to <a rel="nofollow" class="external text" href="https://github.com/lvc/api-sanity-checker/issues">issue tracker</a> or <a rel="nofollow" class="external text" href="https://groups.google.com/forum/#!forum/lvc-tools">mailing list</a>.
 </p>
 <h2> <span class="mw-headline" id="Applications"> Applications </span></h2>
 <p>LSB 4.0 certification test suites for Qt3 (9792 interfaces tested), Qt4 (10803 interfaces tested) and libxml2 (1284 interfaces tested) libraries were developed with the help of this tool, also known as <a href="http://ispras.linuxbase.org/index.php/AZOV_Framework" title="AZOV Framework">AZOV Code Generator</a> in the past (2007-2009).
@@ -283,7 +292,7 @@ Execute the tests using the Xvfb server:<br />
 </li><li> Option for generating bound values for parameters.
 </li></ul>
 <h2> <span class="mw-headline" id="Maintainers"> Maintainers </span></h2>
-<p>The tool was originally developed by the <a rel="nofollow" class="external text" href="http://linuxtesting.org">Russian Linux Verification Center</a> at <a href="http://ispras.linuxbase.org/index.php/ISP_RAS_Company_Profile" title="ISP RAS Company Profile">ISPRAS</a> and since <b>1.12.9</b> version it's developed by the <a rel="nofollow" class="external text" href="http://www.rosalab.com/">ROSA Laboratory</a> in Russia. <a rel="nofollow" class="external text" href="http://andrey-ponomarenko.myopenid.com/">Andrey Ponomarenko</a> is the leader of this project.
+<p>The tool was originally developed by the <a rel="nofollow" class="external text" href="http://linuxtesting.org">Russian Linux Verification Center</a> at <a href="http://ispras.linuxbase.org/index.php/ISP_RAS_Company_Profile" title="ISP RAS Company Profile">ISPRAS</a> and since <b>1.12.9</b> version it's developed by the <a rel="nofollow" class="external text" href="http://www.rosalab.com/">ROSA Laboratory</a> in Russia. <a rel="nofollow" class="external text" href="http://www.linkedin.com/pub/andrey-ponomarenko/67/366/818">Andrey Ponomarenko</a> is the leader of this project.
 </p>
 <h2> <span class="mw-headline" id="Credits"> Credits </span></h2>
 <p>We would like to thank <a href="http://ispras.linuxbase.org/index.php/Thanks" title="Thanks">everyone</a> who has contributed to the success of this project!
@@ -302,5 +311,5 @@ Template argument size: 0/2097152 bytes
 Expensive parser function count: 0/100
 -->
 
-<!-- Saved in parser cache with key rasispdb:pcache:idhash:2411-0!*!0!!en!*!* and timestamp 20130207090617 -->
+<!-- Saved in parser cache with key rasispdb:pcache:idhash:2411-0!*!0!!en!*!* and timestamp 20130524130708 -->
 </div></div></div></div></div></body></html>

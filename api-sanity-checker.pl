@@ -1,11 +1,11 @@
 #!/usr/bin/perl
 ###########################################################################
-# API Sanity Checker 1.98.3
+# API Sanity Checker 1.98.4
 # An automatic generator of basic unit tests for a C/C++ library API
 #
 # Copyright (C) 2009-2010 The Linux Foundation
 # Copyright (C) 2009-2011 Institute for System Programming, RAS
-# Copyright (C) 2011-2013 ROSA Lab
+# Copyright (C) 2011-2013 ROSA Laboratory
 #
 # Written by Andrey Ponomarenko
 #
@@ -16,19 +16,19 @@
 # REQUIREMENTS
 # ============
 #  Linux
-#    - ABI Compliance Checker (1.98.7 or newer)
+#    - ABI Compliance Checker (1.99 or newer)
 #    - G++ (3.0-4.7, recommended 4.5 or newer)
 #    - GNU Binutils (readelf, c++filt, objdump)
 #    - Perl 5 (5.8 or newer)
 #    - Ctags (5.8 or newer)
 #
 #  Mac OS X
-#    - ABI Compliance Checker (1.98.7 or newer)
+#    - ABI Compliance Checker (1.99 or newer)
 #    - Xcode (gcc, c++filt, nm)
 #    - Ctags (5.8 or newer)
 #
 #  MS Windows
-#    - ABI Compliance Checker (1.98.7 or newer)
+#    - ABI Compliance Checker (1.99 or newer)
 #    - MinGW (3.0-4.7, recommended 4.5 or newer)
 #    - MS Visual C++ (dumpbin, undname, cl)
 #    - Active Perl 5 (5.8 or newer)
@@ -55,16 +55,16 @@ use POSIX qw(setsid);
 use File::Path qw(mkpath rmtree);
 use File::Temp qw(tempdir);
 use File::Copy qw(copy);
-use Cwd qw(abs_path cwd);
+use Cwd qw(abs_path cwd realpath);
 use Config;
 
-my $TOOL_VERSION = "1.98.3";
+my $TOOL_VERSION = "1.98.4";
 my $OSgroup = get_OSgroup();
 my $ORIG_DIR = cwd();
 my $TMP_DIR = tempdir(CLEANUP=>1);
 
 my $ABICC = "abi-compliance-checker";
-my $ABICC_VERSION = "1.98.7";
+my $ABICC_VERSION = "1.99";
 
 # Internal modules
 my $MODULES_DIR = get_Modules();
@@ -887,6 +887,7 @@ my %DepLibrary_Symbol;
 my %Symbol_Library;
 my %DepSymbol_Library;
 my %UndefinedSymbols;
+my %Library_Needed;
 my %Class_PureVirtFunc;
 my %Class_Method;
 my %Class_PureMethod;
@@ -2242,7 +2243,7 @@ sub openReport($)
         and $OSgroup ne "macos")
         {
             if($Cmd!~/lynx|links/) {
-                $Cmd .= "  >\"$TMP_DIR/null\" 2>&1 &";
+                $Cmd .= "  >\"/dev/null\" 2>&1 &";
             }
         }
         system($Cmd);
@@ -3432,27 +3433,28 @@ sub skipSymbol($)
 
 sub symbolFilter($)
 {
-    my $Interface = $_[0];
+    my $Symbol = $_[0];
     
-    return 0 if(skipSymbol($Interface));
+    return 0 if(skipSymbol($Symbol));
+    return 0 if(index($Symbol, "_aux_")==0);
     
-    return 0 if(not $CompleteSignature{$Interface}{"Header"});
-    return 0 if($CompleteSignature{$Interface}{"Private"});
-    return 0 if($CompleteSignature{$Interface}{"Data"});
+    return 0 if(not $CompleteSignature{$Symbol}{"Header"});
+    return 0 if($CompleteSignature{$Symbol}{"Private"});
+    return 0 if($CompleteSignature{$Symbol}{"Data"});
     
-    my $ClassId = $CompleteSignature{$Interface}{"Class"};
+    my $ClassId = $CompleteSignature{$Symbol}{"Class"};
     
     if(not $TargetInterfaceName
     and not keys(%InterfacesList))
     {
-        return 0 if($Interface=~/\A(_ZS|_ZNS|_ZNKS)/); # stdc++ symbols
+        return 0 if($Symbol=~/\A(_ZS|_ZNS|_ZNKS)/); # stdc++ symbols
         if(not defined $KeepInternal)
         { # --keep-internal
-            if(index($Interface, "__")==0)
+            if(index($Symbol, "__")==0)
             { # __argz_count
                 return 0;
             }
-            if(index($CompleteSignature{$Interface}{"ShortName"}, "__")==0)
+            if(index($CompleteSignature{$Symbol}{"ShortName"}, "__")==0)
             {
                 return 0;
             }
@@ -3471,16 +3473,16 @@ sub symbolFilter($)
                 }
             }
         }
-        return 0 if($CompleteSignature{$Interface}{"Weak"});
+        return 0 if($CompleteSignature{$Symbol}{"Weak"});
     }
-    if(index($Interface, "_ZN9__gnu_cxx")==0) {
+    if(index($Symbol, "_ZN9__gnu_cxx")==0) {
         return 0;
     }
-    if($CompleteSignature{$Interface}{"Constructor"}) {
-        return ( not ($Interface=~/C1E/ and ($CompleteSignature{$Interface}{"Protected"} or isAbstractClass($ClassId))) );
+    if($CompleteSignature{$Symbol}{"Constructor"}) {
+        return ( not ($Symbol=~/C1E/ and ($CompleteSignature{$Symbol}{"Protected"} or isAbstractClass($ClassId))) );
     }
-    elsif($CompleteSignature{$Interface}{"Destructor"}) {
-        return ( not ($Interface=~/D0E|D1E/ and ($CompleteSignature{$Interface}{"Protected"} or isAbstractClass($ClassId))) );
+    elsif($CompleteSignature{$Symbol}{"Destructor"}) {
+        return ( not ($Symbol=~/D0E|D1E/ and ($CompleteSignature{$Symbol}{"Protected"} or isAbstractClass($ClassId))) );
     }
     return 1;
 }
@@ -4238,11 +4240,11 @@ sub get_FoundationType($)
     }
     return "" if(not $TypeInfo{$TypeId});
     my %Type = %{$TypeInfo{$TypeId}};
-    return %Type if(not $Type{"BaseType"}{"Tid"});
+    return %Type if(not $Type{"BaseType"});
     
     return %Type if($Type{"Type"} eq "Array");
     
-    %Type = get_FoundationType($Type{"BaseType"}{"Tid"});
+    %Type = get_FoundationType($Type{"BaseType"});
     $Cache{"get_FoundationType"}{$TypeId} = \%Type;
     return %Type;
 }
@@ -4257,8 +4259,8 @@ sub get_BaseType($)
     }
     return "" if(not $TypeInfo{$TypeId});
     my %Type = %{$TypeInfo{$TypeId}};
-    return %Type if(not $Type{"BaseType"}{"Tid"});
-    %Type = get_BaseType($Type{"BaseType"}{"Tid"});
+    return %Type if(not $Type{"BaseType"});
+    %Type = get_BaseType($Type{"BaseType"});
     $Cache{"get_BaseType"}{$TypeId} = \%Type;
     return %Type;
 }
@@ -4927,7 +4929,7 @@ sub requirementReturn($$$$)
     return "" if(not $PostCondition or not $TargetTypeId);
     my $PointerLevelReturn = get_PointerLevel($Ireturn);
     my ($TargetCallReturn, $TmpPreamble) =
-    convert_familiar_types((
+    convertTypes((
         "InputTypeName"=>get_TypeName($Ireturn),
         "InputPointerLevel"=>$PointerLevelReturn,
         "OutputTypeId"=>$TargetTypeId,
@@ -5022,13 +5024,13 @@ sub get_PointerLevel($)
     }
     return "" if(not $TypeInfo{$TypeId});
     my %Type = %{$TypeInfo{$TypeId}};
-    return 0 if(not $Type{"BaseType"}{"Tid"});
+    return 0 if(not $Type{"BaseType"});
     return 0 if($Type{"Type"} eq "Array");
     my $PointerLevel = 0;
     if($Type{"Type"} eq "Pointer") {
         $PointerLevel += 1;
     }
-    $PointerLevel += get_PointerLevel($Type{"BaseType"}{"Tid"});
+    $PointerLevel += get_PointerLevel($Type{"BaseType"});
     $Cache{"get_PointerLevel"}{$TypeId} = $PointerLevel;
     return $PointerLevel;
 }
@@ -5574,7 +5576,7 @@ sub add_VirtualSpecType(@)
             ($NewInit_Desc{"Value"}, $NewInit_Desc{"ValueTypeId"}) = select_ValueFromCollection(%Init_Desc);
             if($NewInit_Desc{"Value"} and $NewInit_Desc{"ValueTypeId"})
             {
-                my ($Call, $TmpPreamble)=convert_familiar_types((
+                my ($Call, $TmpPreamble)=convertTypes((
                     "InputTypeName"=>get_TypeName($NewInit_Desc{"ValueTypeId"}),
                     "InputPointerLevel"=>get_PointerLevel($NewInit_Desc{"ValueTypeId"}),
                     "OutputTypeId"=>($Init_Desc{"TypeId_Changed"})?$Init_Desc{"TypeId_Changed"}:$TypeId,
@@ -6395,7 +6397,7 @@ sub isCyclical($$)
     return (grep {$_ eq $_[1]} @{$_[0]});
 }
 
-sub convert_familiar_types(@)
+sub convertTypes(@)
 {
     my %Conv = @_;
     return () if(not $Conv{"OutputTypeId"} or not $Conv{"InputTypeName"} or not $Conv{"Value"} or not $Conv{"Key"});
@@ -6457,6 +6459,7 @@ sub convert_familiar_types(@)
         }
     }
     $Preamble .= "\n" if($Preamble);
+    
     $NeedTypeConvertion = 1 if(get_base_type_name($OutputType_Name) ne get_base_type_name($Conv{"InputTypeName"}));
     $NeedTypeConvertion = 1 if(not is_equal_types($OutputType_Name,$Conv{"InputTypeName"}) and $PLevelDelta==0);
     $NeedTypeConvertion = 1 if(not is_const_type($OutputType_Name) and is_const_type($Conv{"InputTypeName"}));
@@ -6464,7 +6467,8 @@ sub convert_familiar_types(@)
     $NeedTypeConvertion = 1 if((($OutputType_Name=~/\&/) or $Conv{"MustConvert"}) and ($OutputType_PointerLevel > 0) and (($OutputType_BaseTypeType eq "Class") or ($OutputType_BaseTypeType eq "Struct")));
     $NeedTypeConvertion = 1 if($OutputType_PointerLevel eq 2);
     $NeedTypeConvertion = 0 if($OutputType_Name eq $Conv{"InputTypeName"});
-    $NeedTypeConvertion = 0 if(uncover_typedefs($OutputType_Name)=~/\[(\d+|)\]/);#arrays
+    $NeedTypeConvertion = 0 if(uncover_typedefs($OutputType_Name)=~/\[(\d+|)\]/); # arrays
+    $NeedTypeConvertion = 0 if(isAnon($OutputType_Name));
     
     # type convertion
     if($NeedTypeConvertion and ($Conv{"Destination"} eq "Param"))
@@ -6535,7 +6539,7 @@ sub register_ExtType($$$)
     %{$TypeInfo{$MaxTypeId}}=(
         "Name" => $Type_Name,
         "Type" => $Type_Type,
-        "BaseType"=>{ "Tid" => $BaseTypeId },
+        "BaseType" => $BaseTypeId,
         "Tid" => $MaxTypeId,
         "Headers"=>getTypeHeaders($BaseTypeId)
     );
@@ -6667,7 +6671,7 @@ sub emptyDeclaration(@)
     $Type_Init{"Init"} = $InitializedType_Name." ".$Var.";\n";
     $Block_Variable{$CurrentBlock}{$Var} = 1;
     # create call
-    my ($Call, $Preamble) = convert_familiar_types((
+    my ($Call, $Preamble) = convertTypes((
         "InputTypeName"=>$InitializedType_Name,
         "InputPointerLevel"=>$InitializedType_PLevel,
         "OutputTypeId"=>($Init_Desc{"TypeId_Changed"})?$Init_Desc{"TypeId_Changed"}:$Init_Desc{"TypeId"},
@@ -6684,7 +6688,7 @@ sub emptyDeclaration(@)
     else
     {
         my ($TargetCall, $TargetPreamble) =
-        convert_familiar_types((
+        convertTypes((
             "InputTypeName"=>$InitializedType_Name,
             "InputPointerLevel"=>$InitializedType_PLevel,
             "OutputTypeId"=>$Init_Desc{"TargetTypeId"},
@@ -6774,7 +6778,7 @@ sub initializeByValue(@)
                 $Type_Init{"Headers"} = addHeaders(getTypeHeaders($FoundationType_Id), $Type_Init{"Headers"});
                 $Type_Init{"Init"} = correct_init_stmt($Type_Init{"Init"}, $FoundationType_Name, $Var);
                 my ($Call, $TmpPreamble) =
-                convert_familiar_types((
+                convertTypes((
                     "InputTypeName"=>$FoundationType_Name,
                     "InputPointerLevel"=>$Value_PointerLevel,
                     "OutputTypeId"=>($Init_Desc{"TypeId_Changed"})?$Init_Desc{"TypeId_Changed"}:$Init_Desc{"TypeId"},
@@ -6810,7 +6814,7 @@ sub initializeByValue(@)
                     else
                     {
                         my ($Call, $TmpPreamble) =
-                        convert_familiar_types((
+                        convertTypes((
                             "InputTypeName"=>get_TypeName($Init_Desc{"ValueTypeId"}),
                             "InputPointerLevel"=>$Value_PointerLevel,
                             "OutputTypeId"=>($Init_Desc{"TypeId_Changed"})?$Init_Desc{"TypeId_Changed"}:$Init_Desc{"TypeId"},
@@ -6833,7 +6837,7 @@ sub initializeByValue(@)
                     $Type_Init{"Init"} .= $Value_ETypeName." $Var = ($Value_ETypeName)".$Init_Desc{"Value"}.";".($Init_Desc{"ByNull"}?" //can't initialize":"")."\n";
                     $Type_Init{"Headers"} = addHeaders(getTypeHeaders($Value_ETypeId), $Type_Init{"Headers"});
                     my ($Call, $TmpPreamble) =
-                    convert_familiar_types((
+                    convertTypes((
                         "InputTypeName"=>$Value_ETypeName,
                         "InputPointerLevel"=>$Value_PointerLevel,
                         "OutputTypeId"=>($Init_Desc{"TypeId_Changed"})?$Init_Desc{"TypeId_Changed"}:$Init_Desc{"TypeId"},
@@ -6858,7 +6862,7 @@ sub initializeByValue(@)
                     {
                         $CallDestructor = 0;
                         my ($Call, $TmpPreamble) =
-                        convert_familiar_types((
+                        convertTypes((
                             "InputTypeName"=>get_TypeName($Init_Desc{"ValueTypeId"}),
                             "InputPointerLevel"=>$Value_PointerLevel,
                             "OutputTypeId"=>($Init_Desc{"TypeId_Changed"})?$Init_Desc{"TypeId_Changed"}:$Init_Desc{"TypeId"},
@@ -6880,7 +6884,7 @@ sub initializeByValue(@)
                     $Type_Init{"Init"} .= $Value_ETypeName." $Var = ".$Init_Desc{"Value"}.";".($Init_Desc{"ByNull"}?" //can't initialize":"")."\n";
                     $Type_Init{"Headers"} = addHeaders(getTypeHeaders($Value_ETypeId), $Type_Init{"Headers"});
                     my ($Call, $TmpPreamble) =
-                    convert_familiar_types((
+                    convertTypes((
                         "InputTypeName"=>$Value_ETypeName,
                         "InputPointerLevel"=>$Value_PointerLevel,
                         "OutputTypeId"=>($Init_Desc{"TypeId_Changed"})?$Init_Desc{"TypeId_Changed"}:$Init_Desc{"TypeId"},
@@ -6954,7 +6958,7 @@ sub initializeByValue(@)
             $Type_Init{"Init"} .= $Value_ETypeName." $Var = ".$Init_Desc{"Value"}.";".($Init_Desc{"ByNull"}?" //can't initialize":"")."\n";
             $Type_Init{"Headers"} = addHeaders(getTypeHeaders($Value_ETypeId), $Type_Init{"Headers"});
             my ($Call, $TmpPreamble) =
-            convert_familiar_types((
+            convertTypes((
                 "InputTypeName"=>$Value_ETypeName,
                 "InputPointerLevel"=>$Value_PointerLevel,
                 "OutputTypeId"=>($Init_Desc{"TypeId_Changed"})?$Init_Desc{"TypeId_Changed"}:$Init_Desc{"TypeId"},
@@ -6974,7 +6978,7 @@ sub initializeByValue(@)
     else
     {
         my ($TargetCall, $TargetPreamble) =
-        convert_familiar_types((
+        convertTypes((
             "InputTypeName"=>$Value_ETypeName,
             "InputPointerLevel"=>$Value_PointerLevel,
             "OutputTypeId"=>$Init_Desc{"TargetTypeId"},
@@ -7346,7 +7350,7 @@ sub initializeByInterface_OutParam(@)
         $Type_Init{"Init"} .= $Interface_Init{"FinalCode"}."\n";
     }
     # create call
-    my ($Call, $Preamble) = convert_familiar_types((
+    my ($Call, $Preamble) = convertTypes((
         "InputTypeName"=>$InitializedType_Name,
         "InputPointerLevel"=>$InitializedType_PointerLevel,
         "OutputTypeId"=>($Init_Desc{"TypeId_Changed"})?$Init_Desc{"TypeId_Changed"}:$Init_Desc{"TypeId"},
@@ -7363,7 +7367,7 @@ sub initializeByInterface_OutParam(@)
     }
     else
     {
-        my ($TargetCall, $TargetPreamble) = convert_familiar_types((
+        my ($TargetCall, $TargetPreamble) = convertTypes((
             "InputTypeName"=>$InitializedType_Name,
             "InputPointerLevel"=>$InitializedType_PointerLevel,
             "OutputTypeId"=>$Init_Desc{"TargetTypeId"},
@@ -7470,7 +7474,7 @@ sub initializeByInterface(@)
     and not $Interface_Init{"PreCondition"} and not $Interface_Init{"PostCondition"}
     and not $Interface_Init{"ReturnFinalCode"})
     {
-        my ($Call, $Preamble) = convert_familiar_types((
+        my ($Call, $Preamble) = convertTypes((
             "InputTypeName"=>get_TypeName($Interface_Init{"ReturnTypeId"}),
             "InputPointerLevel"=>$ReturnType_PointerLevel,
             "OutputTypeId"=>($Init_Desc{"TypeId_Changed"})?$Init_Desc{"TypeId_Changed"}:$Init_Desc{"TypeId"},
@@ -7506,7 +7510,7 @@ sub initializeByInterface(@)
             $OpenStreams{$CurrentBlock}{$Var} = 1;
         }
         # create call
-        my ($Call, $Preamble) = convert_familiar_types((
+        my ($Call, $Preamble) = convertTypes((
             "InputTypeName"=>$InitializedType_Name,
             "InputPointerLevel"=>$ReturnType_PointerLevel,
             "OutputTypeId"=>($Init_Desc{"TypeId_Changed"})?$Init_Desc{"TypeId_Changed"}:$Init_Desc{"TypeId"},
@@ -7522,7 +7526,7 @@ sub initializeByInterface(@)
         }
         else
         {
-            my ($TargetCall, $TargetPreamble) = convert_familiar_types((
+            my ($TargetCall, $TargetPreamble) = convertTypes((
                 "InputTypeName"=>$InitializedType_Name,
                 "InputPointerLevel"=>$ReturnType_PointerLevel,
                 "OutputTypeId"=>$Init_Desc{"TargetTypeId"},
@@ -7588,8 +7592,8 @@ sub get_OneStep_BaseTypeId($)
     my $TypeId = $_[0];
     my %Type = %{$TypeInfo{$TypeId}};
     if(defined $Type{"BaseType"}
-    and $Type{"BaseType"}{"Tid"}) {
-        $Type{"BaseType"}{"Tid"}
+    and $Type{"BaseType"}) {
+        return $Type{"BaseType"};
     }
     else {
         return $Type{"Tid"};
@@ -7651,9 +7655,9 @@ sub get_PureType($)
     }
     return () if(not $TypeInfo{$TypeId});
     my %Type = %{$TypeInfo{$TypeId}};
-    return %Type if(not $Type{"BaseType"}{"Tid"});
+    return %Type if(not $Type{"BaseType"});
     if($Type{"Type"}=~/\A(Ref|Const|Volatile|Restrict|Typedef)\Z/) {
-        %Type = get_PureType($Type{"BaseType"}{"Tid"});
+        %Type = get_PureType($Type{"BaseType"});
     }
     $Cache{"get_PureType"}{$TypeId} = \%Type;
     return %Type;
@@ -7669,9 +7673,9 @@ sub delete_quals($)
     }
     return () if(not $TypeInfo{$TypeId});
     my %Type = %{$TypeInfo{$TypeId}};
-    return %Type if(not $Type{"BaseType"}{"Tid"});
+    return %Type if(not $Type{"BaseType"});
     if($Type{"Type"}=~/\A(Ref|Const|Volatile|Restrict)\Z/) {
-        %Type = delete_quals($Type{"BaseType"}{"Tid"});
+        %Type = delete_quals($Type{"BaseType"});
     }
     $Cache{"delete_quals"}{$TypeId} = \%Type;
     return %Type;
@@ -7689,8 +7693,8 @@ sub goToFirst($$)
     return () if(not $Type{"Type"});
     if($Type{"Type"} ne $Type_Type)
     {
-        return () if(not $Type{"BaseType"}{"Tid"});
-        %Type = goToFirst($Type{"BaseType"}{"Tid"}, $Type_Type);
+        return () if(not $Type{"BaseType"});
+        %Type = goToFirst($Type{"BaseType"}, $Type_Type);
     }
     $Cache{"goToFirst"}{$TypeId}{$Type_Type} = \%Type;
     return %Type;
@@ -7818,7 +7822,7 @@ sub assembleArray(@)
         $Type_Init{"Init"} .= $ArrayElemType_Name." $Var [".(($ArrayType{"Type"} eq "Array")?$AmountArray:"")."] = {".create_matrix(\@ElemStr, "    ")."};\n";
         #create call
         my ($Call, $TmpPreamble) =
-        convert_familiar_types((
+        convertTypes((
             "InputTypeName"=>formatName($ArrayElemType_Name."*", "T"),
             "InputPointerLevel"=>get_PointerLevel($ArrayType_Id),
             "OutputTypeId"=>($Init_Desc{"TypeId_Changed"})?$Init_Desc{"TypeId_Changed"}:$Init_Desc{"TypeId"},
@@ -7837,7 +7841,7 @@ sub assembleArray(@)
         else
         {
             my ($TargetCall, $Target_TmpPreamble) =
-            convert_familiar_types((
+            convertTypes((
                 "InputTypeName"=>formatName($ArrayElemType_Name."*", "T"),
                 "InputPointerLevel"=>get_PointerLevel($ArrayType_Id),
                 "OutputTypeId"=>$Init_Desc{"TargetTypeId"},
@@ -8141,7 +8145,7 @@ sub assembleFuncPtr(@)
     
     # create call
     my ($Call, $TmpPreamble) =
-    convert_familiar_types((
+    convertTypes((
         "InputTypeName"=>$TypeName,
         "InputPointerLevel"=>0,
         "OutputTypeId"=>($Init_Desc{"TypeId_Changed"})?$Init_Desc{"TypeId_Changed"}:$Init_Desc{"TypeId"},
@@ -8160,7 +8164,7 @@ sub assembleFuncPtr(@)
     else
     {
         my ($TargetCall, $Target_TmpPreamble) =
-        convert_familiar_types((
+        convertTypes((
             "InputTypeName"=>$TypeName,
             "InputPointerLevel"=>0,
             "OutputTypeId"=>$Init_Desc{"TargetTypeId"},
@@ -8215,11 +8219,10 @@ sub declare_anon_union($$)
         @MembStr = (@MembStr, $MembDecl);
     }
     my $Type_Name = select_type_name("union_type_".$Key);
-    $Declarations .= "//auxilliary union type\nunion ".$Type_Name;
+    $Declarations .= "//auxiliary union type\nunion ".$Type_Name;
     $Declarations .= "{\n    ".join(";\n    ", @MembStr).";};\n\n";
     $AuxType{$UnionId} = "union ".$Type_Name;
     $TName_Tid{$AuxType{$UnionId}} = $UnionId;
-    $TName_Tid{$Type_Name} = $UnionId;
     $TypeInfo{$UnionId}{"Name_Old"} = $Union{"Name"};
     $TypeInfo{$UnionId}{"Name"} = $AuxType{$UnionId};
     return ($Declarations, $Headers);
@@ -8256,7 +8259,6 @@ sub declare_anon_struct($$)
     $Declarations .= "{\n    ".join(";\n    ", @MembStr).";};\n\n";
     $AuxType{$StructId} = "struct ".$Type_Name;
     $TName_Tid{$AuxType{$StructId}} = $StructId;
-    $TName_Tid{$Type_Name} = $StructId;
     $TypeInfo{$StructId}{"Name_Old"} = $Struct{"Name"};
     $TypeInfo{$StructId}{"Name"} = $AuxType{$StructId};
     return ($Declarations, $Headers);
@@ -8428,7 +8430,7 @@ sub assembleStruct(@)
         }
         # create call
         my ($Call, $TmpPreamble) =
-        convert_familiar_types((
+        convertTypes((
             "InputTypeName"=>get_TypeName($StructId),
             "InputPointerLevel"=>0,
             "OutputTypeId"=>($Init_Desc{"TypeId_Changed"})?$Init_Desc{"TypeId_Changed"}:$Init_Desc{"TypeId"},
@@ -8445,7 +8447,7 @@ sub assembleStruct(@)
         else
         {
             my ($TargetCall, $Target_TmpPreamble) =
-            convert_familiar_types((
+            convertTypes((
                 "InputTypeName"=>get_TypeName($StructId),
                 "InputPointerLevel"=>0,
                 "OutputTypeId"=>$Init_Desc{"TargetTypeId"},
@@ -8912,7 +8914,7 @@ sub assembleUnion(@)
         }
         #create call
         my ($Call, $TmpPreamble) =
-        convert_familiar_types((
+        convertTypes((
             "InputTypeName"=>get_TypeName($UnionId),
             "InputPointerLevel"=>0,
             "OutputTypeId"=>($Init_Desc{"TypeId_Changed"})?$Init_Desc{"TypeId_Changed"}:$Init_Desc{"TypeId"},
@@ -8929,7 +8931,7 @@ sub assembleUnion(@)
         else
         {
             my ($TargetCall, $Target_TmpPreamble) =
-            convert_familiar_types((
+            convertTypes((
                 "InputTypeName"=>get_TypeName($UnionId),
                 "InputPointerLevel"=>0,
                 "OutputTypeId"=>$Init_Desc{"TargetTypeId"},
@@ -9137,7 +9139,7 @@ sub assembleClass(@)
             $Type_Init{"Init"} .= correct_init_stmt($ConstructedName." $Var = ".$Obj_Init{"Call"}.";\n", $ConstructedName, $Var);
             # create call
             my ($Call, $TmpPreamble) =
-            convert_familiar_types((
+            convertTypes((
                 "InputTypeName"=>$ConstructedName,
                 "InputPointerLevel"=>0,
                 "OutputTypeId"=>($Init_Desc{"TypeId_Changed"})?$Init_Desc{"TypeId_Changed"}:$Init_Desc{"TypeId"},
@@ -9154,7 +9156,7 @@ sub assembleClass(@)
             else
             {
                 my ($TargetCall, $Target_TmpPreamble) =
-                convert_familiar_types((
+                convertTypes((
                     "InputTypeName"=>$ConstructedName,
                     "InputPointerLevel"=>0,
                     "OutputTypeId"=>$Init_Desc{"TargetTypeId"},
@@ -9196,7 +9198,7 @@ sub assembleClass(@)
             }
             #create call
             my ($Call, $TmpPreamble) =
-            convert_familiar_types((
+            convertTypes((
                 "InputTypeName"=>"$ClassName*",
                 "InputPointerLevel"=>1,
                 "OutputTypeId"=>($Init_Desc{"TypeId_Changed"})?$Init_Desc{"TypeId_Changed"}:$Init_Desc{"TypeId"},
@@ -9213,7 +9215,7 @@ sub assembleClass(@)
             else
             {
                 my ($TargetCall, $Target_TmpPreamble) =
-                convert_familiar_types((
+                convertTypes((
                     "InputTypeName"=>"$ClassName*",
                     "InputPointerLevel"=>1,
                     "OutputTypeId"=>$Init_Desc{"TargetTypeId"},
@@ -9413,7 +9415,9 @@ sub select_type_name($)
     my $Type_Name = $_[0];
     my $OtherPrefix = 1;
     my $NameCandidate = $Type_Name;
-    while($TName_Tid{$NameCandidate})
+    while($TName_Tid{$NameCandidate}
+    or $TName_Tid{"struct ".$NameCandidate}
+    or $TName_Tid{"union ".$NameCandidate})
     {
         $NameCandidate = $Type_Name."_".$OtherPrefix;
         $OtherPrefix += 1;
@@ -10292,7 +10296,7 @@ sub callInterfaceParameters_m(@)
                     else
                     {
                         my ($TargetCall, $Preamble)=
-                        convert_familiar_types((
+                        convertTypes((
                             "InputTypeName"=>get_TypeName($TypeId),
                             "InputPointerLevel"=>get_PointerLevel($TypeId),
                             "OutputTypeId"=>get_TypeIdByName($SpecType{$SpecTypeId}{"DataType"}),
@@ -12667,6 +12671,39 @@ sub generateTest($)
             }
         }
         
+        # needed libs
+        my %LibName_P = ();
+        foreach my $Path (keys(%UsedSharedObjects)) {
+            $LibName_P{get_filename($Path)}{$Path} = 1;
+        }
+        
+        foreach my $Path (keys(%UsedSharedObjects))
+        {
+            my $Name = get_filename($Path);
+            foreach my $Dep (keys(%{$Library_Needed{$Name}}))
+            {
+                $Dep = identifyLibrary($Dep);
+                if(is_abs($Dep))
+                { # links
+                    $Dep = realpath($Dep);
+                }
+                $Dep = get_filename($Dep);
+                if(defined $LibName_P{$Dep})
+                {
+                    my @Paths = keys(%{$LibName_P{$Dep}});
+                    if($#Paths==0)
+                    {
+                        my $Dir = get_dirname($Paths[0]);
+                        if(not grep {$Dir eq $_} @DefaultLibPaths)
+                        { # non-default
+                            next;
+                        }
+                        delete($UsedSharedObjects{$Paths[0]});
+                    }
+                }
+            }
+        }
+        
         writeFile("$TestPath/Makefile", get_Makefile($Interface, $IncPaths));
         
         my $RunScript = ($OSgroup eq "windows")?"run_test.bat":"run_test.sh";
@@ -12700,6 +12737,16 @@ sub getLib_Deps($)
         }
         elsif(my $P = $DepSymbol_Library{$Sym}) {
             $Deps{$P} = 1;
+        }
+        elsif(index($Sym, '@')!=-1)
+        {
+            $Sym=~s/\@/\@\@/;
+            if(my $P = $Symbol_Library{$Sym}) {
+                $Deps{$P} = 1;
+            }
+            elsif(my $P = $DepSymbol_Library{$Sym}) {
+                $Deps{$P} = 1;
+            }
         }
     }
     foreach my $P (keys(%Deps))
@@ -13478,7 +13525,7 @@ sub generateTests()
         {
             if(my $Header = $CompleteSignature{$Symbol}{"Header"})
             {
-                if($Header eq $TargetHeaderName)
+                if(get_filename($Header) eq $TargetHeaderName)
                 {
                     if(selectSymbol($Symbol))
                     {
@@ -14230,6 +14277,7 @@ sub read_ABI($)
     %DepLibrary_Symbol = %{$ABI->{"DepSymbols"}};
     %Library_Symbol = %{$ABI->{"Symbols"}};
     %UndefinedSymbols = %{$ABI->{"UndefinedSymbols"}};
+    %Library_Needed = %{$ABI->{"Needed"}};
     
     %Constants = %{$ABI->{"Constants"}};
     %NestedNameSpaces = %{$ABI->{"NameSpaces"}};
@@ -14291,16 +14339,22 @@ sub read_ABI($)
     {
         foreach my $Symbol (keys(%{$Library_Symbol{$Lib_Name}}))
         {
-            if(index($Symbol, "?")!=0)
-            { # remove version
-                $Symbol=~s/[\@\$]+.+?\Z//g;
-            }
-            $Symbol_Library{$Symbol} = identifyLibrary($Lib_Name);
-            if(not defined $Language{$Lib_Name})
+            if(my $P = identifyLibrary($Lib_Name))
             {
-                if(index($Symbol, "_ZN")==0
-                or index($Symbol, "?")==0) {
-                    $Language{$Lib_Name} = "C++"
+                $Symbol_Library{$Symbol} = $P;
+                
+                if(index($Symbol, "?")!=0)
+                { # remove version
+                    $Symbol=~s/[\@\$]+.+?\Z//g;
+                    $Symbol_Library{$Symbol} = $P;
+                }
+                
+                if(not defined $Language{$Lib_Name})
+                {
+                    if(index($Symbol, "_ZN")==0
+                    or index($Symbol, "?")==0) {
+                        $Language{$Lib_Name} = "C++"
+                    }
                 }
             }
         }
@@ -14309,16 +14363,22 @@ sub read_ABI($)
     {
         foreach my $Symbol (keys(%{$DepLibrary_Symbol{$Lib_Name}}))
         {
-            if(index($Symbol, "?")!=0)
-            { # remove version
-                $Symbol=~s/[\@\$]+.+?\Z//g;
-            }
-            $DepSymbol_Library{$Symbol} = identifyLibrary($Lib_Name);
-            if(not defined $Language{$Lib_Name})
+            if(my $P = identifyLibrary($Lib_Name))
             {
-                if(index($Symbol, "_ZN")==0
-                or index($Symbol, "?")==0) {
-                    $Language{$Lib_Name} = "C++"
+                $DepSymbol_Library{$Symbol} = $P;
+                
+                if(index($Symbol, "?")!=0)
+                { # remove version
+                    $Symbol=~s/[\@\$]+.+?\Z//g;
+                    $DepSymbol_Library{$Symbol} = $P;
+                }
+                
+                if(not defined $Language{$Lib_Name})
+                {
+                    if(index($Symbol, "_ZN")==0
+                    or index($Symbol, "?")==0) {
+                        $Language{$Lib_Name} = "C++"
+                    }
                 }
             }
         }
@@ -14330,7 +14390,10 @@ sub read_ABI($)
         }
     }
     
-    foreach my $InfoId (keys(%SymbolInfo))
+    my %Ctors = ();
+    my @IDs = sort {int($a)<=>int($b)} keys(%SymbolInfo);
+    
+    foreach my $InfoId (@IDs)
     {
         if(my $Mangled = $SymbolInfo{$InfoId}{"MnglName"})
         { # unmangling
@@ -14349,16 +14412,28 @@ sub read_ABI($)
             {
                 my $TypeId = $SymbolInfo{$InfoId}{"Param"}{$Pos}{"type"};
                 if($TypeInfo{$TypeId}{"Type"} eq "Restrict") {
-                    $SymbolInfo{$InfoId}{"Param"}{$Pos}{"type"} = $TypeInfo{$TypeId}{"BaseType"}{"Tid"};
+                    $SymbolInfo{$InfoId}{"Param"}{$Pos}{"type"} = $TypeInfo{$TypeId}{"BaseType"};
                 }
             }
         }
+        if(defined $SymbolInfo{$InfoId}{"Constructor"}) {
+            $Ctors{$SymbolInfo{$InfoId}{"Class"}}{$InfoId} = 1;
+        }
     }
+    
+    my $MAX = $IDs[$#IDs] + 1;
     
     foreach my $TypeId (sort {int($a)<=>int($b)} keys(%TypeInfo))
     { # order is important
         if(not defined $TypeInfo{$TypeId}{"Tid"}) {
             $TypeInfo{$TypeId}{"Tid"} = $TypeId;
+        }
+        if(defined $TypeInfo{$TypeId}{"BaseType"})
+        {
+            if(defined $TypeInfo{$TypeId}{"BaseType"}{"Tid"})
+            { # format of ABI dump changed in ACC 1.99
+                $TypeInfo{$TypeId}{"BaseType"} = $TypeInfo{$TypeId}{"BaseType"}{"Tid"};
+            }
         }
         my %TInfo = %{$TypeInfo{$TypeId}};
         if(defined $TInfo{"Base"})
@@ -14370,7 +14445,7 @@ sub read_ABI($)
         if($TInfo{"Type"} eq "Typedef"
         and defined $TInfo{"BaseType"})
         {
-            if(my $BTid = $TInfo{"BaseType"}{"Tid"})
+            if(my $BTid = $TInfo{"BaseType"})
             {
                 my $BName = $TypeInfo{$BTid}{"Name"};
                 if(not $BName)
@@ -14404,6 +14479,20 @@ sub read_ABI($)
                 $TypeInfo{$TypeId}{"Count"} = $1;
             }
         }
+        
+        if($TInfo{"Type"} eq "Class"
+        and not defined $Ctors{$TypeId})
+        { # add default c-tors
+            %{$SymbolInfo{$MAX++}} = (
+                "Class"=>$TypeId,
+                "Constructor"=>1,
+                "Header"=>$TInfo{"Header"},
+                "InLine"=>1,
+                "Line"=>$TInfo{"Line"},
+                "ShortName"=>$TInfo{"Name"},
+                "MnglName"=>"_aux_".$MAX."_C1E"
+            );
+        }
     }
     
     if($COMMON_LANGUAGE eq "C")
@@ -14411,7 +14500,7 @@ sub read_ABI($)
         if(my $TypeId = get_TypeIdByName("struct __exception*"))
         {
             $TypeInfo{$TypeId}{"Name"} = "struct exception*";
-            $TypeInfo{$TypeInfo{$TypeId}{"BaseType"}{"Tid"}}{"Name"} = "struct exception";
+            $TypeInfo{$TypeInfo{$TypeId}{"BaseType"}}{"Name"} = "struct exception";
         }
     }
 }
@@ -14591,7 +14680,9 @@ sub scenario()
     }
     else
     { # default
-        $TargetCompiler = "CL";
+        if($OSgroup eq "windows") {
+            $TargetCompiler = "CL";
+        }
     }
     if(defined $TestTool)
     {

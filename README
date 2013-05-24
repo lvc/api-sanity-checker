@@ -5,7 +5,7 @@ INSTALL:
   sudo perl Makefile.pl -install --prefix=/usr
   
 REQUIRES:
-  ABI Compliance Checker 1.98.7 or newer: https://github.com/lvc/abi-compliance-checker
+  ABI Compliance Checker 1.99 or newer: https://github.com/lvc/abi-compliance-checker
 
 USAGE:
   api-sanity-checker -lib NAME -d VERSION.xml -gen -build -run
