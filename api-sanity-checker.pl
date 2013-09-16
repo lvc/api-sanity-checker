@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 ###########################################################################
-# API Sanity Checker 1.98.4
+# API Sanity Checker 1.98.5
 # An automatic generator of basic unit tests for a C/C++ library API
 #
 # Copyright (C) 2009-2010 The Linux Foundation
@@ -58,7 +58,7 @@ use File::Copy qw(copy);
 use Cwd qw(abs_path cwd realpath);
 use Config;
 
-my $TOOL_VERSION = "1.98.4";
+my $TOOL_VERSION = "1.98.5";
 my $OSgroup = get_OSgroup();
 my $ORIG_DIR = cwd();
 my $TMP_DIR = tempdir(CLEANUP=>1);
@@ -14403,8 +14403,30 @@ sub read_ABI($)
         { # ABI dumps have no mangled names for C-functions
             $SymbolInfo{$InfoId}{"MnglName"} = $SymbolInfo{$InfoId}{"ShortName"};
         }
-        if(my $ClassId = $SymbolInfo{$InfoId}{"Class"}) {
+        if(my $ClassId = $SymbolInfo{$InfoId}{"Class"})
+        {
             $Library_Class{$ClassId} = 1;
+            use Data::Dumper;
+            if(not $SymbolInfo{$InfoId}{"Static"})
+            { # support for ACC >= 1.99.1
+              # remove artificial "this" parameter
+                if(defined $SymbolInfo{$InfoId}{"Param"}
+                and defined $SymbolInfo{$InfoId}{"Param"}{0})
+                {
+                    if($SymbolInfo{$InfoId}{"Param"}{0}{"name"} eq "this")
+                    {
+                        foreach my $MP (0 .. keys(%{$SymbolInfo{$InfoId}{"Param"}})-2)
+                        {
+                            $SymbolInfo{$InfoId}{"Param"}{$MP} = $SymbolInfo{$InfoId}{"Param"}{$MP+1};
+                        }
+                        delete($SymbolInfo{$InfoId}{"Param"}{keys(%{$SymbolInfo{$InfoId}{"Param"}})-1});
+                        
+                        if(not keys(%{$SymbolInfo{$InfoId}{"Param"}})) {
+                            delete($SymbolInfo{$InfoId}{"Param"});
+                        }
+                    }
+                }
+            }
         }
         if(defined $SymbolInfo{$InfoId}{"Param"})
         {
@@ -14464,6 +14486,11 @@ sub read_ABI($)
                     $Type_Typedef{$BTid}{$TypeId} = 1;
                 }
             }
+        }
+        if($TInfo{"Type"} eq "Intrinsic")
+        { # support for ACC<=1.99.4
+          # integer_type has srcp dump{1-2}.i
+            delete($TypeInfo{$TypeId}{"Header"});
         }
         if(not $TName_Tid{$TInfo{"Name"}})
         { # classes: class (id1), typedef (artificial, id2 > id1)
