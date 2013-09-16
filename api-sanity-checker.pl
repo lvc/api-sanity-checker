@@ -14488,7 +14488,7 @@ sub read_ABI($)
             }
         }
         if($TInfo{"Type"} eq "Intrinsic")
-        { # support for ACC<=1.99.4
+        { # support for SUSE
           # integer_type has srcp dump{1-2}.i
             delete($TypeInfo{$TypeId}{"Header"});
         }
