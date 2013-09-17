@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 ###########################################################################
-# API Sanity Checker 1.98.5
+# API Sanity Checker 1.98.6
 # An automatic generator of basic unit tests for a C/C++ library API
 #
 # Copyright (C) 2009-2010 The Linux Foundation
@@ -58,7 +58,7 @@ use File::Copy qw(copy);
 use Cwd qw(abs_path cwd realpath);
 use Config;
 
-my $TOOL_VERSION = "1.98.5";
+my $TOOL_VERSION = "1.98.6";
 my $OSgroup = get_OSgroup();
 my $ORIG_DIR = cwd();
 my $TMP_DIR = tempdir(CLEANUP=>1);
@@ -14406,7 +14406,7 @@ sub read_ABI($)
         if(my $ClassId = $SymbolInfo{$InfoId}{"Class"})
         {
             $Library_Class{$ClassId} = 1;
-            use Data::Dumper;
+            
             if(not $SymbolInfo{$InfoId}{"Static"})
             { # support for ACC >= 1.99.1
               # remove artificial "this" parameter
@@ -14487,7 +14487,8 @@ sub read_ABI($)
                 }
             }
         }
-        if($TInfo{"Type"} eq "Intrinsic")
+        if($TInfo{"Type"} eq "Intrinsic"
+        or $TInfo{"Type"} eq "Pointer")
         { # support for SUSE
           # integer_type has srcp dump{1-2}.i
             delete($TypeInfo{$TypeId}{"Header"});
