@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 ###########################################################################
-# API Sanity Checker 1.98.6
+# API Sanity Checker 1.98.7
 # An automatic generator of basic unit tests for a C/C++ library API
 #
 # Copyright (C) 2009-2010 The Linux Foundation
@@ -58,7 +58,7 @@ use File::Copy qw(copy);
 use Cwd qw(abs_path cwd realpath);
 use Config;
 
-my $TOOL_VERSION = "1.98.6";
+my $TOOL_VERSION = "1.98.7";
 my $OSgroup = get_OSgroup();
 my $ORIG_DIR = cwd();
 my $TMP_DIR = tempdir(CLEANUP=>1);
@@ -1469,6 +1469,9 @@ sub join_P($$)
 sub registerHeader($$)
 {
     my ($Path, $To) = @_;
+    
+    $Path = get_abs_path($Path);
+    
     my $Name = get_filename($Path);
     if(not defined $To->{$Name})
     {
@@ -1507,6 +1510,9 @@ sub getFilePrefix($)
 sub registerHeaders($)
 {
     my $Path = $_[0];
+    
+    $Path = get_abs_path($Path);
+    
     if(-d $Path) {
         registerDir($Path);
     }
