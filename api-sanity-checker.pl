@@ -79,7 +79,8 @@ $CheckHeadersOnly, $Template2Code, $Standalone, $ShowVersion, $MakeIsolated,
 $ParameterNamesFilePath, $CleanSources, $DumpVersion, $TargetHeaderName,
 $RelativeDirectory, $TargetLibraryFullName, $TargetVersion, $StrictGen,
 $StrictBuild, $StrictRun, $Strict, $Debug, $UseCache, $NoInline, $Browse,
-$OpenReport, $UserLang, $OptimizeIncludes, $KeepInternal, $TargetCompiler);
+$OpenReport, $UserLang, $OptimizeIncludes, $KeepInternal, $TargetCompiler,
+$GenerateAll);
 
 my $CmdName = get_filename($0);
 my %OS_LibExt=(
@@ -158,6 +159,7 @@ GetOptions("h|help!" => \$Help,
   "s|symbol|f|function|i|interface=s" => \$TargetInterfaceName,
   "symbols-list|functions-list|interfaces-list=s" => \$InterfacesListPath,
   "header=s" => \$TargetHeaderName,
+  "all!" => \$GenerateAll,
   "xvfb!" => \$UseXvfb,
   "t2c|template2code" => \$Template2Code,
   "strict-gen!" => \$StrictGen,
@@ -345,6 +347,10 @@ EXTRA OPTIONS:
       This option allows to restrict a list of functions that should be tested
       by providing a header file name in which they are declared. This option
       is intended for step-by-step tests development.
+  
+  -all
+      Generate tests for all symbols recursively included
+      in header file(s).
 
   -xvfb
       Use Xvfb-server instead of current X-server (default)
@@ -4159,8 +4165,11 @@ sub compatible_interfaces($$$)
     {
         sort_byCriteria(\@CompatibleInterfaces, "Class");
         sort_CreateParam(\@CompatibleInterfaces, $KeyWords);
-        sort_GetCreate(\@CompatibleInterfaces);
+        
+        # TODO: What should be first?
         sort_byName(\@CompatibleInterfaces, $KeyWords, "Interfaces");
+        sort_GetCreate(\@CompatibleInterfaces);
+        
         sort_FileOpen(\@CompatibleInterfaces) if(get_TypeName(get_FoundationTypeId($TypeId))=~/\A(struct |)(_IO_FILE|__FILE|FILE|_iobuf)\Z/);
         sort_LibMainFunc(\@CompatibleInterfaces);
         sort_byCriteria(\@CompatibleInterfaces, "Data");
@@ -9354,11 +9363,24 @@ sub cover_by_typedef($$$)
 
 sub get_type_typedef($)
 {
-    my $ClassId = $_[0];
-    if($Class_SubClassTypedef{$ClassId}) {
-        return $Class_SubClassTypedef{$ClassId};
+    my $TypeId = $_[0];
+    my $TypeName = get_TypeName($TypeId);
+    
+    if($Class_SubClassTypedef{$TypeId}) {
+        return $Class_SubClassTypedef{$TypeId};
     }
-    my @Types = (keys(%{$Type_Typedef{$ClassId}}));
+    my @Types = ();
+    
+    foreach (keys(%{$Type_Typedef{$TypeId}}))
+    {
+        my $Typedef = get_TypeName($_);
+        if($TypeName=~/ \Q$Typedef\E\Z/) {
+            next;
+        }
+        
+        push(@Types, $_);
+    }
+    
     @Types = sort {lc(get_TypeName($a)) cmp lc(get_TypeName($b))} @Types;
     @Types = sort {length(get_TypeName($a)) <=> length(get_TypeName($b))} @Types;
     if($#Types==0) {
@@ -13556,11 +13578,15 @@ sub generateTests()
     { # all symbols (default)
         foreach my $Symbol (sort keys(%CompleteSignature))
         {
-            if(selectSymbol($Symbol))
+            if(not defined $GenerateAll)
             {
-                if(symbolFilter($Symbol)) {
-                    $TargetInterfaces{$Symbol} = 1;
+                if(not selectSymbol($Symbol)) {
+                    next;
                 }
+            }
+            
+            if(symbolFilter($Symbol)) {
+                $TargetInterfaces{$Symbol} = 1;
             }
         }
         if(not keys(%TargetInterfaces)) {
