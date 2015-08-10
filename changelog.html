@@ -1,0 +1,862 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="keywords" content="C, C++, automatic, tests, checker" />
+  <meta name="description" content="Changelog for API Sanity Checker" />
+  <title>API Sanity Checker: Changelog</title>
+
+  <style type="text/css">
+    body {
+      margin-top: 1.0em;
+      background-color: #deeef7;
+      font-family: Helvetica, Arial, FreeSans, san-serif;
+      color: #000000;
+    }
+    #container {
+      margin: 0 auto;
+      width: 700px;
+    }
+    h1 { font-size: 3.8em; color: #211108; margin-bottom: 3px;margin-top:0px;padding-top:0px;}
+    h1 .small { font-size: 0.4em; }
+    h1 a { text-decoration: none }
+    h2 { font-size: 1.5em; color: #211108; }
+    h3 { text-align: center; color: #211108; }
+    a { color: #211108; }
+    .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
+    .download { float: right; }
+    pre {padding: 0px;margin: 0px;padding-left: 10px;word-wrap:break-word;white-space: pre-wrap;}
+    hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
+    .footer { text-align:center; padding-top:30px; font-style: italic; }
+    .code {border: dashed 1px gray; background-color: #f0f0f0;}
+    .listing {padding: 10px;border: 1px solid black;width: 70%;font-family:"DejaVu Sans Mono", "Monaco", "Courier New", monospace;font-size:14px;}
+    .summary {border:1px solid black;border-collapse:collapse;}
+    table.summary td, table.summary th {border:1px solid black;padding:2px;}
+  </style>
+
+</head>
+
+<body>
+<a href="https://github.com/lvc/api-sanity-checker"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
+
+<div id="container">
+
+<h1><a href="https://github.com/lvc/api-sanity-checker">API Sanity<br/>Checker: History</a></h1>
+<p/>
+<br/>
+
+<b>Version 1.98.6 (September 17, 2013)</b><br/>
+<b>Bug Fixes</b>
+<ul>
+    <li>
+        Support for ABI Compliance Checker 1.99.8.3 
+    </li>
+    <li>
+        Corrected generated test cases code and Makefiles 
+    </li>
+    <li>
+        Support for SUSE 11.2 
+    </li>
+</ul>
+<b>Other</b>
+<ul>
+    <li>
+        Code cleaning 
+    </li>
+</ul>
+<br/>
+
+<b>Version 1.98.3 (February 07, 2013) </b><br/>
+<b>New Options</b>
+<ul>
+    <li>
+        -target
+    </li>
+</ul>
+<b>Bug Fixes</b>
+<ul>
+    <li>
+        Corrected formatting of generated HTML-pages
+    </li>
+    <li>
+        Corrected generated makefiles
+    </li>
+    <li>
+        Corrected -vnum option
+    </li>
+    <li>
+        Other fixes
+    </li>
+</ul>
+<b>Other</b>
+<ul>
+    <li>
+        Code cleaning 
+    </li>
+</ul>
+<br/>
+
+<b>Version 1.98.2 (January 10, 2013) </b><br/>
+<b>Bug Fixes</b>
+<ul>
+    <li>
+        Fixed a problem with resolving of undefined symbols 
+    </li>
+    <li>
+        Moved linker options to LIBS variable in generated makefiles 
+    </li>
+</ul>
+<br/>
+
+<b>Version 1.98 (December 14, 2012) </b><br/>
+<b>New Options</b>
+<ul>
+    <li>
+        -optimize-includes
+    </li>
+    <li>
+        -no-inline
+    </li>
+    <li>
+        -keep-internal
+    </li>
+    <li>
+        -lang
+    </li>
+    <li>
+        -cache
+    </li>
+</ul>
+<b>Improvements</b>
+<ul>
+    <li>
+        Added tests for inline functions 
+    </li>
+    <li>
+        Added test_include_preamble section of the XML-descriptor 
+    </li>
+    <li>
+        Added test_defines section of the XML-descriptor 
+    </li>
+    <li>
+        Improved design of test cases viewer 
+    </li>
+    <li>
+        Support for OpenBSD 
+    </li>
+</ul>
+<b>Bug Fixes</b>
+<ul>
+    <li>
+        More accurate list of includes in test cases 
+    </li>
+    <li>
+        Corrected auto-generated sub-class declarations 
+    </li>
+    <li>
+        Corrected Makefile to install modules 
+    </li>
+    <li>
+        Other fixes
+    </li>
+</ul>
+<b>Other</b>
+<ul>
+    <li>
+        Code cleaning and refactoring 
+    </li>
+</ul>
+<br/>
+
+<b>Version 1.12.11 (December 14, 2012)</b><br/>
+<b>Improvements</b>
+<ul>
+    <li>
+        Support for Mac OS X 10.8 
+    </li>
+</ul>
+<b>Bug Fixes</b>
+<ul>
+    <li>
+        Corrected generating of tests for protected methods
+    </li>
+    <li>
+        Disabled tests for WEAK symbols 
+    </li>
+    <li>
+        Corrected Makefile
+    </li>
+    <li>
+        Other fixes
+    </li>
+</ul>
+<b>Other</b>
+<ul>
+    <li>
+        Code cleaning 
+    </li>
+</ul>
+<br/>
+
+<b>Version 1.12.5 (June 03, 2011)</b><br/>
+<b>New Features</b>
+<ul>
+    <li>
+        Support for the latest GCC 4.6.0 
+    </li>
+</ul>
+<b>Bug Fixes</b>
+<ul>
+    <li>
+        Corrected automatic include paths for headers 
+    </li>
+    <li>
+        Corrected template type names 
+    </li>
+    <li>
+        Corrected automatic preamble and finalization 
+    </li>
+    <li>
+        Corrected links in the problem summary 
+    </li>
+    <li>
+        Corrected help message and documentation
+    </li>
+    <li>
+        Support for C-headers containing C++ keywords 
+    </li>
+    <li>
+        Corrected design of test viewer 
+    </li>
+</ul>
+<b>Other</b>
+<ul>
+    <li>
+        Code cleaning 
+    </li>
+</ul>
+<br/>
+
+<b>Version 1.12 (March 03, 2011)</b><br/>
+<b>New Features</b>
+<ul>
+    <li>
+         Ported to Mac OS X (10.5) and MS Windows (Xp, Vista, 7) 
+    </li>
+    <li>
+         Improved performance 
+    </li>
+    <li>
+         Using File::Temp for storing temporary files 
+    </li>
+    <li>
+         Implemented universal library descriptor: you can specify a directory with headers and shared objects or comma separated list of headers and shared objects instead of a standard XML-descriptor 
+    </li>
+    <li>
+         Extended help message 
+    </li>
+    <li>
+         Added -info option to show full information about the tool 
+    </li>
+    <li>
+         Added -strict-* options family 
+    </li>
+    <li>
+         Added -debug option for debugging 
+    </li>
+    <li>
+         Added "param_name" associating section to specialized types 
+    </li>
+    <li>
+         Added -vnum option to specify library version number outside the descriptor 
+    </li>
+    <li>
+         Added "defines" section to the XML-descriptor to add defines at the headers parsing stage 
+    </li>
+    <li>
+         Added documentation: Options.html, Descriptor.html
+    </li>
+</ul>
+<b>Bug Fixes</b>
+<ul>
+    <li>
+        Corrected automatic detection of include paths for headers (-I options to GCC) 
+    </li>
+    <li>
+        Option -without-shared-objects has been renamed to -headers-only
+    </li>
+    <li>
+        Corrected parsing of header files, identifying of some previously missed classes 
+    </li>
+    <li>
+        Documentation has been moved to "doc/" subdirectory
+    </li>
+</ul>
+<br/>
+
+<b>Version 1.11.1 (March 03, 2011)</b><br/>
+<b>New Features</b>
+<ul>
+    <li>
+        Added documentation: README.html, CHANGES.html, SPECTYPE.html 
+    </li>
+</ul>
+<b>Bug Fixes</b>
+<ul>
+    <li>
+        Corrected processing of typedef type names, fixed potential program hangup 
+    </li>
+    <li>
+        Corrected processing of special symbols in file paths specified by XML-descriptor ("+" and others) 
+    </li>
+</ul>
+<br/>
+
+<b>Version 1.11 (July 22, 2010)</b><br/>
+<b>New Features</b>
+<ul>
+    <li>
+        Added "skip_libs" section to the library descriptor: this section contains a list of shared objects and/or directories with shared objects that should not be processed 
+    </li>
+    <li>
+        Added -library-full-name option to display full library name in title of the report 
+    </li>
+    <li>
+        Improved performance on big libraries 
+    </li>
+    <li>
+        Improved unit tests code 
+    </li>
+</ul>
+<br/>
+
+<b>Version 1.10 (June 25, 2010)</b><br/>
+<b>New Features</b>
+<ul>
+    <li>
+        Added -relpath option: replace {RELPATH} in the library descriptor to some relative path 
+    </li>
+    <li>
+        Added "add_include_paths" section to the library descriptor: this section contains a list of include paths that should be added to the automatically detected include paths 
+    </li>
+    <li>
+        Improved initializing sequences in the test scenarios 
+    </li>
+</ul>
+<b>Bug Fixes</b>
+<ul>
+    <li>
+        Corrected techniques for auto-detection of header file dependencies (include paths) 
+    </li>
+    <li>
+        Corrected checking of complex namespaces changes (C++) 
+    </li>
+    <li>
+        Corrected reuse of previously created variables in tests 
+    </li>
+</ul>
+<br/>
+
+<b>Version 1.9 (June 08, 2010)</b><br/>
+<b>New Features</b>
+<ul>
+    <li>
+        Added -params option for improving tests by adding parameter names separately from header files 
+    </li>
+    <li>
+        Added -header option for restricting a list of functions that should be tested by providing a header file name in which they are declared 
+    </li>
+    <li>
+        Added "skip_warnings" section to the library descriptor for skipping some test messages 
+    </li>
+    <li>
+         Separated stderr and stdout streams of the tool 
+    </li>
+    <li>
+         Improved tests generating rate 
+    </li>
+    <li>
+         Treating SEGV|FPE|BUS|ILL|PIPE|SYS|XCPU|XFSZ signals as errors in the report, other as warnings 
+    </li>
+    <li>
+         Improved test data generation 
+    </li>
+</ul>
+<b>Bug Fixes</b>
+<ul>
+    <li>
+         Corrected complex array type names 
+    </li>
+    <li>
+         Corrected techniques for auto-detection of undefined symbols in the shared objects 
+    </li>
+    <li>
+         Corrected techniques for auto-detection of out parameters 
+    </li>
+    <li>
+         Corrected list of included headers 
+    </li>
+    <li>
+         Fixed tool hanging on some C++ headers (with many namespaces)
+    </li>
+    <li>
+         Corrected order of preamble/finalization in the code 
+    </li>
+    <li>
+         Corrected initialization of agc/argv parameters 
+    </li>
+    <li>
+         Corrected initialization of big arrays 
+    </li>
+    <li>
+         Removed recursive calls from the tests code 
+    </li>
+    <li>
+         Corrected initialization of structure members 
+    </li>
+    <li>
+         Corrected initialization of struct/union types 
+    </li>
+    <li>
+         Corrected global_code/init_code/final_code/value parsing techniques 
+    </li>
+    <li>
+         Corrected tests cleaning 
+    </li>
+</ul>
+<br/>
+
+<b>Version 1.8 (May 05, 2010)</b><br/>
+<b>New Features</b>
+<ul>
+    <li>
+        Ignoring hidden .svn, .git, .bzr, .hg, and CVS directories 
+    </li>
+    <li>
+        Added -dumpversion option for printing tool version and don't do anything else 
+    </li>
+    <li>
+        Added "out_params" section to the library descriptor 
+    </li>
+    <li>
+        Added "lib_version" section to the specialized type and to the collection of specialized types. It allows to specify library version(s) the specialized type or collection will be applied to
+    </li>
+    <li>
+        Improved techniques for auto-detection of out parameters 
+    </li>
+    <li>
+        Improved header files sorting for protecting from compilation errors on the intermediate phase of temporary header file compilation 
+    </li>
+    <li>
+        Improved techniques for auto-detection of header file dependencies (include paths) 
+    </li>
+    <li>
+         Extended set of tested interfaces 
+    </li>
+    <li>
+        Improved techniques for auto-detection of undefined symbols in the specified shared objects 
+    </li>
+    <li>
+        Calling of library malloc function instead of standard malloc() 
+    </li>
+    <li>
+        Improved techniques for initializing intrinsic types 
+    </li>
+    <li>
+        Added sentinel to function call (if needed) 
+    </li>
+    <li>
+        Treating receiving of ABRT signals and exit codes as warnings 
+    </li>
+    <li>
+        Added prefixes to header file includes in the test cases 
+    </li>
+</ul>
+<b>Bug Fixes</b>
+<ul>
+    <li>
+        Test cases for some previously missed C++ namespaces 
+    </li>
+    <li>
+        Removed hidden "void const** __vtt_parm" parameters from the signature of some constructors
+    </li>
+    <li>
+        Corrected redefinition of pure virtual destructors 
+    </li>
+    <li>
+        Corrected processing of several environment specialized types 
+    </li>
+    <li>
+        Corrected selection of functions to call for initializing parameters of other functions 
+    </li>
+    <li>
+        Corrected code parsing techniques (for "value" section of the specialized type) 
+    </li>
+    <li>
+        Preventing hanged execution of the tool on big arrays (>1024 elements) 
+    </li>
+    <li>
+        Corrected processing of "final_code" of specialized type for return value 
+    </li>
+    <li>
+        Corrected list of header file includes in the test cases 
+    </li>
+    <li>
+        Corrected processing of command line options 
+    </li>
+</ul>
+<br/>
+
+<b>Version 1.7 (March 26, 2010)</b><br/>
+<b>New Features</b>
+<ul>
+    <li>
+        The license was changed to dual GNU GPL and LGPL 
+    </li>
+    <li>
+        Added "pre_condition" and "post_condition" properties in the specialized types. Obsolete "constraint" property will be supported, but should be replaced by "post_condition" in the new code 
+    </li>
+    <li>
+        Added -splint-specs option for using splint annotations in the headers (@returned@, @out@, @notnull@, @requires@ and @ensures@) 
+    </li>
+    <li>
+        Using of throw() in the tests for C++ methods with the exceptions handling 
+    </li>
+    <li>
+        Changed meaning of the "skip_interfaces" section in the descriptor. Now it defines interfaces that should not be called in the tests 
+    </li>
+    <li>
+        Added "skip_headers" section in the descriptor 
+    </li>
+</ul>
+<b>Bug Fixes</b>
+<ul>
+    <li>
+        Corrected processing of "libs_depend" section in the descriptor 
+    </li>
+    <li>
+        Directory with temporary files renamed from "temp" to hidden ".tmp_dir" 
+    </li>
+    <li>
+        Corrected processing of shared object dependencies 
+    </li>
+    <li>
+        Corrected processing of relative paths in the "headers", "include_paths", "libs" and "libs_depend" sections 
+    </li>
+    <li>
+        Added tests for some previously missed functions and conversion operators in C++ 
+    </li>
+    <li>
+        Improved internal test suite 
+    </li>
+    <li>
+        Corrected usage of the out-parameters 
+    </li>
+    <li>
+        Corrected code alignment 
+    </li>
+    <li>
+        Corrected LIBS variable in the makefiles 
+    </li>
+    <li>
+        Corrected enumeration members selecting 
+    </li>
+    <li>
+        Corrected some error messages 
+    </li>
+</ul>
+<br/>
+
+<b>Version 1.6 (March 03, 2010)</b><br/>
+<b>New Features</b>
+<ul>
+    <li>
+        Ported to FreeBSD and Haiku 
+    </li>
+    <li>
+        Added namespaces usage in the tests 
+    </li>
+    <li>
+        More accurate distinguishing pointer arguments *x and arrays x[] 
+    </li>
+    <li>
+        Added log for describing tool actions and occurred errors 
+    </li>
+    <li>
+        Improved techniques for auto-detection of header file dependencies (include paths) 
+    </li>
+    <li>
+        Added "libs" attribute to the specialized type for describing external libraries used by this type 
+    </li>
+    <li>
+         Added check for gcc/g++ version (>=3.0.0) 
+    </li>
+    <li>
+        Added -view-only option 
+    </li>
+    <li>
+        Added arguments to the tests 
+    </li>
+    <li>
+        More accurate detection of default gcc include paths 
+    </li>
+    <li>
+        Improved internal test suite 
+    </li>
+    <li>
+        Added error code on return 
+    </li>
+</ul>
+<b>Bug Fixes</b>
+<ul>
+    <li>
+        Corrected signal handling 
+    </li>
+    <li>
+        Corrected header include lists 
+    </li>
+    <li>
+        Corrected makefiles 
+    </li>
+    <li>
+        Corrected usage of the out-parameters 
+    </li>
+    <li>
+        Corrected styles in the report design 
+    </li>
+    <li>
+        Corrected error messages 
+    </li>
+    <li>
+        Corrected code highlighting 
+    </li>
+</ul>
+<br/>
+
+<b>Version 1.5 (February 15, 2010)</b><br/>
+<b>New Features</b>
+<ul>
+    <li>
+        Added "libs_depend" section of the descriptor for shared objects that should be provided to GCC for resolving undefined symbols (if NEEDED elf section in the library shared objects doesn't include it) 
+    </li>
+    <li>
+        Added techniques for auto-detection of undefined symbols in the specified shared objects 
+    </li>
+</ul>
+<b>Bug Fixes</b>
+<ul>
+    <li>
+        Corrected processing of header files in the /usr/include directory 
+    </li>
+    <li>
+        Corrected header include lists 
+    </li>
+    <li>
+        Corrected makefiles 
+    </li>
+    <li>
+        Corrected template for the collection of specialized types 
+    </li>
+    <li>
+        Corrected processing of tab characters in the descriptor 
+    </li>
+    <li>
+        Corrected usage of the out-parameters and return values 
+    </li>
+    <li>
+        Corrected alignment and highlighting of specialized type code 
+    </li>
+    <li>
+        Corrected parameters provided to X virtual frame buffer (xvfb) 
+    </li>
+</ul>
+<br/>
+
+<b>Version 1.4 (February 04, 2010) </b><br/>
+<b>New Features</b>
+<ul>
+    <li>
+        Automated detecting of header file dependencies. Now providing of "include_paths" section in the descriptor is not necessary 
+    </li>
+    <li>
+         Added template for the collection of specialized types (-specialized-type-template option) 
+    </li>
+    <li>
+         Optimized execution time 
+    </li>
+</ul>
+<b>Bug Fixes</b>
+<ul>
+    <li>
+         Corrected makefiles 
+    </li>
+    <li>
+         Corrected descriptor template 
+    </li>
+    <li>
+         More appropriate usage of the out-parameters 
+    </li>
+    <li>
+         Corrected header include lists 
+    </li>
+    <li>
+         Corrected classes hierarchy in C 
+    </li>
+</ul>
+<br/>
+
+<b>Version 1.3 (January 29, 2010)</b><br/>
+<b>New Features</b>
+<ul>
+    <li>
+        Added -t2c option for generating tests in the Template2Code format 
+    </li>
+    <li>
+        Improved overall tests structure. Removed unnecessary code. More appropriate usage of the out-parameters. Improved makefiles code 
+    </li>
+    <li>
+        Added -without-shared-objects option for running the tool without providing of shared objects. It is necessary if the library contains in-line functions only and has no shared objects 
+    </li>
+    <li>
+        Added "libgroup" section in the descriptor for dividing the library into groups 
+    </li>
+    <li>
+        Added -isolated option to restrict functions usage in the tests by the lists specified by the -functions-list option or by the group devision in the descriptor 
+    </li>
+    <li>
+        Tool has been ported to the Cygwin 
+    </li>
+    <li>
+        Using of constants (defines) for initializing parameters 
+    </li>
+    <li>
+        Added printing of incorrect return/parameter values to the report (intrinsic types only) 
+    </li>
+    <li>
+        Added -clean option for cleaning the tests 
+    </li>
+</ul>
+<b>Bug Fixes</b>
+<ul>
+    <li>
+        Corrected help message 
+    </li>
+    <li>
+        Corrected highlighting of the code defines in the reports 
+    </li>
+    <li>
+        Corrected type conversion algorithms 
+    </li>
+    <li>
+        Corrected variables reusing for initializing parameters 
+    </li>
+    <li>
+        Corrected variables naming in the code of specialized types 
+    </li>
+    <li>
+        Corrected reusing of specialized type attributes for the out-parameters 
+    </li>
+    <li>
+        Corrected statements (REQ, REQva) for checking requirements in the generated code 
+    </li>
+    <li>
+        Corrected selection of functions to call for initializing parameters 
+    </li>
+    <li>
+        Corrected headers include list at the beginning of tests 
+    </li>
+</ul>
+<br/>
+
+<b>Version 1.2 (December 22, 2009)</b><br/>
+<b>New Features</b>
+<ul>
+    <li>
+        New sections "Warnings" and "Unexpected Output" in the report 
+    </li>
+    <li>
+        Random test generation mode improved (random selecting of enumeration members and values for intrinsic types) 
+    </li>
+    <li>
+        More accurate selecting of functions to call for initializing parameters of other functions 
+    </li>
+    <li>
+        Added names to unnamed parameters by analyzing type names 
+    </li>
+    <li>
+        Initialization of subclasses in C (if there are no other ways to initialize structure type) 
+    </li>
+    <li>
+        More accurate initializing of array types 
+    </li>
+    <li>
+        More accurate selecting of enumeration members 
+    </li>
+    <li>
+        More accurate type conversion algorithms 
+    </li>
+    <li>
+        Test data improved (added *.xml and *.dtd files) 
+    </li>
+    <li>
+        Values set for intrinsic types extended 
+    </li>
+</ul>
+<b>Bug Fixes</b>
+<ul>
+    <li>
+        Corrected highlighting of variables in the report 
+    </li>
+    <li>
+        Corrected parsing of "interfaces" section (in "associating" section) in the collection of specialized types 
+    </li>
+</ul>
+<br/>
+
+<b>Version 1.1 (December 04, 2009)</b><br/>
+<b>New Features</b>
+<ul>
+    <li>
+        Inserting elements in the lists (C++ only) 
+    </li>
+    <li>
+        More accurate selecting of functions to call for initializing parameters 
+    </li>
+    <li>
+        More information about detected errors in the report 
+    </li>
+    <li>
+        New help message 
+    </li>
+    <li>
+        Additional warnings 
+    </li>
+</ul>
+<b>Bug Fixes</b>
+<ul>
+    <li>
+        Corrected initialization of typedefs to intrinsic types 
+    </li>
+    <li>
+        Corrected headers include list at the beginning of tests 
+    </li>
+    <li>
+        Corrected sorting of detected problems in the report 
+    </li>
+</ul>
+<br/>
+
+<b>Version 1.0 (November 30, 2009)</b><br/>
+Initial version of the tool. 
+<br/>
+
+<div class="footer">
+    get the source code on GitHub : <a href="https://github.com/lvc/api-sanity-checker">lvc/api-sanity-checker</a>
+</div>
+
+<br/>
+<br/>
+
+</div>
+</body>
+</html>
