@@ -1,0 +1,610 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="description" content="Specialized Type" />
+  <title>Specialized Type</title>
+
+  <style type="text/css">
+    body {
+      margin-top: 1.0em;
+      background-color: #deeef7;
+      font-family: Helvetica, Arial, FreeSans, san-serif;
+      color: #000000;
+    }
+    #container {
+      margin: 0 auto;
+      width: 700px;
+    }
+    h1 { font-size: 3.8em; color: #211108; margin-bottom: 3px;margin-top:0px;padding-top:0px;}
+    h1 .small { font-size: 0.4em; }
+    h1 a { text-decoration: none }
+    h2 { font-size: 1.5em; color: #211108; }
+    h3 { text-align: center; color: #211108; }
+    a { color: #211108; }
+    .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
+    .download { float: right; }
+    pre {padding: 0px;margin: 0px;padding-left: 10px;word-wrap:break-word;white-space: pre-wrap;}
+    hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
+    .footer { text-align: center; padding-top:30px; font-style: italic; }
+    .code {border: dashed 1px gray; background-color: #f0f0f0;}
+    .listing {padding: 10px;border: 1px solid black;width: 70%;font-family:"DejaVu Sans Mono", "Monaco", "Courier New", monospace;font-size:14px;}
+    .summary {border:1px solid black;border-collapse:collapse;}
+    table.summary td, table.summary th {border:1px solid black;padding: 4px;}
+    .ext {color: Brown;font-weight: bold;}
+  </style>
+
+</head>
+
+<body>
+<a href="https://github.com/lvc/api-sanity-checker"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
+
+<div id="container">
+
+<h1>Specialized Type</h1>
+<p/>
+The basic idea of specialized types is to provide the test generator (the <a href='index.html'>API Sanity Checker</a> tool) with enough information to generate correct invocation of the target interface in a typical use case and check basic constraints on the return value. The issue is that, for many interfaces, correct invocation requires preparing correct environment and correct parameter values. And this in turn may require calling other interfaces.
+<p/>
+
+Specialized type (or "semantic type" of parameter) include information about various initialization means for various environments. Such information can be reused for multiple interfaces each time the same semantic types are used, which greatly speeds up the development. Correct values for simple types are created by generator completely automatically. When an interface has initialization means assigned for all of its parameters (and if necessary for initial environment), the generator can automatically compose a test for this interface.
+<p/>
+Test development process consists in creating the complete collection of specialized types for the library. Testing of libraries with numerous interfaces by this methodology requires relatively small effort per test and thus is cheap enough. The efficiency is best revealed for interface sets with the number of interfaces starting from hundreds.
+<p/>
+
+<table class='summary'><tr><td>
+<div>Table of Contents</div>
+<ul>
+<li><a href="#Extensions">C/C++ Language Extensions</a></li>
+<li><a href="#Attributes">Attributes of Specialized Type</a></li>
+<li><a href="#Associating">Associating with Interfaces</a></li>
+<li><a href="#Format">Writing Specialized Types</a></li>
+<li><a href="#Collection">Collections of Specialized Types</a></li>
+<li><a href="#TestData">Using Test Data</a></li>
+<li><a href="#Examples">Examples</a></li>
+</ul>
+</td></tr></table>
+
+<a name="Extensions"></a>
+<h2>C/C++ Language Extensions</h2>
+Attributes of specialized type should be described on C/C++ language extended by the following instructions:
+<p/>
+<b>$(type)</b> - instruction initializing an instance of data type.
+<p/>
+<div class='listing'>
+    void create_QAbstractProxyModel(QAbstractProxyModel* Obj)
+    {
+    <pre>
+    Obj->setSourceModel( <span class='ext'>$(QAbstractItemModel*)</span> );</pre>
+    }
+</div>
+<p/>
+
+<b>$[interface]</b> - instruction for interface call with properly initialized parameters.
+<p/>
+<div class='listing'>
+    xmlListPtr create_filled_list()
+    <br/>{
+    <pre>
+    xmlListPtr l=<span class='ext'>$[xmlListCreate]</span>;
+    int num=100;
+    xmlListPushBack(l,&amp;num);
+    return l;</pre>
+    }
+</div>
+<p/>
+
+<b>$0</b> - an instance of the specialized type. 
+<p/>
+<div class='listing'>
+    /*initialize "doc" property of the associated parameter*/
+    <br/><span class='ext'>$0</span>->doc = xmlParseMemory("&lt;p/&gt;",4);
+</div>
+<p/>
+
+<b>$1, $2, ...</b> - references to 1st, 2nd and other interface parameters. 
+<p/>
+<div class='listing'>
+    /*initialize "next" field of the first parameter by the second parameter*/
+    <br/><span class='ext'>$1</span>->next=<span class='ext'>$2</span>;
+</div>
+<p/>
+
+<div class='listing'>
+    /*write first parameter to the second parameter*/
+    <br/><span class='ext'>$2</span>.write(<span class='ext'>$1</span>);
+</div>
+<p/>
+
+<b>$obj</b> - reference to the object that current method calls on (C++ only). 
+<p/>
+<div class='listing'>
+    /*call setStyle() method on the object*/
+    <br/><span class='ext'>$obj</span>.setStyle(Qt::DotLine);
+</div>
+<p/>
+
+<a name="Attributes"></a>
+<h2>Attributes of Specialized Type</h2>
+Specialized type has the following attributes: 
+
+<b>name</b> - Name of the specialized type
+<p/>
+<b>data_type</b> - Name of the associated real data type (QObject*, int, xmlChar ...) or the list of such types (one per line)
+<p/>
+<b>value</b> - Value for initialization (true, 1.0, "string")
+<p/>
+<b>pre_condition/post_condition</b> - Pre/Postcondition on associated function return value or parameter 
+<p/>
+<div class='listing'>
+    <span class='ext'>$0</span>!=NULL
+</div>
+<p/>
+<b>init_code/final_code</b> - Code that should be invoked before/after function call 
+<div class='listing'>
+    /*call the start() method on the associated parameter*/
+    <br/><span class='ext'>$0</span>->start();
+</div>
+<p/>
+<b>global_code</b> - Declarations of auxiliary functions and global variables, header includes 
+<div class='listing'>
+    <span style='color:Green'>#include &lt;QWidgetAction&gt;</span>
+    <br/>QWidgetAction* create_QWidgetAction()
+    <br/>{
+    <pre>
+    QWidgetAction* Obj = new QWidgetAction(<span class='ext'>$(QWidget*)</span>);
+    Obj->setDefaultWidget(<span class='ext'>$(QWidget*)</span>);
+    return Obj;</pre>
+    }
+</div>
+<p/>
+<b>libs</b> - List of external shared objects used by this type. Corresponding external header files should be included in the global_code section
+<p/>
+<b>kind</b> - Kind of the specialized type:
+<ul>
+    <li>
+        <b>normal</b> - This specialized type should be manually associated with the parameters or return values of suitable interfaces
+    </li>
+    <li>
+        <b>common_param</b> - This specialized type will be automatically associated with the parameters of all suitable interfaces 
+    </li>
+    <li>
+        <b>common_retval</b> - This specialized type will be automatically associated with the return values of all suitable interfaces
+    </li>
+    <li>
+        <b>env</b> - This kind of specialized type was introduced for setting up correct environment for the interfaces. The code of this specialized type will be added once at the beginning or at the end of main() function in the test for manually associated interface 
+    </li>
+    <li>
+        <b>common_env</b> - This kind of specialized type is the same as env, but will be automatically associated with all library interfaces 
+    </li>
+</ul>
+
+<a name="Associating"></a>
+<h2>Associating with Interfaces </h2>
+Specialized Types should be associated with the return values or parameters of some library interfaces. Base type of the specialized type should be the same as base type of return value or parameter. For example, specialized type with <b>data_type=int*</b> can be associated with any parameter that has <b>int</b> as the base type like <b>int</b>, <b>int**</b>, <b>int&amp;*</b> and others (it is a <b>family</b> of data types - collection of types that have the same base type). 
+
+<a name="Format"></a>
+<h2>Writing Specialized Types </h2>
+Specialized Type has XML-like structure (you can skip any section if it is not needed):
+<p/>
+
+<div class='listing'>
+
+<span style='color:Blue;'>&lt;spec_type&gt;</span>
+<pre>
+   <span style='color:Green;'>&lt;kind&gt;</span>
+      &lt;!-- Kind of the specialized type.
+           Select it from the following list:
+             normal
+             common_param
+             common_retval
+             env
+             common_env --&gt;
+   <span style='color:Green;'>&lt;/kind&gt;</span>
+ 
+   <span style='color:Green;'>&lt;data_type&gt;</span>
+      &lt;!-- Name of the corresponding real data type,
+           one per line. You can specify several data
+           types if kind is 'common_param' or
+           'common_retval', one per line. This section
+           is not used if kind is 'env' or
+           'common_env' --&gt;
+   <span style='color:Green;'>&lt;/data_type&gt;</span>
+   
+   <span style='color:Green;'>&lt;value&gt;</span>
+      &lt;!-- Value for initialization (true, 1.0,
+      \"string\", ...) --&gt;
+   <span style='color:Green;'>&lt;/value&gt;</span>
+   
+   <span style='color:Green;'>&lt;pre_condition&gt;</span>
+      &lt;!-- Precondition on associated function parameter.
+            Example: $0!=NULL --&gt;
+   <span style='color:Green;'>&lt;/pre_condition&gt;</span>
+   
+   <span style='color:Green;'>&lt;post_condition&gt;</span>
+      &lt;!-- Postcondition on associated function return
+           value or parameter.
+            Example: $0!=NULL &amp;&amp; $obj.style() == DotLine
+       --&gt;
+   <span style='color:Green;'>&lt;/post_condition&gt;</span>
+   
+   <span style='color:Green;'>&lt;init_code&gt;</span>
+      &lt;!-- Code that should be invoked before function call.
+            Example: $0-&gt;start(); --&gt;
+   <span style='color:Green;'>&lt;/init_code&gt;</span>
+   
+   <span style='color:Green;'>&lt;final_code&gt;</span>
+      &lt;!-- Code that should be invoked after function call.
+            Example: $0-&gt;end(); --&gt;
+   <span style='color:Green;'>&lt;/final_code&gt;</span>
+   
+   <span style='color:Green;'>&lt;global_code&gt;</span>
+      &lt;!-- Declarations of auxiliary functions and global
+           variables, header includes --&gt;
+   <span style='color:Green;'>&lt;/global_code&gt;</span>
+   
+   <span style='color:Green;'>&lt;associating&gt;</span>
+      <span style='color:Purple;'>&lt;interfaces&gt;</span>
+         &lt;!-- List of interfaces (mangled/symbol names in
+              C++) that will be associated with the
+              specialized type, one per line --&gt;
+      <span style='color:Purple;'>&lt;/interfaces&gt;</span>
+       
+      <span style='color:Purple;'>&lt;except&gt;</span>
+         &lt;!-- List of interfaces (mangled/symbol names in
+              C++) that will not be associated with the
+              specialized type, one per line. This section
+              is used if kind is 'common_env',
+              'common_param' or 'common_return' --&gt;
+      <span style='color:Purple;'>&lt;/except&gt;</span>
+      
+      <span style='color:Purple;'>&lt;links&gt;</span>
+         &lt;!-- Associations with the return value,
+              parameters or/and object, one per line:
+                param1
+                param2
+                 ...
+                object
+                retval --&gt;
+      <span style='color:Purple;'>&lt;/links&gt;</span>
+      
+      <span style='color:Purple;'>&lt;param_name&gt;</span>
+         &lt;!-- Associations with the parameters by name,
+              one per line:
+                param_name1
+                param_name2
+                param_name3
+                 ...
+                     --&gt;
+      <span style='color:Purple;'>&lt;/param_name&gt;</span>
+   <span style='color:Green;'>&lt;/associating&gt;</span>
+   
+   <span style='color:Green;'>&lt;associating&gt;</span>
+       &lt;!-- Other associations --&gt;
+   <span style='color:Green;'>&lt;/associating&gt;</span>
+   
+   <span style='color:Green;'>&lt;name&gt;</span>
+       &lt;!-- Name of the specialized type --&gt;
+   <span style='color:Green;'>&lt;/name&gt;</span>
+   
+   <span style='color:Green;'>&lt;libs&gt;</span>
+       &lt;!-- External shared objects, one per line.
+            If spectype contains call of the functions from
+            some external shared objects then these objects
+            should be listed here. Corresponding external
+            header files should be included in global_code
+          --&gt;
+   <span style='color:Green;'>&lt;/libs&gt;</span></pre>
+<span style='color:Blue;'>&lt;/spec_type&gt;</span>
+</div>
+
+<a name="Collections"></a>
+<h2>Collections of Specialized Types </h2>
+You can unite several specialized types into collection(s):
+<div class='listing'>
+<pre>
+<span style='color:Red;'>&lt;collection&gt;</span>
+ 
+     <span style='color:Blue;'>&lt;spec_type&gt;</span>
+         &lt;!-- Specialized Type №1 --&gt;
+     <span style='color:Blue;'>&lt;/spec_type&gt;</span>
+     
+     <span style='color:Blue;'>&lt;spec_type&gt;</span>
+         &lt;!-- Specialized Type №2 --&gt;
+     <span style='color:Blue;'>&lt;/spec_type&gt;</span>
+     
+        ...
+    
+<span style='color:Red;'>&lt;/collection&gt;</span>
+
+<span style='color:Red;'>&lt;collection&gt;</span>
+    &lt;!-- Other Collection --&gt;
+<span style='color:Red;'>&lt;/collection&gt;</span>
+</pre>
+</div>
+<p/>
+The file containing collection(s) of specialized types can be provided to the API Sanity Checker tool by the -specialized-types (-st) option:
+<p/>
+<code class='code'>api-sanity-checker -specialized-types SPECTYPES.xml -gen -build -run</code>
+
+<a name="TestData"></a>
+<h2>Using Test Data</h2>
+Test data (special files needed by tests) should be created in some directory before generating tests. Path to that directory should be provided to API Sanity Checker tool by the -test-data (-td) option:
+<p/>
+<code class='code'>api-sanity-checker -test-data DIR -specialized-types SPECTYPES.xml -gen -build -run</code>
+<p/>
+For accessing test data files in the attributes of specialized types you should use TEST_DATA_PATH("file") construction. Test generator will copy specified file to the local "testdata/" directory and replace TEST_DATA_PATH("file") with the "testdata/file" in the generated code.
+<div class='listing'>
+<pre>
+QSound* create_QSound()
+{
+    QSound* Obj=new QSound(<span class='ext'>TEST_DATA_PATH</span>("SoundFile.wav"));
+    Obj->setLoops(5);
+    return Obj;
+}
+</pre>
+</div>
+
+<a name="Examples"></a>
+<h2>Examples</h2>
+Setting up environment for all interfaces and correct initialization for parameters of type GObject* in the ATK library:
+<p/>
+<div class='listing'>
+<pre>
+ <span style='color:Blue;'>&lt;spec_type&gt;</span>
+     <span style='color:Green;'>&lt;kind&gt;</span>
+         common_env
+     <span style='color:Green;'>&lt;/kind&gt;</span>
+ 
+     <span style='color:Green;'>&lt;init_code&gt;</span>
+         g_type_init();
+     <span style='color:Green;'>&lt;/init_code&gt;</span>
+ <span style='color:Blue;'>&lt;/spec_type&gt;</span>
+ 
+ <span style='color:Blue;'>&lt;spec_type&gt;</span>
+     <span style='color:Green;'>&lt;kind&gt;</span>
+         common_param
+     <span style='color:Green;'>&lt;/kind&gt;</span>
+ 
+     <span style='color:Green;'>&lt;data_type&gt;</span>
+         GObject*
+     <span style='color:Green;'>&lt;/data_type&gt;</span>
+    
+     <span style='color:Green;'>&lt;value&gt;</span>
+         g_object_new (G_TYPE_OBJECT, NULL)
+     <span style='color:Green;'>&lt;/value&gt;</span>
+    
+     <span style='color:Green;'>&lt;global_code&gt;</span>
+         #include &lt;glib.h&gt;
+     <span style='color:Green;'>&lt;/global_code&gt;</span>
+ <span style='color:Blue;'>&lt;/spec_type&gt;</span>
+</pre>
+</div>
+<p/>
+
+Correct initialization for all parameters of type xmlListPtr in the libxml2 library:
+<p/>
+<div class='listing'>
+<pre>
+ <span style='color:Blue;'>&lt;spec_type&gt;</span>
+     <span style='color:Green;'>&lt;kind&gt;</span>
+         common_param
+     <span style='color:Green;'>&lt;/kind&gt;</span>
+ 
+     <span style='color:Green;'>&lt;data_type&gt;</span>
+         xmlListPtr
+     <span style='color:Green;'>&lt;/data_type&gt;</span>
+    
+     <span style='color:Green;'>&lt;value&gt;</span>
+         create_filled_list()
+     <span style='color:Green;'>&lt;/value&gt;</span>
+    
+     <span style='color:Green;'>&lt;constraint&gt;</span>
+         $0!=NULL
+     <span style='color:Green;'>&lt;/constraint&gt;</span>
+    
+     <span style='color:Green;'>&lt;global_code&gt;</span>
+         xmlListPtr create_filled_list()
+         {
+             xmlListPtr l = $[xmlListCreate];
+             int num = 100;
+             xmlListPushBack(l, &amp;num);
+             return l;
+         }
+     <span style='color:Green;'>&lt;/global_code&gt;</span>
+ <span style='color:Blue;'>&lt;/spec_type&gt;</span>
+</pre>
+</div>
+<p/>
+
+Correct initialization for the 1st parameter of interface xmlListAppend(xmlListPtr l, void* data) from libxml2 library: 
+<p/>
+<div class='listing'>
+<pre>
+ <span style='color:Blue;'>&lt;spec_type&gt;</span>
+     <span style='color:Green;'>&lt;kind&gt;</span>
+         normal
+     <span style='color:Green;'>&lt;/kind&gt;</span>
+     
+     <span style='color:Green;'>&lt;data_type&gt;</span>
+         xmlListPtr
+     <span style='color:Green;'>&lt;/data_type&gt;</span>
+     
+     <span style='color:Green;'>&lt;value&gt;</span>
+         create_filled_list()
+     <span style='color:Green;'>&lt;/value&gt;</span>
+ 
+     <span style='color:Green;'>&lt;global_code&gt;</span>
+         xmlListPtr create_filled_list()
+         {
+             xmlListPtr l = $[xmlListCreate];
+             int num = 100;
+             xmlListPushBack(l, &amp;num);
+             return l;
+         }
+     <span style='color:Green;'>&lt;/global_code&gt;</span>
+     
+     <span style='color:Green;'>&lt;associating&gt;</span>
+         <span style='color:Purple;'>&lt;interfaces&gt;</span>
+             xmlListAppend
+         <span style='color:Purple;'>&lt;/interfaces&gt;</span>
+       
+         <span style='color:Purple;'>&lt;links&gt;</span>
+             param1
+         <span style='color:Purple;'>&lt;/links&gt;</span>
+     <span style='color:Green;'>&lt;/associating&gt;</span>
+ <span style='color:Blue;'>&lt;/spec_type&gt;</span>
+</pre>
+</div>
+<p/>
+
+Setting up environment for all interfaces from the QtCore library: 
+<p/>
+<div class='listing'>
+<pre>
+ <span style='color:Blue;'>&lt;spec_type&gt;</span>
+     <span style='color:Green;'>&lt;kind&gt;</span>
+         common_env
+     <span style='color:Green;'>&lt;/kind&gt;</span>
+ 
+     <span style='color:Green;'>&lt;global_code&gt;</span>
+         #include&lt;QApplication&gt;
+         #include&lt;QTimer&gt;
+     <span style='color:Green;'>&lt;/global_code&gt;</span>
+ 
+     <span style='color:Green;'>&lt;init_code&gt;</span>
+         #ifdef Q_WS_X11
+           bool useGUI = getenv( "DISPLAY" ) != 0;
+         #else
+           bool useGUI = TRUE;
+         #endif
+         QApplication* app = new QApplication(argc, argv,
+                                              useGUI);
+     <span style='color:Green;'>&lt;/init_code&gt;</span>
+ 
+     <span style='color:Green;'>&lt;final_code&gt;</span>
+         QTimer::singleShot(100, app, SLOT(quit()));
+         app-&gt;exec();
+     <span style='color:Green;'>&lt;/final_code&gt;</span>
+ <span style='color:Blue;'>&lt;/spec_type&gt;</span>
+</pre>
+</div>
+<p/>
+
+Setting up environment for all interfaces from the Gtk+ library: 
+<p/>
+<div class='listing'>
+<pre>
+ <span style='color:Blue;'>&lt;spec_type&gt;</span>
+     <span style='color:Green;'>&lt;kind&gt;</span>
+         common_env
+     <span style='color:Green;'>&lt;/kind&gt;</span>
+ 
+     <span style='color:Green;'>&lt;init_code&gt;</span>
+         gtk_init(&amp;argc, &amp;argv);
+     <span style='color:Green;'>&lt;/init_code&gt;</span>
+ 
+     <span style='color:Green;'>&lt;final_code&gt;</span>
+        gtk_timeout_add(100, &amp;main_loop_quit, NULL);
+        gtk_main();
+     <span style='color:Green;'>&lt;/final_code&gt;</span>
+ 
+     <span style='color:Green;'>&lt;global_code&gt;</span>
+         #include &lt;gtk.h&gt;
+         gboolean main_loop_quit(gpointer data)
+         {
+             gtk_main_quit();
+             return FALSE;
+         }
+     <span style='color:Green;'>&lt;/global_code&gt;</span>
+ 
+     <span style='color:Green;'>&lt;associating&gt;</span>
+         <span style='color:Purple;'>&lt;except&gt;</span>
+             gtk_init
+             gtk_init_check
+             gtk_parse_args
+             gdk_init
+             gdk_init_check
+             gdk_parse_args
+             gtk_test_init
+         <span style='color:Purple;'>&lt;/except&gt;</span>
+     <span style='color:Green;'>&lt;/associating&gt;</span>
+ <span style='color:Blue;'>&lt;/spec_type&gt;</span>
+</pre>
+</div>
+<p/>
+
+Using test data for initializing all parameters of type xmlTextReaderPtr in the libxml2 library: 
+<p/>
+<div class='listing'>
+<pre>
+ <span style='color:Blue;'>&lt;spec_type&gt;</span>
+     <span style='color:Green;'>&lt;kind&gt;</span>
+         common_param
+     <span style='color:Green;'>&lt;/kind&gt;</span>
+     
+     <span style='color:Green;'>&lt;data_type&gt;</span>
+         xmlTextReaderPtr
+     <span style='color:Green;'>&lt;/data_type&gt;</span>
+     
+     <span style='color:Green;'>&lt;value&gt;</span>
+         create_reader()
+     <span style='color:Green;'>&lt;/value&gt;</span>
+ 
+     <span style='color:Green;'>&lt;global_code&gt;</span>
+         xmlTextReaderPtr create_reader(int n)
+         {
+             xmlTextReaderPtr reader = xmlReaderForFile(<span class='ext'>TEST_DATA_PATH("file.xml")</span>, NULL, 0);
+             int i;
+             for(i=0; i&lt;n; i+=1)
+             {
+                 xmlTextReaderRead(reader);
+             }
+             return reader;
+         }
+     <span style='color:Green;'>&lt;/global_code&gt;</span>
+ <span style='color:Blue;'>&lt;/spec_type&gt;</span>
+</pre>
+</div>
+<p/>
+
+Checking the return value of interface xmlLinkGetData(xmlLinkPtr lk) from the libxml2 library:
+<p/>
+<div class='listing'>
+<pre>
+ <span style='color:Blue;'>&lt;spec_type&gt;</span>
+     <span style='color:Green;'>&lt;kind&gt;</span>
+         normal
+     <span style='color:Green;'>&lt;/kind&gt;</span>
+ 
+     <span style='color:Green;'>&lt;data_type&gt;</span>
+         void*
+     <span style='color:Green;'>&lt;/data_type&gt;</span>
+ 
+     <span style='color:Green;'>&lt;constraint&gt;</span>
+         $0!=NULL
+     <span style='color:Green;'>&lt;/constraint&gt;</span>
+     
+     <span style='color:Green;'>&lt;associating&gt;</span>
+         <span style='color:Purple;'>&lt;interfaces&gt;</span>
+             xmlLinkGetData
+         <span style='color:Purple;'>&lt;/interfaces&gt;</span>
+       
+         <span style='color:Purple;'>&lt;links&gt;</span>
+             retval
+         <span style='color:Purple;'>&lt;/links&gt;</span>
+     <span style='color:Green;'>&lt;/associating&gt;</span>
+ <span style='color:Blue;'>&lt;/spec_type&gt;</span>
+</pre>
+</div>
+<p/>
+
+<div class="footer">
+    get the source code on GitHub : <a href="https://github.com/lvc/api-sanity-checker">lvc/api-sanity-checker</a>
+</div>
+
+<br/>
+<br/>
+
+</div>
+</body>
+</html>
