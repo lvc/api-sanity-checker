@@ -1,9 +1,8 @@
 ###########################################################################
 # Module to test API Sanity Checker
 #
-# Copyright (C) 2009-2010 The Linux Foundation
 # Copyright (C) 2009-2011 Institute for System Programming, RAS
-# Copyright (C) 2011-2013 ROSA Lab
+# Copyright (C) 2011-2015 Andrey Ponomarenko's ABI laboratory
 #
 # Written by Andrey Ponomarenko
 #
@@ -22,12 +21,12 @@
 ###########################################################################
 use strict;
 
-my ($Debug, $LIB_EXT, $OpenReport, $TargetCompiler);
+my ($Debug, $LIB_EXT, $TargetCompiler);
 my $OSgroup = get_OSgroup();
 
 sub testTool($$$$)
 {
-    ($Debug, $LIB_EXT, $OpenReport, $TargetCompiler) = @_;
+    ($Debug, $LIB_EXT, $TargetCompiler) = @_;
     
     testC();
     testCpp();
@@ -233,7 +232,7 @@ sub testCpp()
             return 1;
         }";
     
-    runTests("libsample_cpp", "C++", "namespace TestNS {\n$DataDefs\n}\n", "namespace TestNS {\n$Sources\n}\n", "type_test_opaque", "_ZN18type_test_internal5func1ES_");
+    runSelfTests("libsample_cpp", "C++", "namespace TestNS {\n$DataDefs\n}\n", "namespace TestNS {\n$Sources\n}\n", "type_test_opaque", "_ZN18type_test_internal5func1ES_");
 }
 
 sub testC()
@@ -352,7 +351,7 @@ sub testC()
         }";
     
     
-    runTests("libsample_c", "C", $DataDefs, $Sources, "type_test_opaque", "func_test_internal");
+    runSelfTests("libsample_c", "C", $DataDefs, $Sources, "type_test_opaque", "func_test_internal");
 }
 
 sub readFirstLine($)
@@ -365,7 +364,7 @@ sub readFirstLine($)
     return $FirstLine;
 }
 
-sub runTests($$$$$$)
+sub runSelfTests($$$$$$)
 {
     my ($LibName, $Lang, $DataDefs, $Sources, $Opaque, $Private) = @_;
     my $Ext = ($Lang eq "C++")?"cpp":"c";
@@ -461,9 +460,7 @@ sub runTests($$$$$$)
     }
     # running the tool
     my $Cmd = "perl $0 -l $LibName -d $LibName/descriptor.xml -gen -build -run -show-retval";
-    if($OpenReport) {
-        $Cmd .= " -open";
-    }
+    
     if($TargetCompiler) {
         $Cmd .= " -target ".$TargetCompiler;
     }
@@ -494,8 +491,8 @@ sub runTests($$$$$$)
             $Failed = $1;
         }
     }
-    if($Total==($Passed+$Failed) and (($LibName eq "libsample_c" and $Total>5 and $Failed>=1)
-    or ($LibName eq "libsample_cpp" and $Total>10 and $Failed>=1))) {
+    if($Total==($Passed+$Failed) and (($LibName eq "libsample_c" and $Total>5 and $Failed==1)
+    or ($LibName eq "libsample_cpp" and $Total>10 and $Failed==1))) {
         printMsg("INFO", "result: SUCCESS ($Total test cases, $Passed passed, $Failed failed)\n");
     }
     else {

@@ -10,18 +10,17 @@ hr {
 h1 {
     margin-bottom:0px;
     padding-bottom:0px;
-    font-size:26px;
+    font-size:1.625em;
 }
 h2 {
     margin-bottom:0px;
     padding-bottom:0px;
-    font-size:20px;
+    font-size:1.25em;
 }
 span.int {
     font-weight:bold;
     cursor:pointer;
     margin-left:7px;
-    font-size:16px;
     font-family:Arial;
     color:#003E69;
 }
@@ -33,29 +32,23 @@ span:hover.int {
 }
 span.header {
     color:#cc3300;
-    font-size:14px;
+    font-size:0.875em;
     font-weight:bold;
 }
 span.ns {
     color:#408080;
-    font-size:15px;
+    font-size:0.94em;
 }
 span.lib_name {
     color:Green;
-    font-size:14px;
+    font-size:0.875em;
     font-weight:bold;
 }
 span.libgroup {
     color:Black;
-    font-size:14px;
+    font-size:0.875em;
     font-family:Arial;
     font-weight:bold;
-}
-span.mangled {
-    padding-left:15px;
-    font-size:14px;
-    cursor:text;
-    color:#444444;
 }
 span.nowrap {
     white-space:nowrap;
@@ -77,4 +70,7 @@ span.focus_p {
 }
 a.link {
     text-decoration:none;
+}
+.footer {
+    font-size:0.75em;
 }
