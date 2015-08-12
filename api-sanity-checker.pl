@@ -1492,12 +1492,12 @@ sub get_Summary()
     $Success_Tests_Link = $ResultCounter{"Run"}{"Success"} if($ResultCounter{"Run"}{"Success"}>0);
     $STAT_FIRST_LINE .= "passed:".$ResultCounter{"Run"}{"Success"}.";";
     my $Failed_Tests_Link = "0";
-    $Failed_Tests_Link = "<a href='#Failed_Tests' style='color:Blue;'>".$ResultCounter{"Run"}{"Fail"}."</a>" if($ResultCounter{"Run"}{"Fail"}>0);
+    $Failed_Tests_Link = "<a href='#Failed_Tests'>".$ResultCounter{"Run"}{"Fail"}."</a>" if($ResultCounter{"Run"}{"Fail"}>0);
     $STAT_FIRST_LINE .= "failed:".$ResultCounter{"Run"}{"Fail"}.";";
     $Summary .= "<tr><th>Passed / Failed tests</th><td>$Success_Tests_Link / $Failed_Tests_Link</td></tr>";
     if($ResultCounter{"Run"}{"Warnings"}>0)
     {
-        my $Warnings_Link = "<a href='#Warnings' style='color:Blue;'>".$ResultCounter{"Run"}{"Warnings"}."</a>";
+        my $Warnings_Link = "<a href='#Warnings'>".$ResultCounter{"Run"}{"Warnings"}."</a>";
         $Summary .= "<tr><th>Warnings</th><td>$Warnings_Link</td></tr>";
     }
     $STAT_FIRST_LINE .= "warnings:".$ResultCounter{"Run"}{"Warnings"};
@@ -1528,7 +1528,7 @@ sub get_Problem_Summary()
         {
             my $SignalName = (keys(%SignalName_Interface))[0];
             my $Amount = keys(%{$SignalName_Interface{$SignalName}});
-            my $Link = "<a href=\'#".$ProblemType."_".$SignalName."\' style='color:Blue;'>$Amount</a>";
+            my $Link = "<a href=\'#".$ProblemType."_".$SignalName."\'>$Amount</a>";
             $STAT_FIRST_LINE .= lc($ProblemType."_".$SignalName.":$Amount;");
             $Problem_Summary .= "<tr><th>Received ".lc($SignalException)." $SignalName</th><td>$Link</td></tr>";
         }
@@ -1539,7 +1539,7 @@ sub get_Problem_Summary()
             foreach my $SignalName (sort keys(%SignalName_Interface))
             {
                 my $Amount = keys(%{$SignalName_Interface{$SignalName}});
-                my $Link = "<a href=\'#".$ProblemType."_".$SignalName."\' style='color:Blue;'>$Amount</a>";
+                my $Link = "<a href=\'#".$ProblemType."_".$SignalName."\'>$Amount</a>";
                 $STAT_FIRST_LINE .= lc($ProblemType."_".$SignalName.":$Amount;");
                 $Problem_Summary .= (($num!=1)?"<tr>":"")."<th>$SignalName</th><td>$Link</td></tr>";
                 $num+=1;
@@ -1558,7 +1558,7 @@ sub get_Problem_Summary()
         {
             my $ExitValue = (keys(%ExitValue_Interface))[0];
             my $Amount = keys(%{$ExitValue_Interface{$ExitValue}});
-            my $Link = "<a href=\'#Exited_With_Value_$ExitValue\' style='color:Blue;'>$Amount</a>";
+            my $Link = "<a href=\'#Exited_With_Value_$ExitValue\'>$Amount</a>";
             $STAT_FIRST_LINE .= lc("Exited_With_Value_$ExitValue:$Amount;");
             $Problem_Summary .= "<tr><th colspan=\'$ColSpan\'>Exited with value \"$ExitValue\"</th><td>$Link</td></tr>";
         }
@@ -1568,7 +1568,7 @@ sub get_Problem_Summary()
             foreach my $ExitValue (sort keys(%ExitValue_Interface))
             {
                 my $Amount = keys(%{$ExitValue_Interface{$ExitValue}});
-                my $Link = "<a href=\'#Exited_With_Value_$ExitValue\' style='color:Blue;'>$Amount</a>";
+                my $Link = "<a href=\'#Exited_With_Value_$ExitValue\'>$Amount</a>";
                 $STAT_FIRST_LINE .= lc("Exited_With_Value_$ExitValue:$Amount;");
                 $Problem_Summary .= "<th>\"$ExitValue\"</th><td>$Link</td></tr>";
             }
@@ -1579,21 +1579,21 @@ sub get_Problem_Summary()
     if(keys(%{$ProblemType_Interface{"Hanged_Execution"}}))
     {
         my $Amount = keys(%{$ProblemType_Interface{"Hanged_Execution"}});
-        my $Link = "<a href=\'#Hanged_Execution\' style='color:Blue;'>$Amount</a>";
+        my $Link = "<a href=\'#Hanged_Execution\'>$Amount</a>";
         $STAT_FIRST_LINE .= "hanged_execution:$Amount;";
         $Problem_Summary .= "<tr><th colspan=\'$ColSpan\'>Hanged execution</th><td>$Link</td></tr>";
     }
     if(keys(%{$ProblemType_Interface{"Requirement_Failed"}}))
     {
         my $Amount = keys(%{$ProblemType_Interface{"Requirement_Failed"}});
-        my $Link = "<a href=\'#Requirement_Failed\' style='color:Blue;'>$Amount</a>";
+        my $Link = "<a href=\'#Requirement_Failed\'>$Amount</a>";
         $STAT_FIRST_LINE .= "requirement_failed:$Amount;";
         $Problem_Summary .= "<tr><th colspan=\'$ColSpan\'>Requirement failed</th><td>$Link</td></tr>";
     }
     if(keys(%{$ProblemType_Interface{"Other_Problems"}}))
     {
         my $Amount = keys(%{$ProblemType_Interface{"Other_Problems"}});
-        my $Link = "<a href=\'#Other_Problems\' style='color:Blue;'>$Amount</a>";
+        my $Link = "<a href=\'#Other_Problems\'>$Amount</a>";
         $STAT_FIRST_LINE .= "other_problems:$Amount;";
         $Problem_Summary .= "<tr><th colspan=\'$ColSpan\'>Other problems</th><td>$Link</td></tr>";
     }
@@ -1673,7 +1673,8 @@ sub get_TestView($$)
     $Test=~s/\@NL\@/\n/g;
     
     my $Table = "";
-    $Table .= "<table cellspacing='0' class='test_view'>";
+    $Table .= "<table cellspacing='0' class='test_view'>\n";
+    $Table .= "<tr><td colspan='2'>&nbsp;</td></tr>\n";
     
     my @Lines = split(/\n/, $Test);
     
@@ -1687,6 +1688,7 @@ sub get_TestView($$)
         $Table .= "</tr>\n";
     }
     
+    $Table .= "<tr><td colspan='2'>&nbsp;</td></tr>\n";
     $Table .= "</table>\n";
     
     return $Table;
