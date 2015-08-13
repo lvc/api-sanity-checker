@@ -75,7 +75,7 @@ $UseXvfb, $TestTool, $MinimumCode, $TestDataPath, $MaximumCode, $RandomCode,
 $SpecTypes_PackagePath, $CheckReturn, $DisableDefaultValues, $ShowRetVal,
 $CheckHeadersOnly, $Template2Code, $Standalone, $ShowVersion, $MakeIsolated,
 $ParameterNamesFilePath, $CleanSources, $DumpVersion, $TargetHeaderName,
-$RelativeDirectory, $TargetLibraryFullName, $TargetVersion, $StrictGen,
+$RelativeDirectory, $TargetTitle, $TargetVersion, $StrictGen,
 $StrictBuild, $StrictRun, $Strict, $Debug, $UseCache, $NoInline, $UserLang,
 $OptimizeIncludes, $KeepInternal, $TargetCompiler, $GenerateAll,
 $InterfacesListPath);
@@ -174,7 +174,7 @@ GetOptions("h|help!" => \$Help,
   "disable-default-values!" => \$DisableDefaultValues,
   "optimize-includes=s" => \$OptimizeIncludes,
   "p|params=s" => \$ParameterNamesFilePath,
-  "l-full|lib-full=s" => \$TargetLibraryFullName,
+  "title|l-full|lib-full=s" => \$TargetTitle,
   "relpath|reldir=s" => \$RelativeDirectory,
   "lang=s" => \$UserLang,
   "target=s" => \$TargetCompiler,
@@ -425,8 +425,8 @@ EXTRA OPTIONS:
             func2;param1;param2;param3 ...
             ...
 
-  -l-full|-lib-full NAME
-      Library name in the report title.
+  -title NAME
+      The name of the library in the report title.
 
   -relpath|-reldir PATH
       Replace {RELPATH} in the library descriptor by PATH.
@@ -1610,13 +1610,13 @@ sub get_Problem_Summary()
 
 sub get_Report_Header()
 {
-    my $Report_Header = "<h1>Test results for the <span style='color:Blue;'>$TargetLibraryFullName</span>-<span style='color:Blue;'>".$Descriptor{"Version"}."</span> library on <span style='color:Blue;'>".getArch()."</span></h1>\n";
+    my $Report_Header = "<h1>Test results for the <span style='color:Blue;'>$TargetTitle</span>-<span style='color:Blue;'>".$Descriptor{"Version"}."</span> library on <span style='color:Blue;'>".getArch()."</span></h1>\n";
     return $Report_Header;
 }
 
 sub get_TestSuite_Header()
 {
-    my $Report_Header = "<h1>Test suite for the <span style='color:Blue;'>$TargetLibraryFullName</span>-<span style='color:Blue;'>".$Descriptor{"Version"}."</span> library on <span style='color:Blue;'>".getArch()."</span></h1>\n";
+    my $Report_Header = "<h1>Test suite for the <span style='color:Blue;'>$TargetTitle</span>-<span style='color:Blue;'>".$Descriptor{"Version"}."</span> library on <span style='color:Blue;'>".getArch()."</span></h1>\n";
     return $Report_Header;
 }
 
@@ -1936,9 +1936,9 @@ sub composeHTML_Head($$$$$)
 
 sub create_Index()
 {
-    my $Title = $TargetLibraryFullName."-".$Descriptor{"Version"}.": Test suite";
-    my $Keywords = "$TargetLibraryFullName, tests, API";
-    my $Description = "Test suite for the $TargetLibraryFullName-".$Descriptor{"Version"}." library on ".getArch();
+    my $Title = $TargetTitle."-".$Descriptor{"Version"}.": Test suite";
+    my $Keywords = "$TargetTitle, tests, API";
+    my $Description = "Test suite for the $TargetTitle-".$Descriptor{"Version"}." library on ".getArch();
     
     my $Header = get_TestSuite_Header();
     my $CssStyles = readModule("Styles", "List.css");
@@ -1951,9 +1951,9 @@ sub create_Index()
 
 sub createReport()
 {
-    my $Title = $TargetLibraryFullName."-".$Descriptor{"Version"}.": test results";
-    my $Keywords = "$TargetLibraryFullName, test, API";
-    my $Description = "Test results for the $TargetLibraryFullName-".$Descriptor{"Version"}." library on ".getArch();
+    my $Title = $TargetTitle."-".$Descriptor{"Version"}.": test results";
+    my $Keywords = "$TargetTitle, test, API";
+    my $Description = "Test results for the $TargetTitle-".$Descriptor{"Version"}." library on ".getArch();
     
     my $CssStyles = readModule("Styles", "Report.css");
     my $JScripts = readModule("Scripts", "Sections.js");
@@ -14585,8 +14585,8 @@ sub scenario()
             exitStatus("Error", "These symbols are not allowed in the library name: \"\\\", \"\/\" and \"*\"");
         }
     }
-    if(not $TargetLibraryFullName) {
-        $TargetLibraryFullName = $TargetLibraryName;
+    if(not $TargetTitle) {
+        $TargetTitle = $TargetLibraryName;
     }
     if($TestDataPath and not -d $TestDataPath) {
         exitStatus("Access_Error", "can't access directory \'$TestDataPath\'");
