@@ -192,107 +192,111 @@ Specialized Type has XML-like structure (you can skip any section if it is not n
 <span style='color:Blue;'>&lt;spec_type&gt;</span>
 <pre>
    <span style='color:Green;'>&lt;kind&gt;</span>
-      &lt;!-- Kind of the specialized type.
-           Select it from the following list:
-             normal
-             common_param
-             common_retval
-             env
-             common_env --&gt;
+      /* Kind of the specialized type.
+         Select it from the following list:
+           normal
+           common_param
+           common_retval
+           env
+           common_env */
    <span style='color:Green;'>&lt;/kind&gt;</span>
  
    <span style='color:Green;'>&lt;data_type&gt;</span>
-      &lt;!-- Name of the corresponding real data type,
-           one per line. You can specify several data
-           types if kind is 'common_param' or
-           'common_retval', one per line. This section
-           is not used if kind is 'env' or
-           'common_env' --&gt;
+      /* Name of the corresponding real data type,
+         one per line. You can specify several data
+         types if kind is 'common_param' or
+         'common_retval', one per line. This section
+         is not used if kind is 'env' or
+         'common_env' */
    <span style='color:Green;'>&lt;/data_type&gt;</span>
    
    <span style='color:Green;'>&lt;value&gt;</span>
-      &lt;!-- Value for initialization (true, 1.0,
-      \"string\", ...) --&gt;
+      /* Value for initialization (true, 1.0,
+         "string", ...) */
    <span style='color:Green;'>&lt;/value&gt;</span>
    
    <span style='color:Green;'>&lt;pre_condition&gt;</span>
-      &lt;!-- Precondition on associated function parameter.
-            Example: $0!=NULL --&gt;
+      /* Precondition on associated function parameter.
+          Example: $0!=NULL */
    <span style='color:Green;'>&lt;/pre_condition&gt;</span>
    
    <span style='color:Green;'>&lt;post_condition&gt;</span>
-      &lt;!-- Postcondition on associated function return
-           value or parameter.
-            Example: $0!=NULL &amp;&amp; $obj.style() == DotLine
-       --&gt;
+      /* Postcondition on associated function return
+         value or parameter.
+          Example: $0!=NULL &amp;&amp; $obj.style() == DotLine
+       */
    <span style='color:Green;'>&lt;/post_condition&gt;</span>
    
    <span style='color:Green;'>&lt;init_code&gt;</span>
-      &lt;!-- Code that should be invoked before function call.
-            Example: $0-&gt;start(); --&gt;
+      /* Code that should be invoked before function call.
+          Example: $0-&gt;start(); */
    <span style='color:Green;'>&lt;/init_code&gt;</span>
    
    <span style='color:Green;'>&lt;final_code&gt;</span>
-      &lt;!-- Code that should be invoked after function call.
-            Example: $0-&gt;end(); --&gt;
+      /* Code that should be invoked after function call.
+          Example: $0-&gt;end(); */
    <span style='color:Green;'>&lt;/final_code&gt;</span>
    
    <span style='color:Green;'>&lt;global_code&gt;</span>
-      &lt;!-- Declarations of auxiliary functions and global
-           variables, header includes --&gt;
+      /* Declarations of auxiliary functions and global
+         variables, header includes */
    <span style='color:Green;'>&lt;/global_code&gt;</span>
+   
+   <span style='color:Green;'>&lt;decl_code&gt;</span>
+        /* Code that will be pasted instead of parameter
+           automatic declaration. Example: char \$0[16]; */
+   <span style='color:Green;'>&lt;/decl_code&gt;</span>
    
    <span style='color:Green;'>&lt;associating&gt;</span>
       <span style='color:Purple;'>&lt;interfaces&gt;</span>
-         &lt;!-- List of interfaces (mangled/symbol names in
-              C++) that will be associated with the
-              specialized type, one per line --&gt;
+         /* List of interfaces (mangled/symbol names in
+            C++) that will be associated with the
+            specialized type, one per line */
       <span style='color:Purple;'>&lt;/interfaces&gt;</span>
        
       <span style='color:Purple;'>&lt;except&gt;</span>
-         &lt;!-- List of interfaces (mangled/symbol names in
-              C++) that will not be associated with the
-              specialized type, one per line. This section
-              is used if kind is 'common_env',
-              'common_param' or 'common_return' --&gt;
+         /* List of interfaces (mangled/symbol names in
+            C++) that will not be associated with the
+            specialized type, one per line. This section
+            is used if kind is 'common_env',
+            'common_param' or 'common_return' */
       <span style='color:Purple;'>&lt;/except&gt;</span>
       
       <span style='color:Purple;'>&lt;links&gt;</span>
-         &lt;!-- Associations with the return value,
-              parameters or/and object, one per line:
-                param1
-                param2
-                 ...
-                object
-                retval --&gt;
+         /* Associations with the return value,
+            parameters or/and object, one per line:
+              param1
+              param2
+               ...
+              object
+              retval */
       <span style='color:Purple;'>&lt;/links&gt;</span>
       
       <span style='color:Purple;'>&lt;param_name&gt;</span>
-         &lt;!-- Associations with the parameters by name,
-              one per line:
-                param_name1
-                param_name2
-                param_name3
-                 ...
-                     --&gt;
+         /* Associations with the parameters by name,
+            one per line:
+              param_name1
+              param_name2
+              param_name3
+               ...
+                     */
       <span style='color:Purple;'>&lt;/param_name&gt;</span>
    <span style='color:Green;'>&lt;/associating&gt;</span>
    
    <span style='color:Green;'>&lt;associating&gt;</span>
-       &lt;!-- Other associations --&gt;
+       /* Other associations */
    <span style='color:Green;'>&lt;/associating&gt;</span>
    
    <span style='color:Green;'>&lt;name&gt;</span>
-       &lt;!-- Name of the specialized type --&gt;
+       /* Name of the specialized type */
    <span style='color:Green;'>&lt;/name&gt;</span>
    
    <span style='color:Green;'>&lt;libs&gt;</span>
-       &lt;!-- External shared objects, one per line.
-            If spectype contains call of the functions from
-            some external shared objects then these objects
-            should be listed here. Corresponding external
-            header files should be included in global_code
-          --&gt;
+       /* External shared objects, one per line.
+          If spectype contains call of the functions from
+          some external shared objects then these objects
+          should be listed here. Corresponding external
+          header files should be included in global_code */
    <span style='color:Green;'>&lt;/libs&gt;</span></pre>
 <span style='color:Blue;'>&lt;/spec_type&gt;</span>
 </div>
@@ -305,11 +309,11 @@ You can unite several specialized types into collection(s):
 <span style='color:Red;'>&lt;collection&gt;</span>
  
      <span style='color:Blue;'>&lt;spec_type&gt;</span>
-         &lt;!-- Specialized Type №1 --&gt;
+         /* Specialized Type №1 */
      <span style='color:Blue;'>&lt;/spec_type&gt;</span>
      
      <span style='color:Blue;'>&lt;spec_type&gt;</span>
-         &lt;!-- Specialized Type №2 --&gt;
+         /* Specialized Type №2 */
      <span style='color:Blue;'>&lt;/spec_type&gt;</span>
      
         ...
@@ -317,7 +321,7 @@ You can unite several specialized types into collection(s):
 <span style='color:Red;'>&lt;/collection&gt;</span>
 
 <span style='color:Red;'>&lt;collection&gt;</span>
-    &lt;!-- Other Collection --&gt;
+    /* Other Collection */
 <span style='color:Red;'>&lt;/collection&gt;</span>
 </pre>
 </div>
@@ -332,12 +336,12 @@ Test data (special files needed by tests) should be created in some directory be
 <p/>
 <code class='code'>api-sanity-checker -test-data DIR -specialized-types SPECTYPES.xml -gen -build -run</code>
 <p/>
-For accessing test data files in the attributes of specialized types you should use TEST_DATA_PATH("file") construction. Test generator will copy specified file to the local "testdata/" directory and replace TEST_DATA_PATH("file") with the "testdata/file" in the generated code.
+For accessing test data files in the attributes of specialized types you should use <code>TEST_DATA_PATH("file")</code> construction. Test generator will copy specified file to the local "testdata/" directory and replace <code>TEST_DATA_PATH("file")</code> with the <code>"testdata/file"</code> in the generated code.
 <div class='listing'>
 <pre>
 QSound* create_QSound()
 {
-    QSound* Obj=new QSound(<span class='ext'>TEST_DATA_PATH</span>("SoundFile.wav"));
+    QSound* Obj=new QSound(<span class='ext'>TEST_DATA_PATH("SoundFile.wav")</span>);
     Obj->setLoops(5);
     return Obj;
 }
@@ -457,7 +461,7 @@ Correct initialization for the 1st parameter of interface xmlListAppend(xmlListP
 </div>
 <p/>
 
-Setting up environment for all interfaces from the QtCore library: 
+Setting up environment for all interfaces from the libQt5Core library: 
 <p/>
 <div class='listing'>
 <pre>

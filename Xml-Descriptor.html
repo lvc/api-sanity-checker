@@ -194,13 +194,52 @@ The library descriptor is a simple XML-file that specifies version number, paths
 <pre>
 <span style='color:Green;'>&lt;test_include_preamble&gt;</span>
     /* The list of header files that should be
-    included in each test case before other
-    headers, one per line */
+       included in each test case before other
+       headers, one per line */
 <span style='color:Green;'>&lt;/test_include_preamble&gt;</span>
 
 <span style='color:Green;'>&lt;test_defines&gt;</span>
     /* Add defines to test cases */
 <span style='color:Green;'>&lt;/test_defines&gt;</span>
+
+<span style='color:Green;'>&lt;libs_depend&gt;</span>
+    /* The list of paths to libraries that should be
+       provided to gcc for resolving undefined symbols
+       (if NEEDED elf section doesn't include them) */
+<span style='color:Green;'>&lt;/libs_depend&gt;</span>
+
+<span style='color:Green;'>&lt;opaque_types&gt;</span>
+    /* The list of opaque types, one per line */
+<span style='color:Green;'>&lt;/opaque_types&gt;</span>
+
+<span style='color:Green;'>&lt;libgroup&gt;</span>
+    <span style='color:Purple;'>&lt;name&gt;</span>
+        /* Name of the libgroup */
+    <span style='color:Purple;'>&lt;/name&gt;</span>
+
+    <span style='color:Purple;'>&lt;symbols&gt;</span>
+        /* The list of symbols (mangled names in C++)
+           in the group that should be tested, one
+           per line */
+    <span style='color:Purple;'>&lt;/symbols&gt;</span>
+<span style='color:Green;'>&lt;/libgroup&gt;</span>
+
+<span style='color:Green;'>&lt;out_params&gt;</span>
+    /* Associating of out(returned)-parameters
+       with symbols, one entry per line:
+          symbol:param_name
+                or
+          symbol:param_number
+       Examples:
+          dbus_parse_address:entry
+          dbus_parse_address:2       */
+<span style='color:Green;'>&lt;/out_params&gt;</span>
+
+<span style='color:Green;'>&lt;skip_warnings&gt;</span>
+    /* The list of warnings that should not be shown in
+       the report, one pattern per line */
+<span style='color:Green;'>&lt;/skip_warnings&gt;</span>
+
 </pre>
 </div>
 <p/>
@@ -323,24 +362,31 @@ BlackBerry 10 Native SDK:
 </div>
 <p/>
 
-QtCore:
+libQt5Core:
 <div class='listing'>
 <pre>
 <span style='color:Green;'>&lt;version&gt;</span>
-    4.6.0
+    5.5.0
 <span style='color:Green;'>&lt;/version&gt;</span>
 
 <span style='color:Green;'>&lt;headers&gt;</span>
-    /usr/local/Qt-4.6.0/include/QtCore/QtCore
+    /usr/local/Qt-5.5.0/include/QtCore
 <span style='color:Green;'>&lt;/headers&gt;</span>
 
 <span style='color:Green;'>&lt;libs&gt;</span>
-    /usr/local/Qt-4.6.0/lib/libQtCore.so.4
+    /usr/local/Qt-5.5.0/lib/libQt5Core.so.5.5.0
 <span style='color:Green;'>&lt;/libs&gt;</span>
 
 <span style='color:Green;'>&lt;include_paths&gt;</span>
-    /usr/local/Qt-4.6.0/include/
+    /usr/local/Qt-5.5.0/include/
 <span style='color:Green;'>&lt;/include_paths&gt;</span>
+
+<span style='color:Green;'>&lt;skip_headers&gt;</span>
+    /private/
+    qt_windows.h
+    qatomic_*
+    *_impl.h
+<span style='color:Green;'>&lt;/skip_headers&gt;</span>
  
 <span style='color:Green;'>&lt;gcc_options&gt;</span>
     -fvisibility=hidden
@@ -353,7 +399,6 @@ QtCore:
     -DQT_NO_CAST_TO_ASCII
     -DQT_NO_STL
     -DQT_SHARED
-    -DQT3_SUPPORT
 <span style='color:Green;'>&lt;/gcc_options&gt;</span>
 </pre>
 </div>
