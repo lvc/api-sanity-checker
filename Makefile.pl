@@ -54,7 +54,7 @@ OPTIONS:
       Print this help.
 
   --prefix=PREFIX
-      Install files in PREFIX [/usr/local].
+      Install files in PREFIX [/usr].
 
   -install
       Command to install the tool.
@@ -215,7 +215,7 @@ sub scenario()
         print "-- Installing $TOOL_PATH\n";
         mkpath($EXE_PATH);
         writeFile($EXE_PATH."/".$TOOL_SNAME, $Content);
-        chmod(0775, $EXE_PATH."/".$TOOL_SNAME);
+        chmod(0755, $EXE_PATH."/".$TOOL_SNAME);
         
         if($Config{"osname"}=~/win/i) {
             writeFile($EXE_PATH."/".$TOOL_SNAME.".cmd", "\@perl \"$TOOL_PATH\" \%*");

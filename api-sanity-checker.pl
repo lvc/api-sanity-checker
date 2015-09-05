@@ -3904,7 +3904,7 @@ sub compatible_interfaces($$$)
         sort_CreateParam(\@CompatibleInterfaces, $KeyWords);
         
         # TODO: What should be first?
-        sort_byName(\@CompatibleInterfaces, $KeyWords, "Interfaces");
+        # sort_byName(\@CompatibleInterfaces, $KeyWords, "Interfaces");
         sort_GetCreate(\@CompatibleInterfaces);
         
         sort_FileOpen(\@CompatibleInterfaces) if(get_TypeName(get_FoundationTypeId($TypeId))=~/\A(struct |)(_IO_FILE|__FILE|FILE|_iobuf)\Z/);
