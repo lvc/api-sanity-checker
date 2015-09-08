@@ -1,11 +1,21 @@
 NAME:
   API Sanity Checker - an automatic generator of basic unit tests for a C/C++ library API.
+  
+  The tool is able to generate reasonable (in most, but unfortunately not all, cases) input data for parameters and compose simple ("sanity" or "shallow"-quality) test cases for every function in the API through the analysis of declarations in header files.
+
+  The quality of generated tests allows to check absence of critical errors in simple use cases. The tool is able to build and execute generated tests and detect crashes (segfaults), all kinds of emitted signals, non-zero program return code and program hanging.
+  
+  The tool is developed by Andrey Ponomarenko: http://abi-laboratory.pro/
 
 INSTALL:
-  sudo perl Makefile.pl -install --prefix=/usr
+  sudo make install prefix=/usr
   
 REQUIRES:
   ABI Compliance Checker 1.99 or newer: https://github.com/lvc/abi-compliance-checker
+  Perl 5
+  G++
+  GNU Binutils
+  Ctags
 
 USAGE:
   api-sanity-checker -lib NAME -d VERSION.xml -gen -build -run
