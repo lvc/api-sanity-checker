@@ -102,7 +102,10 @@ my %ERROR_CODE = (
     "Module_Error"=>9
 );
 
-my $HomePage = "http://lvc.github.com/api-sanity-checker/";
+my %HomePage = (
+    "Dev"=>"https://github.com/lvc/api-sanity-checker",
+    "Wiki"=>"https://lvc.github.io/api-sanity-checker/"
+);
 
 my $ShortUsage = "API Sanity Checker $TOOL_VERSION
 Unit test generator for a C/C++ library
@@ -463,7 +466,8 @@ EXIT CODES:
     non-zero - Tests failed or the tool has run with errors.
 
 MORE INFORMATION:
-    $HomePage\n");
+    ".$HomePage{"Wiki"}."
+    ".$HomePage{"Dev"}."\n\n");
 }
 
 # Constants
@@ -14519,7 +14523,7 @@ sub detectPrefix(@)
 sub getReportFooter()
 {
     my $Footer = "<hr/><div class='footer' align='right'><i>Generated on ".(localtime time);
-    $Footer .= " by <a href='".$HomePage."'>API Sanity Checker</a> $TOOL_VERSION &#160;";
+    $Footer .= " by <a href='".$HomePage{"Dev"}."'>API Sanity Checker</a> $TOOL_VERSION &#160;";
     $Footer .= "</i></div>";
     $Footer .= "<br/>";
     return $Footer;

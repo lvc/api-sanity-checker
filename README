@@ -5,7 +5,7 @@ NAME:
 
   The quality of generated tests allows to check absence of critical errors in simple use cases. The tool is able to build and execute generated tests and detect crashes (segfaults), all kinds of emitted signals, non-zero program return code and program hanging.
   
-  The tool is developed by Andrey Ponomarenko: http://abi-laboratory.pro/
+  The tool is developed by Andrey Ponomarenko: https://abi-laboratory.pro/
 
 INSTALL:
   sudo make install prefix=/usr
