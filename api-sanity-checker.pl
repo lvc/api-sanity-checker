@@ -4,7 +4,7 @@
 # An automatic generator of basic unit tests for a C/C++ library API
 #
 # Copyright (C) 2009-2011 Institute for System Programming, RAS
-# Copyright (C) 2011-2015 Andrey Ponomarenko's ABI Laboratory
+# Copyright (C) 2011-2016 Andrey Ponomarenko's ABI Laboratory
 #
 # Written by Andrey Ponomarenko
 #
@@ -15,25 +15,25 @@
 # REQUIREMENTS
 # ============
 #  Linux
-#    - ABI Compliance Checker (1.99 or newer)
+#    - ABI Compliance Checker (1.99.24 or newer)
 #    - G++ (3.0-4.7, 4.8.3, 4.9 or newer)
 #    - GNU Binutils (readelf, c++filt, objdump)
 #    - Perl 5 (5.8 or newer)
 #    - Ctags (5.8 or newer)
 #
 #  Mac OS X
-#    - ABI Compliance Checker (1.99 or newer)
+#    - ABI Compliance Checker (1.99.24 or newer)
 #    - Xcode (gcc, c++filt, nm)
 #    - Ctags (5.8 or newer)
 #
 #  MS Windows
-#    - ABI Compliance Checker (1.99 or newer)
+#    - ABI Compliance Checker (1.99.24 or newer)
 #    - MinGW (3.0-4.7, 4.8.3, 4.9 or newer)
 #    - MS Visual C++ (dumpbin, undname, cl)
 #    - Active Perl 5 (5.8 or newer)
 #    - Ctags (5.8 or newer)
 #    - Add tool locations to the PATH environment variable
-#    - Run vsvars32.bat (C:\Microsoft Visual Studio 9.0\Common7\Tools\)
+#    - Run vcvars64.bat (C:\Microsoft Visual Studio 9.0\VC\bin\)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License or the GNU Lesser
@@ -63,7 +63,7 @@ my $ORIG_DIR = cwd();
 my $TMP_DIR = tempdir(CLEANUP=>1);
 
 my $ABI_CC = "abi-compliance-checker";
-my $ABI_CC_VERSION = "1.99";
+my $ABI_CC_VERSION = "1.99.24";
 
 # Internal modules
 my $MODULES_DIR = get_Modules();
@@ -78,7 +78,7 @@ $ParameterNamesFilePath, $CleanSources, $DumpVersion, $TargetHeaderName,
 $RelativeDirectory, $TargetTitle, $TargetVersion, $StrictGen,
 $StrictBuild, $StrictRun, $Strict, $Debug, $UseCache, $NoInline, $UserLang,
 $OptimizeIncludes, $KeepInternal, $TargetCompiler, $GenerateAll,
-$InterfacesListPath);
+$InterfacesListPath, $CxxIncompat);
 
 my $CmdName = get_filename($0);
 my %OS_LibExt=(
@@ -109,7 +109,7 @@ my %HomePage = (
 
 my $ShortUsage = "API Sanity Checker $TOOL_VERSION
 Unit test generator for a C/C++ library
-Copyright (C) 2015 Andrey Ponomarenko's ABI Laboratory
+Copyright (C) 2016 Andrey Ponomarenko's ABI Laboratory
 License: GNU LGPL or GNU GPL
 
 Usage: $CmdName [options]
@@ -186,7 +186,8 @@ GetOptions("h|help!" => \$Help,
 # other options
   "test!" => \$TestTool,
   "disable-variable-reuse!" => \$DisableReuse,
-  "long-variable-names!" => \$LongVarNames
+  "long-variable-names!" => \$LongVarNames,
+  "cxx-incompatible!" => \$CxxIncompat
 ) or ERR_MESSAGE();
 
 sub ERR_MESSAGE()
@@ -460,6 +461,10 @@ OTHER OPTIONS:
 
   -long-variable-names
       Enable long (complex) variable names instead of short names.
+  
+  -cxx-incompatible
+      Set this option if input C header files use C++ keywords. The tool
+      will pass this option to the ACC tool in order to handle them properly.
 
 EXIT CODES:
     0 - Successful tests. The tool has run without any errors.
@@ -13950,6 +13955,11 @@ sub read_ABI($)
         if($CheckHeadersOnly) {
             $Cmd .= " -headers-only";
         }
+        
+        if($CxxIncompat) {
+            $Cmd .= " -cxx-incompatible";
+        }
+        
         if($Debug)
         {
             $Cmd .= " -debug";
@@ -14543,7 +14553,7 @@ sub scenario()
     }
     if(defined $ShowVersion)
     {
-        printMsg("INFO", "API Sanity Checker $TOOL_VERSION\nCopyright (C) 2015 Andrey Ponomarenko's ABI Laboratory\nLicense: LGPL or GPL <http://www.gnu.org/licenses/>\nThis program is free software: you can redistribute it and/or modify it.\n\nWritten by Andrey Ponomarenko.");
+        printMsg("INFO", "API Sanity Checker $TOOL_VERSION\nCopyright (C) 2016 Andrey Ponomarenko's ABI Laboratory\nLicense: LGPL or GPL <http://www.gnu.org/licenses/>\nThis program is free software: you can redistribute it and/or modify it.\n\nWritten by Andrey Ponomarenko.");
         exit(0);
     }
     if(defined $DumpVersion)
@@ -14556,9 +14566,9 @@ sub scenario()
     }
     if($OSgroup eq "windows")
     {
-        if(not $ENV{"DevEnvDir"}
-        or not $ENV{"LIB"}) {
-            exitStatus("Error", "can't start without VS environment (vsvars32.bat)");
+        if(not $ENV{"VCINSTALLDIR"}
+        or not $ENV{"INCLUDE"}) {
+            exitStatus("Error", "can't start without VC environment (vcvars64.bat)");
         }
     }
     if(defined $TargetCompiler)

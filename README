@@ -11,7 +11,7 @@ INSTALL:
   sudo make install prefix=/usr
   
 REQUIRES:
-  ABI Compliance Checker 1.99 or newer: https://github.com/lvc/abi-compliance-checker
+  ABI Compliance Checker 1.99.24 or newer: https://github.com/lvc/abi-compliance-checker
   Perl 5
   G++
   GNU Binutils
@@ -35,4 +35,4 @@ USAGE:
     </libs>
 
 ADV. USAGE:
-  For advanced usage, see doc/Readme.html or output of --help option.
+  For advanced usage, see doc/index.html or output of --help option.

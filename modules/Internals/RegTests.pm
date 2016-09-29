@@ -459,7 +459,7 @@ sub runSelfTests($$$$$$)
         }
     }
     # running the tool
-    my $Cmd = "perl $0 -l $LibName -d $LibName/descriptor.xml -gen -build -run -show-retval";
+    my $Cmd = "perl $0 -l $LibName -d $LibName/descriptor.xml -gen -build -run -show-retval -cxx-incompatible";
     
     if($TargetCompiler) {
         $Cmd .= " -target ".$TargetCompiler;
