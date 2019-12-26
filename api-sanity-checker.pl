@@ -12226,7 +12226,7 @@ sub generateTest($)
     $SanityTest = correct_spaces($SanityTest); # cleaning code
     if(getTestLang($Interface) eq "C++" and getSymLang($Interface) eq "C")
     { # removing extended initializer lists
-        $SanityTest=~s/({\s*|\s)\.[a-z_][a-z_\d]*\s*=\s*/$1  /ig;
+        $SanityTest=~s/(\{\s*|\s)\.[a-z_][a-z_\d]*\s*=\s*/$1  /ig;
     }
     if(defined $Standalone)
     { # create stuff for building and running test
